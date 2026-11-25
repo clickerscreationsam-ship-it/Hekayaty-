@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'wouter';
+import { FeatherLogo } from '@/components/common/FeatherLogo';
 import {
   Sparkles,
   Send,
@@ -66,20 +67,8 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
           {/* Brand Info */}
           <div className="lg:col-span-2 flex flex-col gap-4">
-            <Link href="/" className="flex items-center gap-3 group focus:outline-none w-fit">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#087C7B] via-[#119B98] to-[#C5A15B] flex items-center justify-center p-0.5 shadow-[0_0_15px_rgba(8,124,123,0.25)]">
-                <div className="w-full h-full bg-[#111C2B] rounded-[10px] flex items-center justify-center">
-                  <span className="font-cinzel text-xl font-bold text-[#E1C58B]">H</span>
-                </div>
-              </div>
-              <div className="flex flex-col">
-                <span className="font-cinzel text-xl font-bold tracking-wider text-[#087C7B] dark:text-[#E1C58B]">
-                  HEKAYATY
-                </span>
-                <span className="text-[11px] font-arabic tracking-[0.2em] text-[#604735] dark:text-[#C5A15B] -mt-1 font-semibold">
-                  حـكـايـاتـي
-                </span>
-              </div>
+            <Link href="/" className="flex items-center gap-3 group focus:outline-none w-fit" aria-label="الصفحة الرئيسية لحكاياتي">
+              <FeatherLogo size="md" />
             </Link>
 
             <p className="text-[#604735] dark:text-zinc-400 font-arabic text-sm leading-relaxed max-w-md">

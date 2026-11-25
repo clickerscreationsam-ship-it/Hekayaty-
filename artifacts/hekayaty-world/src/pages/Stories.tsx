@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useStories, useCharacters, useWorlds } from '@/lib/hooks';
 import { motion } from 'framer-motion';
 import { Link } from 'wouter';
+import { SEOHead } from '@/components/common/SEOHead';
 import {
   BookOpen,
   Search,
@@ -35,7 +36,13 @@ export default function Stories() {
   });
 
   return (
-    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto font-arabic" dir="rtl">
+    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto font-arabic notranslate" dir="rtl" translate="no">
+      <SEOHead
+        title="مكتبة القصص والمرويات الأدبية"
+        description="اقرأ أحدث القصص الأدبية، المرويات الكوزمية، والروايات المصورة المكتوبة بقلم نخبة مبدعي حكاياتي."
+        canonicalUrl="/stories"
+        ogType="website"
+      />
       {/* Header */}
       <div className="mb-10 text-right">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-deep-teal/10 dark:bg-antique-gold/10 border border-deep-teal/20 dark:border-antique-gold/30 text-deep-teal dark:text-antique-gold text-xs font-semibold mb-3">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRoute, Link } from 'wouter';
 import { useWorld, useCharacters, useComics, useTimeline } from '@/lib/hooks';
 import { motion } from 'framer-motion';
@@ -13,9 +13,12 @@ import {
   ChevronLeft,
   Building,
   Flag,
+  Share2,
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
+import { SEOHead } from '@/components/common/SEOHead';
+import { SocialShareModal } from '@/components/common/SocialShareModal';
 
 export default function WorldDetail() {
   const [, params] = useRoute('/worlds/:id');
@@ -26,6 +29,7 @@ export default function WorldDetail() {
   const { data: timelineEvents = [] } = useTimeline();
   const { addToFavorites, isInFavorites, removeFromFavorites } = useAppStore();
   const { toast } = useToast();
+  const [shareOpen, setShareOpen] = useState(false);
 
   if (!world) {
     return (
@@ -59,7 +63,14 @@ export default function WorldDetail() {
   };
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto font-arabic" dir="rtl">
+    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto font-arabic notranslate" dir="rtl" translate="no">
+      <SEOHead
+        title={`عالم ${world.nameAr}`}
+        description={world.descriptionAr || `تعرف على عالم ${world.nameAr} ومناخه وسكانه في كون حكاياتي`}
+        ogImage={world.image}
+        canonicalUrl={`/worlds/${world.id}`}
+        ogType="article"
+      />
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-xs text-[#604735] dark:text-zinc-400 mb-6">
         <Link href="/" className="hover:text-[#087C7B] dark:hover:text-white transition-colors">
@@ -106,20 +117,42 @@ export default function WorldDetail() {
               </p>
             </div>
 
-            <button
-              type="button"
-              onClick={toggleFav}
-              className={`px-4 py-2.5 rounded-xl text-xs font-semibold backdrop-blur-md border transition-all shrink-0 ${
-                isFav
-                  ? 'bg-red-500/20 text-red-400 border-red-500/40'
-                  : 'bg-black/60 text-white border-white/20 hover:border-[#087C7B] dark:hover:border-[#C5A15B]'
-              }`}
-            >
-              {isFav ? '♥ في المفضلة' : '♡ أضف العالم للمفضلة'}
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShareOpen(true)}
+                className="px-4 py-2.5 rounded-xl text-xs font-semibold backdrop-blur-md border border-white/20 bg-black/60 text-white hover:border-[#087C7B] dark:hover:border-[#C5A15B] transition-all flex items-center gap-1.5"
+                title="مشاركة هذا العالم"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>مشاركة</span>
+              </button>
+              <button
+                type="button"
+                onClick={toggleFav}
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold backdrop-blur-md border transition-all ${
+                  isFav
+                    ? 'bg-red-500/20 text-red-400 border-red-500/40'
+                    : 'bg-black/60 text-white border-white/20 hover:border-[#087C7B] dark:hover:border-[#C5A15B]'
+                }`}
+              >
+                {isFav ? '♥ في المفضلة' : '♡ أضف العالم للمفضلة'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      <SocialShareModal
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+        title={`عالم ${world.nameAr} | حكاياتي`}
+        description={world.descriptionAr}
+        url={typeof window !== 'undefined' ? window.location.href : `https://hekayaty.com/worlds/${world.id}`}
+        imageUrl={world.image}
+        contentType="world"
+        contentId={world.id}
+      />
 
       {/* Main Dossier Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">

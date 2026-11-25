@@ -1,0 +1,19 @@
+{
+  "name": "حكاياتي | HEKAYATY",
+  "short_name": "حكاياتي",
+  "description": "الوجهة الترفيهية الأدبية الأولى لاكتشاف وقراءة أضخم الأكوان القصصية العربية المترابطة.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0E131F",
+  "theme_color": "#087C7B",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

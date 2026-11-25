@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRoute, Link } from 'wouter';
 import { useCharacter, useCharacters, useWorlds, useComics, useTimeline } from '@/lib/hooks';
 import { motion } from 'framer-motion';
@@ -15,9 +15,12 @@ import {
   Clock,
   Sparkles,
   Activity,
+  Share2,
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
+import { SEOHead } from '@/components/common/SEOHead';
+import { SocialShareModal } from '@/components/common/SocialShareModal';
 
 export default function CharacterDetail() {
   const [, params] = useRoute('/characters/:id');
@@ -29,6 +32,7 @@ export default function CharacterDetail() {
   const { data: timelineEvents = [] } = useTimeline();
   const { addToFavorites, isInFavorites, removeFromFavorites } = useAppStore();
   const { toast } = useToast();
+  const [shareOpen, setShareOpen] = useState(false);
 
   if (!character) {
     return (
@@ -72,7 +76,31 @@ export default function CharacterDetail() {
   };
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto font-arabic" dir="rtl">
+    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto font-arabic notranslate" dir="rtl" translate="no">
+      <SEOHead
+        title={`${character.nameAr} (${character.aliasAr})`}
+        description={character.bioAr || `سجل شخصية ${character.nameAr} في الأكوان القصصية`}
+        ogImage={character.image}
+        ogType="profile"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'Person',
+          name: character.nameAr,
+          alternateName: character.aliasAr,
+          image: character.image,
+          description: character.bioAr,
+        }}
+      />
+
+      <SocialShareModal
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+        title={`${character.nameAr} — ${character.aliasAr}`}
+        description={character.bioAr}
+        imageUrl={character.image}
+        contentType="character"
+        contentId={character.id}
+      />
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-xs text-[#604735] dark:text-zinc-400 mb-8">
         <Link href="/" className="hover:text-[#087C7B] dark:hover:text-white transition-colors">
@@ -102,17 +130,28 @@ export default function CharacterDetail() {
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#087C7B] dark:bg-[#C5A15B] text-[#F7F1E6] dark:text-[#111C2B]">
                 {character.aliasAr}
               </span>
-              <button
-                type="button"
-                onClick={toggleFavorite}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-md border transition-all ${
-                  isFav
-                    ? 'bg-red-500/20 text-red-400 border-red-500/40'
-                    : 'bg-black/60 text-white border-white/20 hover:border-[#087C7B] dark:hover:border-[#C5A15B]'
-                }`}
-              >
-                {isFav ? '♥ في المفضلة' : '♡ أضف للمفضلة'}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShareOpen(true)}
+                  className="p-1.5 rounded-xl text-xs font-semibold backdrop-blur-md border bg-black/60 text-white border-white/20 hover:border-[#087C7B] dark:hover:border-[#C5A15B] transition-all"
+                  title="مشاركة البطل"
+                  aria-label="مشاركة البطل"
+                >
+                  <Share2 className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={toggleFavorite}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-md border transition-all ${
+                    isFav
+                      ? 'bg-red-500/20 text-red-400 border-red-500/40'
+                      : 'bg-black/60 text-white border-white/20 hover:border-[#087C7B] dark:hover:border-[#C5A15B]'
+                  }`}
+                >
+                  {isFav ? '♥ في المفضلة' : '♡ أضف للمفضلة'}
+                </button>
+              </div>
             </div>
           </div>
 

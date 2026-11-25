@@ -1,2 +1,32 @@
+# HEKAYATY Web Robots Configuration
+# https://hekayaty.com
+
 User-agent: *
 Allow: /
+Allow: /assets/
+Allow: /favicon.svg
+Allow: /comics
+Allow: /stories
+Allow: /characters
+Allow: /worlds
+Allow: /timeline
+Allow: /encyclopedia
+Allow: /news
+Allow: /events
+Allow: /selected
+
+# Restrict Private & Administrative Endpoints
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /profile
+Disallow: /profile/*
+Disallow: /editorial
+Disallow: /editorial/*
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /api/admin/
+Disallow: /mockup/
+
+Sitemap: https://hekayaty.com/sitemap.xml

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'wouter';
+import { SEOHead } from '@/components/common/SEOHead';
 import {
   useComics,
   useCharacters,
@@ -60,7 +61,13 @@ export default function Home() {
   const lastReadComic = lastReadProgress ? comics.find((c) => c.id === lastReadProgress.comicId) : null;
 
   return (
-    <div className="w-full overflow-hidden font-arabic" dir="rtl">
+    <div className="w-full overflow-hidden font-arabic notranslate" dir="rtl" translate="no">
+      <SEOHead
+        title="الرئيسية | عوالم خيالية لا تنتهي"
+        description="الوجهة الترفيهية الأدبية الأولى لاكتشاف وقراءة أضخم الأكوان القصصية العربية المترابطة، الروايات، والكوميكس الأصلي بمؤثرات وتجربة قراءة غامرة."
+        canonicalUrl="https://hekayaty.com/"
+        ogType="website"
+      />
       {/* 1. CINEMATIC HERO SECTION */}
       <section className="relative min-h-[calc(100vh-5rem)] flex items-center justify-center overflow-hidden py-12 sm:py-24">
         <motion.div

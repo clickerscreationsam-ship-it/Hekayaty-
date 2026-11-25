@@ -3,6 +3,7 @@ import { useCharacters, useWorlds } from '@/lib/hooks';
 import { motion } from 'framer-motion';
 import { Link } from 'wouter';
 import { Search, Shield, Sparkles, Globe, ChevronLeft, Zap } from 'lucide-react';
+import { SEOHead } from '@/components/common/SEOHead';
 
 export default function Characters() {
   const [alignmentFilter, setAlignmentFilter] = useState<'all' | 'hero' | 'villain' | 'antihero' | 'neutral'>('all');
@@ -69,7 +70,13 @@ export default function Characters() {
   };
 
   return (
-    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto font-arabic" dir="rtl">
+    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto font-arabic notranslate" dir="rtl" translate="no">
+      <SEOHead
+        title="موسوعة الشخصيات والأبطال الكوزميين"
+        description="دليل شامل لكافة أبطال وأشرار وكيانات كون حكاياتي، مع قدراتهم الخارقة، أصولهم الكوزمية، وعلاقاتهم."
+        canonicalUrl="/characters"
+        ogType="website"
+      />
       {/* Header */}
       <div className="mb-10 text-right">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#087C7B]/10 dark:bg-[#C5A15B]/10 border border-[#087C7B]/30 dark:border-[#C5A15B]/30 text-[#087C7B] dark:text-[#E1C58B] text-xs font-semibold mb-3">

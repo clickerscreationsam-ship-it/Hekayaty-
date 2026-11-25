@@ -13,6 +13,8 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAppStore } from '@/stores/useAppStore';
+import { SEOHead } from '@/components/common/SEOHead';
+import { SocialShareModal } from '@/components/common/SocialShareModal';
 
 export default function StoryDetail() {
   const [, params] = useRoute('/stories/:id');
@@ -21,6 +23,7 @@ export default function StoryDetail() {
   const { data: characters = [] } = useCharacters();
   const { data: worlds = [] } = useWorlds();
   const [fontSize, setFontSize] = useState<'normal' | 'large' | 'xlarge'>('normal');
+  const [shareOpen, setShareOpen] = useState(false);
   const { toast } = useToast();
   const { addToFavorites, isInFavorites, removeFromFavorites } = useAppStore();
 
@@ -54,8 +57,7 @@ export default function StoryDetail() {
   };
 
   const handleShare = () => {
-    navigator.clipboard?.writeText(window.location.href);
-    toast({ title: 'تم نسخ رابط القصة للحافظة' });
+    setShareOpen(true);
   };
 
   const fontClasses = {
@@ -65,7 +67,41 @@ export default function StoryDetail() {
   };
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-[900px] mx-auto font-arabic" dir="rtl">
+    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-[900px] mx-auto font-arabic notranslate" dir="rtl" translate="no">
+      <SEOHead
+        title={story.titleAr}
+        description={story.synopsisAr || story.content?.slice(0, 160)}
+        ogImage={story.coverImage}
+        ogType="book"
+        author={story.authorAr || story.author}
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'Book',
+          name: story.titleAr,
+          headline: story.titleAr,
+          author: {
+            '@type': 'Person',
+            name: story.authorAr || story.author || 'حكاياتي',
+          },
+          image: story.coverImage,
+          description: story.synopsisAr,
+          inLanguage: 'ar',
+          publisher: {
+            '@type': 'Organization',
+            name: 'حكاياتي | HEKAYATY',
+          },
+        }}
+      />
+
+      <SocialShareModal
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+        title={story.titleAr}
+        description={story.synopsisAr}
+        imageUrl={story.coverImage}
+        contentType="novel"
+        contentId={story.id}
+      />
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-xs text-foreground/60 mb-6">
         <Link href="/" className="hover:text-deep-teal dark:hover:text-antique-gold transition-colors">

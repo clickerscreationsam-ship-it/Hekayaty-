@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRoute, Link } from 'wouter';
 import { useNews, useComics, useCharacters } from '@/lib/hooks';
 import { Calendar, User, ChevronLeft, Share2, BookOpen, Users, Newspaper } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { SEOHead } from '@/components/common/SEOHead';
+import { SocialShareModal } from '@/components/common/SocialShareModal';
 
 export default function NewsDetail() {
   const [, params] = useRoute('/news/:id');
@@ -11,6 +13,7 @@ export default function NewsDetail() {
   const { data: characters = [] } = useCharacters();
   const article = newsArticles.find((n) => n.id === params?.id);
   const { toast } = useToast();
+  const [shareOpen, setShareOpen] = useState(false);
 
   if (!article) {
     return (
@@ -31,12 +34,36 @@ export default function NewsDetail() {
   const relatedChar = characters.find((c) => article.relatedCharacterIds?.includes(c.id));
 
   const handleShare = () => {
-    navigator.clipboard?.writeText(window.location.href);
-    toast({ title: 'تم نسخ رابط المقال للحافظة' });
+    setShareOpen(true);
   };
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-[900px] mx-auto font-arabic" dir="rtl">
+    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-[900px] mx-auto font-arabic notranslate" dir="rtl" translate="no">
+      <SEOHead
+        title={article.titleAr}
+        description={article.summaryAr || article.contentAr?.slice(0, 160)}
+        ogImage={article.image}
+        ogType="article"
+        canonicalUrl={`/news/${article.id}`}
+        author={article.author}
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'NewsArticle',
+          headline: article.titleAr,
+          description: article.summaryAr,
+          image: article.image,
+          datePublished: article.date,
+          inLanguage: 'ar',
+          author: {
+            '@type': 'Person',
+            name: article.author || 'حكاياتي',
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: 'حكاياتي | HEKAYATY',
+          },
+        }}
+      />
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-xs text-foreground/60 mb-6">
         <Link href="/" className="hover:text-deep-teal dark:hover:text-antique-gold transition-colors">
@@ -127,6 +154,17 @@ export default function NewsDetail() {
           </footer>
         )}
       </article>
+
+      <SocialShareModal
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+        title={article.titleAr}
+        description={article.summaryAr || article.titleAr}
+        url={typeof window !== 'undefined' ? window.location.href : `https://hekayaty.com/news/${article.id}`}
+        imageUrl={article.image}
+        contentType="article"
+        contentId={article.id}
+      />
     </div>
   );
 }

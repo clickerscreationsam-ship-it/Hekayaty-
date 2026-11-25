@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useWorlds, useCharacters, useComics } from '@/lib/hooks';
 import { motion } from 'framer-motion';
 import { Link } from 'wouter';
+import { SEOHead } from '@/components/common/SEOHead';
 import {
   Compass,
   Globe,
@@ -24,7 +25,13 @@ export default function Worlds() {
   );
 
   return (
-    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto font-arabic" dir="rtl">
+    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto font-arabic notranslate" dir="rtl" translate="no">
+      <SEOHead
+        title="أطلس العوالم والأبعاد"
+        description="استكشف عوالم وأبعاد كون حكاياتي، من إمبراطوريات الرمال الذهبية إلى الحواضر السايبربانكية وأعماق الفضاء."
+        canonicalUrl="/worlds"
+        ogType="website"
+      />
       {/* Header */}
       <div className="mb-12 text-center max-w-3xl mx-auto">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#087C7B]/10 dark:bg-[#C5A15B]/10 border border-[#087C7B]/30 dark:border-[#C5A15B]/30 text-[#087C7B] dark:text-[#E1C58B] text-xs font-semibold mb-3">

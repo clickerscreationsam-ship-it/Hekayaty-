@@ -9,6 +9,8 @@ import { useComic, useComics, useCharacters, useWorlds } from '@/lib/hooks';
 import type { Comic } from '@/types';
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
+import { SEOHead } from '@/components/common/SEOHead';
+import { SocialShareModal } from '@/components/common/SocialShareModal';
 
 function getTitleAr(comic: Comic): string {
   return (comic as any).titleAr || (comic as any).title || '';
@@ -96,6 +98,7 @@ export default function ComicDetail() {
   const addToCollection = (useAppStore as any).getState?.()?.addToCollection;
 
   const [addedToCollection, setAddedToCollection] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
 
   const comicId = params?.id || '';
   const { data: comic } = useComic(comicId);
@@ -172,12 +175,48 @@ export default function ComicDetail() {
   }
 
   function handleShare() {
-    navigator.clipboard.writeText(window.location.href).catch(() => {});
-    toast({ title: 'تم نسخ الرابط 🔗', description: 'يمكنك مشاركته مع أصدقائك' });
+    setShareOpen(true);
   }
 
   return (
-    <div className="min-h-screen pb-24" dir="rtl">
+    <div className="min-h-screen pb-24 font-arabic notranslate" dir="rtl" translate="no">
+      {comic && (
+        <>
+          <SEOHead
+            title={titleAr}
+            description={synopsisAr || `كوميكس ${titleAr} - ${seriesName}`}
+            ogImage={comic.coverImage}
+            ogType="book"
+            author={(comic as any).writer || 'حكاياتي'}
+            jsonLd={{
+              '@context': 'https://schema.org',
+              '@type': 'Book',
+              name: titleAr,
+              headline: titleAr,
+              image: comic.coverImage,
+              description: synopsisAr,
+              inLanguage: 'ar',
+              author: {
+                '@type': 'Person',
+                name: (comic as any).writer || 'حكاياتي',
+              },
+              publisher: {
+                '@type': 'Organization',
+                name: 'حكاياتي | HEKAYATY',
+              },
+            }}
+          />
+          <SocialShareModal
+            isOpen={shareOpen}
+            onClose={() => setShareOpen(false)}
+            title={titleAr}
+            description={synopsisAr}
+            imageUrl={comic.coverImage}
+            contentType="comic"
+            contentId={comic.id}
+          />
+        </>
+      )}
       {/* Ambient blurred background */}
       <div className="absolute top-0 left-0 right-0 h-[60vh] opacity-15 dark:opacity-20 pointer-events-none z-0 overflow-hidden">
         <div

@@ -9,10 +9,12 @@ import editorialRouter from "./editorial";
 import adminRouter from "./admin";
 import uploadRouter from "./upload";
 import eventsRouter, { adminEventsRouter } from "./events";
+import seoRouter from "./seo";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(seoRouter);
 router.use("/auth", authRouter);
 router.use("/events", eventsRouter);
 router.use("/admin/events", adminEventsRouter);

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAppStore } from '@/stores/useAppStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { FeatherLogo } from '@/components/common/FeatherLogo';
 import { api } from '@/lib/api';
 import {
   Search,
@@ -109,21 +110,9 @@ export function Navbar() {
       >
         <div className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 sm:h-20 gap-2">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 sm:gap-3 group focus:outline-none shrink-0">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[#087C7B] via-[#119B98] to-[#C5A15B] flex items-center justify-center p-0.5 shadow-[0_0_15px_rgba(8,124,123,0.25)] group-hover:scale-105 transition-transform duration-300">
-                <div className="w-full h-full bg-[#111C2B] dark:bg-[#111C2B] rounded-[9px] sm:rounded-[10px] flex items-center justify-center">
-                  <span className="font-cinzel text-base sm:text-xl font-bold text-[#E1C58B]">H</span>
-                </div>
-              </div>
-              <div className="flex flex-col">
-                <span className="font-cinzel text-base sm:text-xl font-bold tracking-wider text-[#1E293B] dark:text-[#E1C58B] group-hover:text-[#087C7B] dark:group-hover:text-[#C5A15B] transition-colors leading-tight">
-                  HEKAYATY
-                </span>
-                <span className="text-[9px] sm:text-[11px] font-arabic tracking-[0.18em] text-[#2C241E] dark:text-[#C5A15B] font-bold">
-                  حـكـايـاتـي
-                </span>
-              </div>
+            {/* Official Feather Logo */}
+            <Link href="/" className="flex items-center gap-2 sm:gap-3 group focus:outline-none shrink-0" aria-label="الصفحة الرئيسية لحكاياتي">
+              <FeatherLogo size="md" />
             </Link>
 
             {/* Desktop Navigation */}

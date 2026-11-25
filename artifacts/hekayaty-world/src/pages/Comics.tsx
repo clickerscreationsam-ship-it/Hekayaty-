@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'wouter';
 import { Search, BookOpen, Star, ChevronDown, SlidersHorizontal, X, FileText } from 'lucide-react';
 import { useComics } from '@/lib/hooks';
+import { SEOHead } from '@/components/common/SEOHead';
 import type { Comic } from '@/types';
 
 const GENRES = ['الكل', 'أكشن', 'خيال', 'خيال علمي', 'رعب', 'دراما', 'مغامرة'];
@@ -210,7 +211,13 @@ export default function Comics() {
   const hasActiveFilters = genre !== 'الكل' || classification !== 'الكل' || worldFilter !== 'الكل';
 
   return (
-    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8" dir="rtl">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 notranslate" dir="rtl" translate="no">
+      <SEOHead
+        title="مكتبة الكوميكس والقصص المصورة"
+        description="استكشف أكبر مكتبة للقصص المصورة والمانجا العربية، واقرأ فصول الملاحم الكوزمية بجودة فائقة."
+        canonicalUrl="/comics"
+        ogType="website"
+      />
       <div className="max-w-7xl mx-auto">
 
         {/* ── Header ── */}

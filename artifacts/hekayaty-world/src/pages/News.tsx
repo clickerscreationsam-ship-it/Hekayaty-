@@ -3,6 +3,7 @@ import { useNews } from '@/lib/hooks';
 import { motion } from 'framer-motion';
 import { Link } from 'wouter';
 import { Newspaper, Calendar, ChevronLeft, Search, Tag, Sparkles } from 'lucide-react';
+import { SEOHead } from '@/components/common/SEOHead';
 
 export default function News() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -30,7 +31,13 @@ export default function News() {
   });
 
   return (
-    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto font-arabic" dir="rtl">
+    <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto font-arabic notranslate" dir="rtl" translate="no">
+      <SEOHead
+        title="أخبار وإعلانات منصة حكاياتي"
+        description="تابع آخر أخبار الإصدارات، فعاليات المجتمع، وتحديثات ملحمة حكاياتي الرسمية."
+        canonicalUrl="/news"
+        ogType="website"
+      />
       {/* Header */}
       <div className="mb-10 text-right">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-deep-teal/10 dark:bg-antique-gold/10 border border-deep-teal/20 dark:border-antique-gold/30 text-deep-teal dark:text-antique-gold text-xs font-semibold mb-3">

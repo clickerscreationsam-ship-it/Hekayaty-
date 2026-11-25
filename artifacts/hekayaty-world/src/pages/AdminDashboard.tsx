@@ -41,6 +41,7 @@ import { TimelineStudioModal } from '@/components/admin/TimelineStudioModal';
 import { CharacterCreationModal } from '@/components/admin/CharacterCreationModal';
 import { NovelChapterEditorModal } from '@/components/admin/NovelChapterEditorModal';
 import { ModalPortal } from '@/components/admin/ModalPortal';
+import { SEOManagerSection } from '@/components/admin/SEOManagerSection';
 
 type AdminTab =
   | 'overview'
@@ -50,7 +51,8 @@ type AdminTab =
   | 'ip_mgmt'
   | 'publishing_mgmt'
   | 'operations'
-  | 'events_mgmt';
+  | 'events_mgmt'
+  | 'seo_mgmt';
 
 type ContentSubTab = 'comics' | 'stories' | 'series' | 'classification';
 type OperationsSubTab = 'financials' | 'users' | 'applications' | 'commerce' | 'audit';
@@ -1122,6 +1124,21 @@ export default function AdminDashboard() {
               <div className="flex items-center gap-3">
                 <span className="text-[#C5A15B]">🎪</span>
                 <span>الكرنفالات والمسابقات</span>
+              </div>
+              <ChevronRight className="w-4 h-4 opacity-70" />
+            </button>
+
+            <button
+              onClick={() => setActiveTab('seo_mgmt')}
+              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-medium transition-all ${
+                activeTab === 'seo_mgmt'
+                  ? 'bg-gradient-to-l from-[#C5A15B] to-[#a8873a] text-black shadow-md'
+                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Globe className="w-4 h-4 text-[#C5A15B]" />
+                <span>إدارة السيو ومحركات البحث</span>
               </div>
               <ChevronRight className="w-4 h-4 opacity-70" />
             </button>
@@ -2477,6 +2494,11 @@ export default function AdminDashboard() {
           {/* ══════════════════════════════════════════════════════════════════ */}
           {activeTab === 'events_mgmt' && (
             <EventsMgmtPanel toast={toast} />
+          )}
+
+          {/* SEO & SOCIAL SHARING MANAGEMENT TAB */}
+          {activeTab === 'seo_mgmt' && (
+            <SEOManagerSection />
           )}
         </div>
       </div>
