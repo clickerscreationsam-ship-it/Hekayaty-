@@ -1,176 +1,392 @@
 import React from 'react';
 import { useRoute, Link } from 'wouter';
-import { characters, worlds, comics } from '@/data/mockData';
+import { useCharacter, useCharacters, useWorlds, useComics, useTimeline } from '@/lib/hooks';
 import { motion } from 'framer-motion';
-import { Shield, Map, Sword, BookOpen, ArrowLeft } from 'lucide-react';
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
+import {
+  ArrowRight,
+  Shield,
+  Zap,
+  Globe,
+  BookOpen,
+  Award,
+  ChevronLeft,
+  AlertTriangle,
+  Users,
+  Clock,
+  Sparkles,
+  Activity,
+} from 'lucide-react';
+import { useAppStore } from '@/stores/useAppStore';
+import { useToast } from '@/hooks/use-toast';
 
 export default function CharacterDetail() {
-  const [match, params] = useRoute('/characters/:id');
-  const character = characters.find(c => c.id === params?.id);
+  const [, params] = useRoute('/characters/:id');
+  const characterId = params?.id || '';
+  const { data: character } = useCharacter(characterId);
+  const { data: characters = [] } = useCharacters();
+  const { data: worlds = [] } = useWorlds();
+  const { data: comics = [] } = useComics();
+  const { data: timelineEvents = [] } = useTimeline();
+  const { addToFavorites, isInFavorites, removeFromFavorites } = useAppStore();
+  const { toast } = useToast();
 
   if (!character) {
-    return <div className="min-h-screen flex items-center justify-center text-white">Character not found</div>;
+    return (
+      <div className="min-h-screen py-20 px-4 text-center font-arabic" dir="rtl">
+        <h2 className="text-2xl font-bold text-[#2A1F17] dark:text-white mb-2">الشخصية غير موجودة</h2>
+        <p className="text-sm text-[#604735] dark:text-zinc-400 mb-6">ربما تم حذفها أو أن الرابط غير صحيح.</p>
+        <Link
+          href="/characters"
+          className="px-6 py-2.5 rounded-xl bg-[#087C7B] hover:bg-[#075B5C] text-[#F7F1E6] font-semibold text-sm"
+        >
+          العودة لسجل الشخصيات
+        </Link>
+      </div>
+    );
   }
 
-  const world = worlds.find(w => w.id === character.worldId);
-  const relatedComics = comics.filter(c => c.characters.includes(character.id));
+  const world = worlds.find((w) => w.id === character.worldId);
+  const relatedComics = comics.filter((c) => character.comicIds?.includes(c.id));
+  const relatedChars = characters.filter((c) => character.relatedCharacterIds?.includes(c.id));
+  const events = timelineEvents.filter((t) => character.timelineEventIds?.includes(t.id));
 
-  const statsData = [
-    { subject: 'Strength', A: character.stats.strength, fullMark: 100 },
-    { subject: 'Speed', A: character.stats.speed, fullMark: 100 },
-    { subject: 'Durability', A: character.stats.durability, fullMark: 100 },
-    { subject: 'Magic', A: character.stats.magic, fullMark: 100 },
-    { subject: 'Combat', A: character.stats.combat, fullMark: 100 },
-    { subject: 'Intel', A: character.stats.intelligence, fullMark: 100 },
-  ];
+  const isFav = isInFavorites(character.id, 'character');
+
+  const toggleFavorite = () => {
+    if (isFav) {
+      removeFromFavorites(character.id, 'character');
+      toast({ title: 'تمت الإزالة من المفضلة' });
+    } else {
+      addToFavorites({ id: character.id, type: 'character' });
+      toast({ title: 'تمت الإضافة إلى مفضلتك' });
+    }
+  };
+
+  const statLabels: Record<string, string> = {
+    strength: 'القوة الجسدية',
+    speed: 'السرعة والمناورة',
+    durability: 'الصلابة والتحمل',
+    intelligence: 'الذكاء والتكتيك',
+    magic: 'السحر والطاقة',
+    combat: 'مهارة القتال',
+  };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Banner */}
-      <div className="relative h-[60vh] min-h-[500px] w-full">
-        <div className="absolute inset-0" style={{ background: character.image.startsWith('linear-gradient') ? character.image : `url(${character.image}) center/20%` }}></div>
-        {/* If it's a real image, we want it to cover differently or use a blur backing, since it's a portrait. For now, cover is okay. Let's adjust background size */}
-        <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-50" style={{ backgroundImage: character.image.startsWith('linear-gradient') ? 'none' : `url(${character.image})` }}></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/50 to-transparent"></div>
-        
-        <div className="absolute top-8 left-8 z-10">
-          <Link href="/characters">
-            <button className="flex items-center gap-2 text-white/70 hover:text-white transition-colors">
-              <ArrowLeft className="w-5 h-5" /> Back to Database
-            </button>
-          </Link>
+    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto font-arabic" dir="rtl">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 text-xs text-[#604735] dark:text-zinc-400 mb-8">
+        <Link href="/" className="hover:text-[#087C7B] dark:hover:text-white transition-colors">
+          الرئيسية
+        </Link>
+        <ChevronLeft className="w-3.5 h-3.5" />
+        <Link href="/characters" className="hover:text-[#087C7B] dark:hover:text-white transition-colors">
+          الشخصيات
+        </Link>
+        <ChevronLeft className="w-3.5 h-3.5" />
+        <span className="text-[#087C7B] dark:text-[#E1C58B] font-semibold">{character.nameAr}</span>
+      </div>
+
+      {/* Hero Banner Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+        {/* Left Column: Portrait */}
+        <div className="lg:col-span-5 flex flex-col gap-4">
+          <div className="relative rounded-3xl overflow-hidden border border-[#D8C5A8] dark:border-[#C5A15B]/30 bg-[#EFE5D4] dark:bg-zinc-950 aspect-[3/4] shadow-xl">
+            <img
+              src={character.image}
+              alt={character.nameAr}
+              className="w-full h-full object-cover object-top"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#111C2B] via-transparent to-transparent opacity-80" />
+
+            <div className="absolute bottom-4 right-4 left-4 flex items-center justify-between">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#087C7B] dark:bg-[#C5A15B] text-[#F7F1E6] dark:text-[#111C2B]">
+                {character.aliasAr}
+              </span>
+              <button
+                type="button"
+                onClick={toggleFavorite}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-md border transition-all ${
+                  isFav
+                    ? 'bg-red-500/20 text-red-400 border-red-500/40'
+                    : 'bg-black/60 text-white border-white/20 hover:border-[#087C7B] dark:hover:border-[#C5A15B]'
+                }`}
+              >
+                {isFav ? '♥ في المفضلة' : '♡ أضف للمفضلة'}
+              </button>
+            </div>
+          </div>
+
+          {/* Quick stats grid */}
+          <div className="glass-panel p-5 rounded-2xl space-y-3">
+            <h4 className="text-sm font-bold text-[#2A1F17] dark:text-white flex items-center gap-2">
+              <Zap className="w-4 h-4 text-[#087C7B] dark:text-[#C5A15B]" />
+              <span>مؤشرات القوة القتالية</span>
+            </h4>
+
+            {/* Cinematic Power Rating Meter */}
+            {(() => {
+              const rawRating = character.powerRating ?? character.stats?.powerRating;
+              if (rawRating !== undefined && rawRating !== null) {
+                const rating = Number(rawRating);
+                const ratingColor =
+                  rating >= 90 ? '#ef4444' :
+                  rating >= 70 ? '#f97316' :
+                  rating >= 50 ? '#C5A15B' : '#087C7B';
+                return (
+                  <div className="p-3 rounded-xl bg-gradient-to-r from-[#0B1320] to-[#162235] border border-[#C5A15B]/30 mb-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
+                        <Zap className="w-3.5 h-3.5 text-[#C5A15B]" />
+                        تقييم القوة الإجمالي
+                      </span>
+                      <span className="text-2xl font-black" style={{ color: ratingColor }}>
+                        {rating}<span className="text-sm text-zinc-500 font-normal">/100</span>
+                      </span>
+                    </div>
+                    <div className="h-2.5 w-full bg-zinc-800 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${rating}%` }}
+                        transition={{ duration: 1.2, ease: 'easeOut' }}
+                        className="h-full rounded-full"
+                        style={{ background: `linear-gradient(to left, ${ratingColor}, ${ratingColor}88)` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-[10px] text-zinc-500 mt-1">
+                      <span>ضعيف</span>
+                      <span className="text-zinc-400 font-semibold">
+                        {rating >= 90 ? '🔴 كوني / أسطوري' :
+                         rating >= 70 ? '🟠 قوة عالية' :
+                         rating >= 50 ? '🟡 متوسط' : '🔵 عادي'}
+                      </span>
+                      <span>كوني</span>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
+
+            <div className="space-y-2.5">
+              {Object.entries(character.stats).filter(([k]) => k !== 'powerRating').map(([statKey, val]) => (
+                <div key={statKey}>
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-[#604735] dark:text-zinc-400">{statLabels[statKey] || statKey}</span>
+                    <span className="text-[#087C7B] dark:text-[#E1C58B] font-semibold">{val}%</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-[#D8C5A8]/40 dark:bg-white/5 rounded-full overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${val}%` }}
+                      transition={{ duration: 0.8, ease: 'easeOut' }}
+                      className="h-full bg-gradient-to-l from-[#087C7B] to-[#119B98] dark:from-[#C5A15B] dark:to-[#927849] rounded-full"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="absolute bottom-0 left-0 w-full p-8 md:p-16 z-10 max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="flex items-center gap-4 mb-4">
-               <span className={`px-4 py-1 text-sm font-bold uppercase tracking-widest rounded-full border bg-black/50 backdrop-blur-md ${character.alignment === 'Hero' ? 'text-blue-400 border-blue-400' : character.alignment === 'Villain' ? 'text-red-400 border-red-400' : 'text-purple-400 border-purple-400'}`}>
-                {character.alignment}
-              </span>
-              <span className="text-xl font-arabic text-primary">{character.arabicName}</span>
+        {/* Right Column: Bio & Dossier */}
+        <div className="lg:col-span-7 flex flex-col gap-6">
+          <div className="glass-panel p-6 sm:p-8 rounded-3xl space-y-6">
+            {/* Header info */}
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#087C7B]/10 dark:bg-[#C5A15B]/15 text-[#087C7B] dark:text-[#E1C58B] border border-[#087C7B]/30 dark:border-[#C5A15B]/30">
+                  {character.classification === 'original'
+                    ? 'شخصية أصلية'
+                    : character.classification === 'hekayaty_selected'
+                    ? 'حكاياتي المختارة'
+                    : 'تعاون رسمي'}
+                </span>
+                {world && (
+                  <Link
+                    href={`/worlds/${world.id}`}
+                    className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-[#EFE5D4] dark:bg-white/5 text-[#2A1F17] dark:text-zinc-300 hover:text-[#087C7B] dark:hover:text-white border border-[#D8C5A8] dark:border-white/10"
+                  >
+                    <Globe className="w-3.5 h-3.5 text-[#087C7B] dark:text-[#C5A15B]" />
+                    <span>عالم {world.nameAr}</span>
+                  </Link>
+                )}
+              </div>
+              <h1 className="text-3xl sm:text-5xl font-bold text-[#2A1F17] dark:text-white mb-1">
+                {character.nameAr}
+              </h1>
+              <p className="text-base text-[#087C7B] dark:text-[#E1C58B] font-semibold">{character.nameEn}</p>
             </div>
-            <h1 className="text-5xl md:text-8xl font-cinzel font-bold text-white mb-2 drop-shadow-lg">{character.name}</h1>
-            <p className="text-2xl text-white/70 font-light drop-shadow-md">{character.alias}</p>
-          </motion.div>
+
+            {/* Biography */}
+            <div>
+              <h3 className="text-sm font-bold text-[#2A1F17] dark:text-zinc-300 mb-2">السيرة الذاتية</h3>
+              <p className="text-sm sm:text-base text-[#604735] dark:text-zinc-300 leading-relaxed">
+                {character.bioAr}
+              </p>
+            </div>
+
+            {/* Origin Story */}
+            <div className="p-4 rounded-2xl bg-[#EFE5D4]/70 dark:bg-white/[0.02] border border-[#D8C5A8] dark:border-white/5">
+              <h3 className="text-sm font-bold text-[#087C7B] dark:text-[#E1C58B] mb-1.5 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4" />
+                <span>قصة البداية والأصل</span>
+              </h3>
+              <p className="text-xs sm:text-sm text-[#604735] dark:text-zinc-300 leading-relaxed">
+                {character.originAr}
+              </p>
+            </div>
+
+            {/* Powers and Weaknesses */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-[#087C7B]/5 dark:bg-emerald-500/[0.03] border border-[#087C7B]/20 dark:border-emerald-500/20">
+                <h4 className="text-xs font-bold text-[#087C7B] dark:text-emerald-400 mb-2.5 flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5" />
+                  <span>القدرات والخوارق</span>
+                </h4>
+                <div className="flex flex-wrap gap-1.5">
+                  {character.powersAr.map((p, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2.5 py-1 rounded-lg bg-[#087C7B]/10 dark:bg-emerald-500/10 text-[#087C7B] dark:text-emerald-300 text-xs border border-[#087C7B]/20 dark:border-emerald-500/20"
+                    >
+                      {p}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-red-500/[0.03] border border-red-500/20">
+                <h4 className="text-xs font-bold text-red-600 dark:text-red-400 mb-2.5 flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <span>نقاط الضعف والتحديات</span>
+                </h4>
+                <div className="flex flex-wrap gap-1.5">
+                  {character.weaknessesAr.map((w, idx) => (
+                    <span
+                      key={idx}
+                      className="px-2.5 py-1 rounded-lg bg-red-500/10 text-red-700 dark:text-red-300 text-xs border border-red-500/20"
+                    >
+                      {w}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Affiliations & Metadata */}
+            <div className="pt-4 border-t border-[#D8C5A8]/50 dark:border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs text-[#604735] dark:text-zinc-400">
+              <div>
+                <span className="font-semibold text-[#2A1F17] dark:text-zinc-300">الانتماءات: </span>
+                <span>{character.affiliationsAr.join(' • ')}</span>
+              </div>
+              {character.firstAppearance && (
+                <div>
+                  <span className="font-semibold text-[#2A1F17] dark:text-zinc-300">أول ظهور: </span>
+                  <span className="text-[#087C7B] dark:text-[#E1C58B] font-bold">{character.firstAppearance}</span>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          
-          {/* Main Column */}
-          <div className="lg:col-span-2 space-y-12">
-            <section>
-              <h2 className="text-3xl font-cinzel font-bold text-white mb-6 border-b border-white/10 pb-4">Biography</h2>
-              <p className="text-lg text-white/80 leading-relaxed mb-6">{character.fullBio}</p>
-              <h3 className="text-xl font-bold text-white mb-3">Origin Story</h3>
-              <p className="text-white/70 leading-relaxed">{character.originStory}</p>
-            </section>
-
-            <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="glass-card p-6 rounded-2xl">
-                <h3 className="text-xl font-cinzel font-bold text-primary mb-4 flex items-center gap-2">
-                  <Sword className="w-5 h-5" /> Abilities
-                </h3>
-                <ul className="space-y-3">
-                  {character.powers.map(power => (
-                    <li key={power} className="flex items-center gap-3 text-white/80">
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
-                      {power}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="glass-card p-6 rounded-2xl">
-                <h3 className="text-xl font-cinzel font-bold text-destructive mb-4 flex items-center gap-2">
-                  <Shield className="w-5 h-5" /> Weaknesses
-                </h3>
-                <ul className="space-y-3">
-                  {character.weaknesses.map(weak => (
-                    <li key={weak} className="flex items-center gap-3 text-white/80">
-                      <div className="w-1.5 h-1.5 rounded-full bg-destructive"></div>
-                      {weak}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </section>
-
-            <section>
-              <h2 className="text-3xl font-cinzel font-bold text-white mb-6 border-b border-white/10 pb-4">Featured In</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {relatedComics.map(comic => (
-                  <Link key={comic.id} href={`/comics/${comic.id}`}>
-                    <div className="group cursor-pointer">
-                      <div className="aspect-[2/3] rounded-lg overflow-hidden border border-white/10 mb-2">
-                        <div className="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-500" style={{ backgroundImage: comic.coverImage.startsWith('linear-gradient') ? 'none' : `url(${comic.coverImage})`, background: comic.coverImage.startsWith('linear-gradient') ? comic.coverImage : '' }}></div>
-                      </div>
-                      <div className="text-sm font-bold text-white group-hover:text-primary line-clamp-1">{comic.title}</div>
-                      <div className="text-xs text-muted-foreground">Issue #{comic.issueNumber}</div>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </section>
+      {/* Related Comics Section */}
+      {relatedComics.length > 0 && (
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold text-[#2A1F17] dark:text-white flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-[#087C7B] dark:text-[#C5A15B]" />
+              <span>إصدارات ظهرت فيها الشخصية ({relatedComics.length})</span>
+            </h3>
+            <Link href="/comics" className="text-xs text-[#087C7B] dark:text-[#E1C58B] hover:underline font-semibold">
+              عرض كل الكوميكس ←
+            </Link>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-8">
-            <div className="glass-card p-6 rounded-2xl border-t-4 border-t-primary">
-              <h3 className="text-lg font-cinzel font-bold text-white mb-6 text-center uppercase tracking-widest">Power Metrics</h3>
-              <div className="h-[250px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadarChart cx="50%" cy="50%" outerRadius="70%" data={statsData}>
-                    <PolarGrid stroke="rgba(255,255,255,0.1)" />
-                    <PolarAngleAxis dataKey="subject" tick={{ fill: 'rgba(255,255,255,0.7)', fontSize: 12 }} />
-                    <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                    <Radar
-                      name={character.name}
-                      dataKey="A"
-                      stroke="#D4A017"
-                      strokeWidth={2}
-                      fill="#D4A017"
-                      fillOpacity={0.4}
-                    />
-                  </RadarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {relatedComics.map((comic) => (
+              <Link
+                key={comic.id}
+                href={`/comics/${comic.id}`}
+                className="group rounded-2xl overflow-hidden bg-[#FAF5ED] dark:bg-zinc-950 border border-[#D8C5A8] dark:border-white/10 hover:border-[#087C7B] dark:hover:border-[#C5A15B]/50 p-3 transition-all shadow-sm"
+              >
+                <div className="aspect-[2/3] rounded-xl overflow-hidden mb-2.5 bg-[#EFE5D4] dark:bg-zinc-900">
+                  <img
+                    src={comic.coverImage}
+                    alt={comic.titleAr}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                  />
+                </div>
+                <h4 className="text-xs font-bold text-[#2A1F17] dark:text-white group-hover:text-[#087C7B] dark:group-hover:text-[#E1C58B] transition-colors truncate">
+                  {comic.titleAr}
+                </h4>
+                <span className="text-[10px] text-[#604735] dark:text-zinc-400">العدد #{comic.issueNumber}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
-            <div className="glass-card p-6 rounded-2xl">
-              <h3 className="text-lg font-cinzel font-bold text-white mb-4 uppercase tracking-widest">Affiliations</h3>
-              <div className="flex flex-wrap gap-2">
-                {character.affiliations.map(affil => (
-                  <span key={affil} className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-sm text-white/80">
-                    {affil}
-                  </span>
-                ))}
-              </div>
-            </div>
+      {/* Related Characters */}
+      {relatedChars.length > 0 && (
+        <div className="mb-12">
+          <h3 className="text-xl font-bold text-[#2A1F17] dark:text-white mb-6 flex items-center gap-2">
+            <Users className="w-5 h-5 text-[#087C7B] dark:text-[#C5A15B]" />
+            <span>شخصيات ذات صلة</span>
+          </h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {relatedChars.map((rc) => (
+              <Link
+                key={rc.id}
+                href={`/characters/${rc.id}`}
+                className="p-3.5 rounded-2xl bg-[#FAF5ED] dark:bg-zinc-950 border border-[#D8C5A8] dark:border-white/10 hover:border-[#087C7B] dark:hover:border-[#C5A15B]/40 flex items-center gap-3 transition-all group shadow-sm"
+              >
+                <img
+                  src={rc.image}
+                  alt={rc.nameAr}
+                  className="w-12 h-12 rounded-full object-cover shrink-0 border border-[#D8C5A8] dark:border-white/10 group-hover:border-[#087C7B] dark:group-hover:border-[#C5A15B]"
+                />
+                <div className="overflow-hidden">
+                  <h4 className="text-sm font-bold text-[#2A1F17] dark:text-white group-hover:text-[#087C7B] dark:group-hover:text-[#E1C58B] truncate">
+                    {rc.nameAr}
+                  </h4>
+                  <span className="text-xs text-[#604735] dark:text-zinc-400">{rc.aliasAr}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
 
-            {world && (
-              <div className="glass-card p-6 rounded-2xl">
-                <h3 className="text-lg font-cinzel font-bold text-white mb-4 uppercase tracking-widest">Homeworld</h3>
-                <Link href={`/worlds/${world.id}`}>
-                  <div className="group cursor-pointer">
-                    <div className="aspect-video rounded-lg overflow-hidden mb-3 relative">
-                      <div className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition-transform duration-500" style={{ backgroundImage: world.image.startsWith('linear-gradient') ? 'none' : `url(${world.image})`, background: world.image.startsWith('linear-gradient') ? world.image : '' }}></div>
-                      <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors"></div>
-                      <Map className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 text-white/70" />
-                    </div>
-                    <div className="font-bold text-primary group-hover:text-white transition-colors">{world.name}</div>
-                    <div className="text-sm text-muted-foreground">{world.arabicName}</div>
-                  </div>
+      {/* Timeline Events */}
+      {events.length > 0 && (
+        <div className="mb-12">
+          <h3 className="text-xl font-bold text-[#2A1F17] dark:text-white mb-6 flex items-center gap-2">
+            <Clock className="w-5 h-5 text-[#087C7B] dark:text-[#C5A15B]" />
+            <span>محطات تاريخية شاركت فيها الشخصية</span>
+          </h3>
+          <div className="space-y-3">
+            {events.map((ev) => (
+              <div
+                key={ev.id}
+                className="p-4 rounded-2xl bg-[#EFE5D4]/70 dark:bg-white/[0.02] border border-[#D8C5A8] dark:border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+              >
+                <div>
+                  <span className="text-xs text-[#087C7B] dark:text-[#E1C58B] font-semibold">{ev.year}</span>
+                  <h4 className="text-sm font-bold text-[#2A1F17] dark:text-white mt-0.5">{ev.titleAr}</h4>
+                  <p className="text-xs text-[#604735] dark:text-zinc-400 mt-1">{ev.descriptionAr}</p>
+                </div>
+                <Link
+                  href="/timeline"
+                  className="text-xs text-[#087C7B] dark:text-[#E1C58B] hover:underline shrink-0 font-medium"
+                >
+                  عرض في الخط الزمني ←
                 </Link>
               </div>
-            )}
+            ))}
           </div>
-          
         </div>
-      </div>
+      )}
     </div>
   );
 }

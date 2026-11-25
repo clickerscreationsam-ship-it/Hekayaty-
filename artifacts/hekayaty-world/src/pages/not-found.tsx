@@ -1,23 +1,33 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { AlertCircle } from 'lucide-react';
+import React from 'react';
+import { Link } from 'wouter';
+import { Compass, ChevronLeft } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md mx-4">
-        <CardContent className="pt-6">
-          <div className="flex mb-4 gap-2">
-            <AlertCircle className="h-8 w-8 text-red-500" />
-            <h1 className="text-2xl font-bold text-gray-900">
-              404 Page Not Found
-            </h1>
-          </div>
+    <div
+      dir="rtl"
+      className="min-h-[75vh] flex flex-col items-center justify-center text-center px-4 font-arabic"
+    >
+      <div className="w-16 h-16 rounded-2xl bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center text-[#D4AF37] mb-6 shadow-[0_0_30px_rgba(212,175,55,0.2)]">
+        <Compass className="w-8 h-8 animate-spin" style={{ animationDuration: '10s' }} />
+      </div>
 
-          <p className="mt-4 text-sm text-gray-600">
-            Did you forget to add the page to the router?
-          </p>
-        </CardContent>
-      </Card>
+      <h1 className="text-7xl sm:text-9xl font-bold font-cinzel gold-gradient mb-2">404</h1>
+      <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+        إحداثيات بُعد غير موجود في الكون
+      </h2>
+      <p className="text-sm text-zinc-400 max-w-md leading-relaxed mb-8">
+        يبدو أن المسار الذي تحاول الوصول إليه يقع خارج نطاق الأبعاد الخمسة المعروفة في سجلات
+        حكاياتي.
+      </p>
+
+      <Link
+        href="/"
+        className="py-3 px-8 rounded-2xl bg-[#D4AF37] text-black font-bold text-sm hover:brightness-110 transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+      >
+        <span>العودة إلى البوابة الرئيسية</span>
+        <ChevronLeft className="w-4 h-4" />
+      </Link>
     </div>
   );
 }

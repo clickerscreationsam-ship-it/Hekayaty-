@@ -1,8 +1,10 @@
 import express, { type Express } from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { authMiddleware } from "./middlewares/auth";
 
 const app: Express = express();
 
@@ -25,10 +27,15 @@ app.use(
     },
   }),
 );
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cors({ origin: true, credentials: true }));
+app.use(cookieParser());
+app.use(express.json({ limit: "100mb" }));
+app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 
+// Global authentication parsing
+app.use(authMiddleware);
+
+// API Routes
 app.use("/api", router);
 
 export default app;

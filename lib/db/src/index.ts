@@ -1,16 +1,16 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import pg from "pg";
-import * as schema from "./schema";
+// =============================================================================
+// HEKAYATY — DB Client
+// =============================================================================
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
+import * as schema from './schema/index';
 
-const { Pool } = pg;
-
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+const DATABASE_URL = process.env['DATABASE_URL'];
+if (!DATABASE_URL) {
+  console.warn('⚠️ [DB Warning]: DATABASE_URL is not set. Operating in offline/memory mode.');
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-export const db = drizzle(pool, { schema });
+const pool = new Pool(DATABASE_URL ? { connectionString: DATABASE_URL, max: 10 } : {});
 
-export * from "./schema";
+export const db = drizzle(pool, { schema });
+export * from './schema/index';

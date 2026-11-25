@@ -1,159 +1,400 @@
-import React, { useEffect, useRef } from 'react';
-import { useAppStore } from '@/stores/useAppStore';
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation, Link } from 'wouter';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search as SearchIcon, X, ArrowRight, Clock, Flame } from 'lucide-react';
-import { Link } from 'wouter';
-import { characters, comics, worlds } from '@/data/mockData';
+import {
+  Search,
+  X,
+  BookOpen,
+  Users,
+  Globe,
+  Sparkles,
+  ArrowRight,
+  Clock,
+  ChevronLeft,
+} from 'lucide-react';
+import { useAppStore } from '@/stores/useAppStore';
+import { useComics, useCharacters, useWorlds, useStories } from '@/lib/hooks';
 
 export function SearchOverlay() {
-  const { searchOpen, setSearchOpen } = useAppStore();
-  const [query, setQuery] = React.useState('');
+  const { searchOpen, setSearchOpen, recentSearches, addRecentSearch, clearRecentSearches } =
+    useAppStore();
+  const [query, setQuery] = useState('');
+  const [, setLocation] = useLocation();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const { data: comics = [] } = useComics();
+  const { data: characters = [] } = useCharacters();
+  const { data: worlds = [] } = useWorlds();
+  const { data: stories = [] } = useStories();
 
   useEffect(() => {
     if (searchOpen) {
       setTimeout(() => inputRef.current?.focus(), 100);
-      document.body.style.overflow = 'hidden';
     } else {
-      document.body.style.overflow = 'unset';
+      setQuery('');
     }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
   }, [searchOpen]);
 
-  // Handle escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setSearchOpen(false);
+      if (e.key === 'Escape' && searchOpen) {
+        setSearchOpen(false);
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setSearchOpen]);
+  }, [searchOpen, setSearchOpen]);
 
-  const searchResults = React.useMemo(() => {
-    if (!query) return null;
-    const lowerQuery = query.toLowerCase();
-    
-    return {
-      characters: characters.filter(c => c.name.toLowerCase().includes(lowerQuery) || c.alias.toLowerCase().includes(lowerQuery)).slice(0, 3),
-      comics: comics.filter(c => c.title.toLowerCase().includes(lowerQuery)).slice(0, 3),
-      worlds: worlds.filter(w => w.name.toLowerCase().includes(lowerQuery)).slice(0, 3)
-    };
-  }, [query]);
+  if (!searchOpen) return null;
+
+  const trimmed = query.trim().toLowerCase();
+
+  const matchingCharacters = trimmed
+    ? characters.filter(
+        (c) =>
+          c.nameAr.toLowerCase().includes(trimmed) ||
+          c.nameEn.toLowerCase().includes(trimmed) ||
+          c.aliasAr.toLowerCase().includes(trimmed) ||
+          c.bioAr.toLowerCase().includes(trimmed)
+      )
+    : [];
+
+  const matchingComics = trimmed
+    ? comics.filter(
+        (c) =>
+          c.titleAr.toLowerCase().includes(trimmed) ||
+          c.titleEn.toLowerCase().includes(trimmed) ||
+          c.synopsisAr.toLowerCase().includes(trimmed) ||
+          c.genresAr.some((g) => g.toLowerCase().includes(trimmed))
+      )
+    : [];
+
+  const matchingWorlds = trimmed
+    ? worlds.filter(
+        (w) =>
+          w.nameAr.toLowerCase().includes(trimmed) ||
+          w.nameEn.toLowerCase().includes(trimmed) ||
+          w.descriptionAr.toLowerCase().includes(trimmed)
+      )
+    : [];
+
+  const matchingStories = trimmed
+    ? stories.filter(
+        (s) =>
+          s.titleAr.toLowerCase().includes(trimmed) ||
+          s.synopsisAr.toLowerCase().includes(trimmed) ||
+          s.authorAr.toLowerCase().includes(trimmed)
+      )
+    : [];
+
+  const totalResults =
+    matchingCharacters.length +
+    matchingComics.length +
+    matchingWorlds.length +
+    matchingStories.length;
+
+  const handleSelect = (url: string, searchTitle?: string) => {
+    if (searchTitle) {
+      addRecentSearch(searchTitle);
+    }
+    setSearchOpen(false);
+    setLocation(url);
+  };
+
+  const trendingTags = [
+    'خيال علمي',
+    'مغامرة',
+    'أكشن',
+    'أساطير',
+    'روايات مصورة',
+    'سلاسل ملحمية',
+  ];
 
   return (
     <AnimatePresence>
-      {searchOpen && (
+      <div className="fixed inset-0 z-50 overflow-y-auto" dir="rtl">
+        {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-xl flex flex-col p-4 sm:p-8 md:p-16"
-        >
-          <div className="absolute top-6 right-6">
-            <button
-              onClick={() => setSearchOpen(false)}
-              className="p-3 rounded-full bg-white/5 hover:bg-white/10 text-muted-foreground hover:text-white transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
+          onClick={() => setSearchOpen(false)}
+          className="fixed inset-0 bg-[#111C2B]/80 dark:bg-black/80 backdrop-blur-xl"
+        />
 
-          <div className="w-full max-w-4xl mx-auto mt-10 md:mt-20">
-            <div className="relative">
-              <SearchIcon className="absolute left-6 top-1/2 -translate-y-1/2 w-8 h-8 text-primary" />
+        {/* Content Container */}
+        <div className="min-h-screen px-4 py-8 sm:py-16 flex justify-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: -20 }}
+            transition={{ duration: 0.2 }}
+            className="w-full max-w-3xl bg-[#FAF5ED] dark:bg-[#172538] border border-[#D8C5A8] dark:border-[#C5A15B]/30 rounded-2xl sm:rounded-3xl shadow-2xl p-5 sm:p-7 relative z-10 font-arabic flex flex-col gap-6"
+          >
+            {/* Search Input Bar */}
+            <div className="relative flex items-center border-b border-[#D8C5A8] dark:border-white/10 pb-4">
+              <Search className="w-6 h-6 text-[#087C7B] dark:text-[#C5A15B] ml-3 shrink-0" />
               <input
                 ref={inputRef}
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search heroes, worlds, comics..."
-                className="w-full bg-white/5 border-2 border-white/10 focus:border-primary rounded-2xl py-6 pl-20 pr-8 text-2xl md:text-4xl font-light text-white outline-none placeholder:text-white/20 transition-all shadow-[0_0_30px_rgba(0,0,0,0.5)]"
+                placeholder="ابحث عن أبطال، كوميكس، عوالم، مرويات، أو أسرار..."
+                className="w-full bg-transparent text-xl sm:text-2xl text-[#2A1F17] dark:text-white placeholder-[#604735]/60 dark:placeholder-zinc-500 focus:outline-none"
               />
+              <button
+                type="button"
+                onClick={() => setSearchOpen(false)}
+                className="p-2 rounded-xl text-[#604735] dark:text-zinc-400 hover:text-[#087C7B] dark:hover:text-white hover:bg-[#EFE5D4] dark:hover:bg-white/5 transition-colors shrink-0"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            {!query && (
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div>
-                  <h3 className="text-sm font-cinzel font-bold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <Clock className="w-4 h-4" /> Recent Searches
-                  </h3>
-                  <div className="flex flex-col gap-3">
-                    {['Zayed Al-Dhahabi', 'Origins of Light Issue 1', 'Al-Sama Al-Hamra'].map((term) => (
-                      <button key={term} onClick={() => setQuery(term)} className="text-left text-lg text-white/70 hover:text-primary transition-colors flex items-center gap-3 group">
-                        <ArrowRight className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                        {term}
+            {/* Results or Suggestions */}
+            {query.trim() === '' ? (
+              <div className="space-y-6">
+                {/* Recent Searches */}
+                {recentSearches.length > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between text-xs text-[#604735] dark:text-zinc-400 mb-3">
+                      <span className="flex items-center gap-1.5 font-semibold text-[#2A1F17] dark:text-zinc-300">
+                        <Clock className="w-3.5 h-3.5 text-[#087C7B] dark:text-[#C5A15B]" />
+                        عمليات البحث الأخيرة
+                      </span>
+                      <button
+                        type="button"
+                        onClick={clearRecentSearches}
+                        className="hover:text-red-500 transition-colors text-[11px]"
+                      >
+                        مسح السجل
                       </button>
-                    ))}
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {recentSearches.map((s, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setQuery(s)}
+                          className="px-3 py-1.5 rounded-lg bg-[#EFE5D4] dark:bg-white/[0.03] border border-[#D8C5A8] dark:border-white/10 text-xs text-[#2A1F17] dark:text-zinc-300 hover:text-[#087C7B] dark:hover:text-[#E1C58B] hover:border-[#087C7B] dark:hover:border-[#C5A15B]/40 transition-colors"
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Trending Tags */}
                 <div>
-                  <h3 className="text-sm font-cinzel font-bold text-primary uppercase tracking-widest mb-4 flex items-center gap-2">
-                    <Flame className="w-4 h-4" /> Trending
-                  </h3>
-                  <div className="flex flex-wrap gap-3">
-                    {['Shadow Emperor', 'Cosmic Magic', 'Chronos Falls', 'Zayed vs Farhan'].map((tag) => (
-                      <button key={tag} onClick={() => setQuery(tag)} className="px-4 py-2 rounded-full bg-white/5 border border-white/10 hover:border-primary hover:bg-primary/10 text-sm text-white/80 transition-colors">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-[#2A1F17] dark:text-zinc-300 mb-3">
+                    <Sparkles className="w-3.5 h-3.5 text-[#087C7B] dark:text-[#C5A15B]" />
+                    <span>موضوعات شائعة في الكون</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {trendingTags.map((tag, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => setQuery(tag)}
+                        className="px-3.5 py-1.5 rounded-xl bg-[#EFE5D4] dark:bg-white/[0.04] border border-[#D8C5A8] dark:border-[#C5A15B]/20 text-xs text-[#2A1F17] dark:text-white hover:bg-[#087C7B]/15 hover:border-[#087C7B] dark:hover:bg-[#C5A15B]/20 dark:hover:border-[#C5A15B]/50 transition-all"
+                      >
                         {tag}
                       </button>
                     ))}
                   </div>
                 </div>
-              </motion.div>
-            )}
 
-            {searchResults && (
-              <div className="mt-12 overflow-y-auto max-h-[60vh] pr-4 custom-scrollbar">
-                {searchResults.characters.length > 0 && (
-                  <div className="mb-10">
-                    <h3 className="text-sm font-cinzel font-bold text-muted-foreground uppercase tracking-widest mb-4">Characters</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                      {searchResults.characters.map((char) => (
-                        <Link key={char.id} href={`/characters/${char.id}`}>
-                          <div onClick={() => setSearchOpen(false)} className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-colors cursor-pointer group">
-                            <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0" style={{ background: char.image }}></div>
-                            <div>
-                              <div className="font-bold text-white group-hover:text-primary transition-colors">{char.name}</div>
-                              <div className="text-xs text-muted-foreground">{char.alias}</div>
-                            </div>
+                {/* Quick Shortcuts */}
+                <div className="pt-4 border-t border-[#D8C5A8]/50 dark:border-white/5">
+                  <div className="text-xs text-[#604735] dark:text-zinc-400 mb-3 font-semibold">تصفح سريع:</div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => handleSelect('/comics')}
+                      className="p-3 rounded-xl bg-[#EFE5D4]/60 dark:bg-white/[0.02] border border-[#D8C5A8] dark:border-white/5 hover:border-[#087C7B] dark:hover:border-[#C5A15B]/40 text-right flex items-center justify-between text-xs font-semibold text-[#2A1F17] dark:text-zinc-300 hover:text-[#087C7B] dark:hover:text-white"
+                    >
+                      <span>كل الكوميكس</span>
+                      <ChevronLeft className="w-3.5 h-3.5 text-[#087C7B] dark:text-[#C5A15B]" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSelect('/characters')}
+                      className="p-3 rounded-xl bg-[#EFE5D4]/60 dark:bg-white/[0.02] border border-[#D8C5A8] dark:border-white/5 hover:border-[#087C7B] dark:hover:border-[#C5A15B]/40 text-right flex items-center justify-between text-xs font-semibold text-[#2A1F17] dark:text-zinc-300 hover:text-[#087C7B] dark:hover:text-white"
+                    >
+                      <span>كل الشخصيات</span>
+                      <ChevronLeft className="w-3.5 h-3.5 text-[#087C7B] dark:text-[#C5A15B]" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSelect('/worlds')}
+                      className="p-3 rounded-xl bg-[#EFE5D4]/60 dark:bg-white/[0.02] border border-[#D8C5A8] dark:border-white/5 hover:border-[#087C7B] dark:hover:border-[#C5A15B]/40 text-right flex items-center justify-between text-xs font-semibold text-[#2A1F17] dark:text-zinc-300 hover:text-[#087C7B] dark:hover:text-white"
+                    >
+                      <span>أطلس العوالم</span>
+                      <ChevronLeft className="w-3.5 h-3.5 text-[#087C7B] dark:text-[#C5A15B]" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSelect('/selected')}
+                      className="p-3 rounded-xl bg-[#EFE5D4]/60 dark:bg-white/[0.02] border border-[#D8C5A8] dark:border-white/5 hover:border-[#087C7B] dark:hover:border-[#C5A15B]/40 text-right flex items-center justify-between text-xs font-semibold text-[#2A1F17] dark:text-zinc-300 hover:text-[#087C7B] dark:hover:text-white"
+                    >
+                      <span>حكاياتي المختارة</span>
+                      <ChevronLeft className="w-3.5 h-3.5 text-[#087C7B] dark:text-[#C5A15B]" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : totalResults === 0 ? (
+              <div className="py-12 text-center text-[#604735] dark:text-zinc-400">
+                <Search className="w-12 h-12 text-[#D8C5A8] dark:text-zinc-600 mx-auto mb-3" />
+                <p className="text-base text-[#2A1F17] dark:text-zinc-300 font-semibold mb-1">
+                  لم نعثر على نتائج مطابقة لـ "{query}"
+                </p>
+                <p className="text-xs text-[#604735] dark:text-zinc-500">
+                  جرّب البحث باسم شخصية مثل "زايد" أو اسم عالم مثل "زلامار" أو نوع قصة مثل "أكشن".
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-6 max-h-[60vh] overflow-y-auto pr-1">
+                {/* Comics */}
+                {matchingComics.length > 0 && (
+                  <div>
+                    <div className="text-xs font-bold text-[#087C7B] dark:text-[#C5A15B] mb-2.5 flex items-center gap-1.5">
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span>الكوميكس ({matchingComics.length})</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {matchingComics.map((comic) => (
+                        <div
+                          key={comic.id}
+                          onClick={() => handleSelect(`/comics/${comic.id}`, comic.titleAr)}
+                          className="p-2.5 rounded-xl bg-[#EFE5D4]/80 dark:bg-white/[0.02] hover:bg-[#EFE5D4] dark:hover:bg-white/[0.06] border border-[#D8C5A8] dark:border-white/5 hover:border-[#087C7B] dark:hover:border-[#C5A15B]/40 cursor-pointer flex items-center gap-3 transition-all"
+                        >
+                          <img
+                            src={comic.coverImage}
+                            alt={comic.titleAr}
+                            className="w-12 h-16 object-cover rounded-lg shrink-0 border border-[#D8C5A8] dark:border-white/10"
+                          />
+                          <div className="overflow-hidden">
+                            <h4 className="text-sm font-semibold text-[#2A1F17] dark:text-white truncate">
+                              {comic.titleAr}
+                            </h4>
+                            <p className="text-xs text-[#604735] dark:text-zinc-400 truncate">{comic.synopsisAr}</p>
+                            <span className="text-[10px] text-[#087C7B] dark:text-[#E1C58B] font-semibold mt-1 inline-block">
+                              العدد #{comic.issueNumber} • تقييم {comic.rating}★
+                            </span>
                           </div>
-                        </Link>
+                        </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {searchResults.comics.length > 0 && (
-                  <div className="mb-10">
-                    <h3 className="text-sm font-cinzel font-bold text-muted-foreground uppercase tracking-widest mb-4">Comics</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                      {searchResults.comics.map((comic) => (
-                        <Link key={comic.id} href={`/comics/${comic.id}`}>
-                          <div onClick={() => setSearchOpen(false)} className="flex items-center gap-4 p-3 rounded-xl hover:bg-white/5 border border-transparent hover:border-white/10 transition-colors cursor-pointer group">
-                            <div className="w-10 h-14 rounded overflow-hidden flex-shrink-0" style={{ background: comic.coverImage }}></div>
-                            <div>
-                              <div className="font-bold text-white group-hover:text-primary transition-colors line-clamp-1">{comic.title}</div>
-                              <div className="text-xs text-muted-foreground">Issue #{comic.issueNumber}</div>
-                            </div>
+                {/* Characters */}
+                {matchingCharacters.length > 0 && (
+                  <div>
+                    <div className="text-xs font-bold text-[#087C7B] dark:text-[#C5A15B] mb-2.5 flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5" />
+                      <span>الشخصيات ({matchingCharacters.length})</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {matchingCharacters.map((char) => (
+                        <div
+                          key={char.id}
+                          onClick={() =>
+                            handleSelect(`/characters/${char.id}`, char.nameAr)
+                          }
+                          className="p-2.5 rounded-xl bg-[#EFE5D4]/80 dark:bg-white/[0.02] hover:bg-[#EFE5D4] dark:hover:bg-white/[0.06] border border-[#D8C5A8] dark:border-white/5 hover:border-[#087C7B] dark:hover:border-[#C5A15B]/40 cursor-pointer flex items-center gap-3 transition-all"
+                        >
+                          <img
+                            src={char.image}
+                            alt={char.nameAr}
+                            className="w-12 h-12 rounded-full object-cover shrink-0 border border-[#087C7B]/40 dark:border-[#C5A15B]/30"
+                          />
+                          <div className="overflow-hidden">
+                            <h4 className="text-sm font-semibold text-[#2A1F17] dark:text-white truncate">
+                              {char.nameAr}
+                            </h4>
+                            <p className="text-xs text-[#087C7B] dark:text-[#E1C58B]">{char.aliasAr}</p>
+                            <p className="text-[11px] text-[#604735] dark:text-zinc-400 truncate">{char.bioAr}</p>
                           </div>
-                        </Link>
+                        </div>
                       ))}
                     </div>
                   </div>
                 )}
-                
-                {searchResults.characters.length === 0 && searchResults.comics.length === 0 && searchResults.worlds.length === 0 && (
-                  <div className="text-center py-20">
-                    <SearchIcon className="w-16 h-16 text-white/10 mx-auto mb-4" />
-                    <h2 className="text-2xl font-bold text-white/50">No results found for "{query}"</h2>
+
+                {/* Worlds */}
+                {matchingWorlds.length > 0 && (
+                  <div>
+                    <div className="text-xs font-bold text-[#087C7B] dark:text-[#C5A15B] mb-2.5 flex items-center gap-1.5">
+                      <Globe className="w-3.5 h-3.5" />
+                      <span>العوالم ({matchingWorlds.length})</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {matchingWorlds.map((world) => (
+                        <div
+                          key={world.id}
+                          onClick={() => handleSelect(`/worlds/${world.id}`, world.nameAr)}
+                          className="p-2.5 rounded-xl bg-[#EFE5D4]/80 dark:bg-white/[0.02] hover:bg-[#EFE5D4] dark:hover:bg-white/[0.06] border border-[#D8C5A8] dark:border-white/5 hover:border-[#087C7B] dark:hover:border-[#C5A15B]/40 cursor-pointer flex items-center gap-3 transition-all"
+                        >
+                          <img
+                            src={world.image}
+                            alt={world.nameAr}
+                            className="w-12 h-12 rounded-lg object-cover shrink-0 border border-[#D8C5A8] dark:border-white/10"
+                          />
+                          <div className="overflow-hidden">
+                            <h4 className="text-sm font-semibold text-[#2A1F17] dark:text-white truncate">
+                              عالم {world.nameAr}
+                            </h4>
+                            <p className="text-[11px] text-[#604735] dark:text-zinc-400 truncate">
+                              {world.descriptionAr}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Stories */}
+                {matchingStories.length > 0 && (
+                  <div>
+                    <div className="text-xs font-bold text-[#087C7B] dark:text-[#C5A15B] mb-2.5 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>القصص والمرويات ({matchingStories.length})</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2">
+                      {matchingStories.map((story) => (
+                        <div
+                          key={story.id}
+                          onClick={() => handleSelect(`/stories/${story.id}`, story.titleAr)}
+                          className="p-3 rounded-xl bg-[#EFE5D4]/80 dark:bg-white/[0.02] hover:bg-[#EFE5D4] dark:hover:bg-white/[0.06] border border-[#D8C5A8] dark:border-white/5 hover:border-[#087C7B] dark:hover:border-[#C5A15B]/40 cursor-pointer flex items-center justify-between transition-all"
+                        >
+                          <div>
+                            <h4 className="text-sm font-semibold text-[#2A1F17] dark:text-white">
+                              {story.titleAr}
+                            </h4>
+                            <p className="text-xs text-[#604735] dark:text-zinc-400">{story.synopsisAr}</p>
+                            <span className="text-[11px] text-[#087C7B] dark:text-[#E1C58B]">
+                              بقلم: {story.authorAr}
+                            </span>
+                          </div>
+                          <ChevronLeft className="w-4 h-4 text-[#604735] dark:text-zinc-500 shrink-0" />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
             )}
-          </div>
-        </motion.div>
-      )}
+          </motion.div>
+        </div>
+      </div>
     </AnimatePresence>
   );
 }

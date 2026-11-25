@@ -1,0 +1,490 @@
+# HEKAYATY WORLD — CINEMATIC HOMEPAGE MASTER PROMPT
+
+Create an ultra-premium AAA-quality homepage for a fictional entertainment universe called **Hekayaty World**.
+
+The homepage must feel like a combination of:
+
+* League of Legends Universe
+* Arcane Official Website
+* Riot Forge
+* Marvel Unlimited
+* DC Universe Infinite
+* Star Wars Databank
+
+But with a completely original identity.
+
+The result should look like a website that cost more than **$50,000** to design and build.
+
+The design must immediately communicate:
+
+* Epic storytelling
+* Massive universe
+* Legendary heroes
+* Ancient civilizations
+* Fantasy worlds
+* Futuristic technology
+* Premium entertainment brand
+
+The website is NOT a comic store.
+
+It is the official digital hub of a massive Arabic fantasy and superhero universe.
+
+---
+
+# General Design Direction
+
+Visual Style:
+
+* Cinematic
+* Premium
+* Fututuristic Fantasy
+* Immersive
+* Luxury
+* Interactive
+* AAA Game Quality
+
+Color Palette:
+
+* Deep Black (#050505)
+* Midnight Blue (#081224)
+* Gold (#D4AF37)
+* Bronze (#8A5A2B)
+* Silver Highlights (#D9D9D9)
+* Electric Blue Accents
+* Purple Cosmic Effects
+* Orange Energy Effects
+
+The interface must feel alive.
+
+Use:
+
+* Glowing particles
+* Floating embers
+* Cosmic fog
+* Animated gradients
+* Light rays
+* Depth layers
+* Glassmorphism panels
+* Cinematic shadows
+
+Every section should feel handcrafted.
+
+---
+
+# NAVBAR
+
+Sticky Navigation
+
+Glassmorphism Background
+
+Blur Effect
+
+Gold Border Glow
+
+Left Side:
+
+HEKAYATY WORLD Logo
+
+Center:
+
+* Home
+* Comics
+* Characters
+* Worlds
+* Timeline
+* Encyclopedia
+* Card Game
+* Community
+* News
+
+Right Side:
+
+* Search Icon
+* Notifications
+* Language Switch
+* Theme Toggle
+* User Profile
+
+Navbar should animate while scrolling.
+
+---
+
+# HERO SECTION
+
+This section must be breathtaking.
+
+Full Screen Height (100vh)
+
+Background:
+
+Massive fantasy city mixed with futuristic architecture.
+
+Ancient towers.
+
+Floating islands.
+
+Flying creatures.
+
+Cosmic sky.
+
+Energy portals.
+
+Distant mountains.
+
+Animated particles.
+
+Subtle moving clouds.
+
+Parallax effects.
+
+Video placeholder background.
+
+---
+
+Layout:
+
+Left Side:
+
+Small Label:
+
+"Welcome to Hekayaty World"
+
+Massive Headline:
+
+"A Universe Without Limits"
+
+Huge cinematic typography.
+
+Gold gradient text.
+
+Subtitle:
+
+"Hekayaty World is more than stories. It is a living universe of heroes, legends, kingdoms, wars, mysteries, and endless adventures."
+
+Buttons:
+
+Primary:
+
+"Explore Universe"
+
+Secondary:
+
+"Read Comics"
+
+Both with hover animations.
+
+---
+
+Center Visual:
+
+Two legendary original heroes standing back-to-back.
+
+One representing light.
+
+One representing shadow.
+
+Extremely detailed armor.
+
+Cinematic lighting.
+
+Epic scale.
+
+Not copyrighted characters.
+
+Completely original designs.
+
+---
+
+Hero Statistics Row:
+
+250+
+Comics
+
+120+
+Characters
+
+30+
+Worlds
+
+1000+
+Locations
+
+500K+
+Community Members
+
+Animated counters when entering viewport.
+
+---
+
+# FEATURED CHARACTERS SECTION
+
+Dark background.
+
+Large section title:
+
+"Legendary Heroes"
+
+Display 4 premium character cards.
+
+Each card includes:
+
+* Character portrait
+* Name
+* Title
+* Power level
+* Affiliation
+* World
+
+Hover Effects:
+
+* Glow
+* Lift animation
+* Particle burst
+* Border illumination
+
+Cards should feel collectible.
+
+---
+
+# LATEST COMICS SECTION
+
+Premium comic showcase.
+
+Display 4 comic covers.
+
+Each card includes:
+
+* Cover
+* Title
+* Issue Number
+* Release Date
+* Rating
+
+Hover:
+
+* 3D tilt
+* Glow border
+* Quick view overlay
+
+Add a "View All Comics" button.
+
+---
+
+# WORLDS SECTION
+
+One of the most impressive sections.
+
+Title:
+
+"Explore Our Worlds"
+
+Background:
+
+Massive galaxy map.
+
+Interactive world cards.
+
+Display:
+
+* Zalamar
+* Nova Qadim
+* Al-Marid
+* The Void
+* Syrra Prime
+
+Each world card includes:
+
+* Planet image
+* Cities count
+* Population
+* Threat level
+* Lore preview
+
+Hover should reveal additional details.
+
+---
+
+# TIMELINE SECTION
+
+Title:
+
+"The Great Timeline"
+
+Create a cinematic horizontal timeline.
+
+Display major events:
+
+* Age of Origins
+* Rise of Kingdoms
+* The Great War
+* The Awakening
+* The Dark Rebellion
+* New Era
+
+Timeline should glow and animate on scroll.
+
+Include large central artifact in the background.
+
+---
+
+# ENCYCLOPEDIA SECTION
+
+Premium cards for:
+
+* Characters
+* Worlds
+* Powers
+* Artifacts
+* Organizations
+* Creatures
+
+Each category should have:
+
+* Icon
+* Image
+* Hover animation
+* Quick access
+
+---
+
+# CARD GAME SECTION
+
+Show premium fantasy cards.
+
+Large card previews.
+
+Animated rarity effects.
+
+Gold borders.
+
+Glow effects.
+
+Collection statistics.
+
+Deck builder preview.
+
+---
+
+# COMMUNITY SECTION
+
+Modern social experience.
+
+Show:
+
+* Popular discussions
+* Fan art
+* Community highlights
+* Top creators
+
+Cards should look like a premium gaming community.
+
+---
+
+# NEWS SECTION
+
+Entertainment-style news feed.
+
+Featured article.
+
+Latest universe updates.
+
+Upcoming events.
+
+Trailers.
+
+Announcements.
+
+Modern magazine layout.
+
+---
+
+# READING GUIDE SECTION
+
+Display:
+
+* Beginner Path
+* Hero Path
+* World Path
+* Timeline Path
+
+Each path has:
+
+* Progress indicator
+* Completion percentage
+* Recommended comics
+
+---
+
+# USER PROFILE PREVIEW
+
+Premium dashboard card.
+
+Display:
+
+* Avatar
+* Level
+* XP Progress
+* Favorite Characters
+* Favorite Worlds
+* Recent Activity
+
+Luxury design.
+
+---
+
+# FOOTER
+
+Large cinematic footer.
+
+Include:
+
+* Logo
+* Navigation Links
+* Social Media
+* Newsletter
+* Copyright
+
+Background should contain subtle stars and glowing particles.
+
+---
+
+# ANIMATIONS
+
+Use Framer Motion extensively.
+
+Include:
+
+* Page Load Animations
+* Fade In Sections
+* Scroll Reveal
+* Floating Elements
+* Hover Lift Effects
+* Parallax Layers
+* Animated Counters
+* Smooth Transitions
+* Micro Interactions
+
+Every interaction should feel premium.
+
+---
+
+# RESPONSIVENESS
+
+Perfect on:
+
+* Mobile
+* Tablet
+* Laptop
+* Ultra-Wide Screens
+
+Mobile version must maintain the same luxury feeling.
+
+---
+
+# FINAL GOAL
+
+The homepage should instantly make visitors believe they entered the official website of a billion-dollar entertainment franchise.
+
+It must feel immersive, cinematic, emotional, magical, futuristic, and unforgettable.
+
+The visual quality should rival the best entertainment, gaming, and cinematic universe websites in the world while maintaining a unique Arabic fantasy identity under the brand name "HEKAYATY WORLD".
