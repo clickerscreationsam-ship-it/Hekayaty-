@@ -2,7 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "services": {
     "api-server": {
-      "root": "artifacts/api-server"
+      "root": "artifacts/api-server",
+      "entrypoint": "src/index.ts"
     },
     "hekayaty-world": {
       "root": "artifacts/hekayaty-world"
