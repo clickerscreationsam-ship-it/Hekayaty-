@@ -34,7 +34,7 @@ const STORAGE_KEY = 'hekayaty_seo_settings_v1';
 const DEFAULT_SETTINGS: SEOSettings = {
   siteTitle: 'حكاياتي | HEKAYATY — منصة الأكوان القصصية والروايات الرقمية',
   siteDescription: 'الوجهة الترفيهية الأدبية الأولى لاكتشاف وقراءة أضخم الأكوان القصصية العربية المترابطة، الروايات، والكوميكس الأصلي بمؤثرات وتجربة قراءة غامرة.',
-  keywords: 'حكاياتي, روايات عربية, كوميكس عربي, قصص خيالية, أدب رقمي, أبطال كوزميك, قراءة رقمية',
+  keywords: 'حكاياتي, روايات عربية, كوميكس عربي, قصص خيالية, أدب رقمي, أبطال أسطوريون, قراءة رقمية',
   canonicalUrl: 'https://hekayaty.com',
   ogImage: 'https://hekayaty.com/assets/magic_library_clouds.png',
   twitterHandle: '@hekayatyn6',

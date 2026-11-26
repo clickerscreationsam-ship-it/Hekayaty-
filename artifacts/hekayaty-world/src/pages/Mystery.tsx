@@ -38,7 +38,7 @@ export default function Mystery() {
     <div className="min-h-screen bg-[#070B14] text-white font-arabic notranslate relative overflow-hidden" dir="rtl" translate="no">
       <SEOHead
         title="لغز حكاياتي اليومي | Mystery of Hekayaty"
-        description="سلسلة ألغاز يومية مشوقة في عوالم حكاياتي، كل يوم حلقة جديدة تكشف سراً كوزمياً جديداً."
+        description="سلسلة ألغاز يومية مشوقة في عوالم حكاياتي، كل يوم حلقة جديدة تكشف سراً غامضاً جديداً."
         canonicalUrl="https://hekayaty.com/mystery"
         ogType="website"
       />

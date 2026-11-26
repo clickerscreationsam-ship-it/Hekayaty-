@@ -39,7 +39,7 @@ export default function Stories() {
     <div className="min-h-screen py-10 px-4 sm:px-6 lg:px-8 max-w-[1400px] mx-auto font-arabic notranslate" dir="rtl" translate="no">
       <SEOHead
         title="مكتبة القصص والمرويات الأدبية"
-        description="اقرأ أحدث القصص الأدبية، المرويات الكوزمية، والروايات المصورة المكتوبة بقلم نخبة مبدعي حكاياتي."
+        description="اقرأ أحدث القصص الأدبية، المرويات الخيالية، والروايات المصورة المكتوبة بقلم نخبة مبدعي حكاياتي."
         canonicalUrl="/stories"
         ogType="website"
       />

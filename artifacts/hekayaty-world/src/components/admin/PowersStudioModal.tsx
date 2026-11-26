@@ -18,7 +18,7 @@ export function PowersStudioModal({ isOpen, onClose, toast }: PowersStudioProps)
   const [newPower, setNewPower] = useState({
     name_ar: '',
     name_en: '',
-    category_ar: 'طاقة كوزمية',
+    category_ar: 'طاقة خارقة',
     level: 80,
     icon: '⚡',
     description_ar: '',
@@ -63,7 +63,7 @@ export function PowersStudioModal({ isOpen, onClose, toast }: PowersStudioProps)
       setNewPower({
         name_ar: '',
         name_en: '',
-        category_ar: 'طاقة كوزمية',
+        category_ar: 'طاقة خارقة',
         level: 80,
         icon: '⚡',
         description_ar: '',
@@ -112,7 +112,7 @@ export function PowersStudioModal({ isOpen, onClose, toast }: PowersStudioProps)
                 <input
                   type="text"
                   required
-                  placeholder="مثال: التحكم بالجاذبية الكوزمية"
+                  placeholder="مثال: التحكم بالجاذبية الفلكية"
                   value={newPower.name_ar}
                   onChange={(e) => setNewPower({ ...newPower, name_ar: e.target.value })}
                   className="w-full bg-[#152033] border border-[#2E3C51] focus:border-[#087C7B] rounded-xl px-3 py-2 text-white text-xs outline-none"
@@ -126,7 +126,7 @@ export function PowersStudioModal({ isOpen, onClose, toast }: PowersStudioProps)
                   onChange={(e) => setNewPower({ ...newPower, category_ar: e.target.value })}
                   className="w-full bg-[#152033] border border-[#2E3C51] focus:border-[#087C7B] rounded-xl px-3 py-2 text-white text-xs outline-none"
                 >
-                  <option value="طاقة كوزمية">طاقة كوزمية (Cosmic)</option>
+                  <option value="طاقة خارقة">طاقة خارقة (Cosmic)</option>
                   <option value="عنصري وطبيعي">عنصري وطبيعي (Elemental)</option>
                   <option value="ذهني ونفسي">ذهني ونفسي (Psionic)</option>
                   <option value="فيزيائي وجسدي">فيزيائي وجسدي (Physical)</option>

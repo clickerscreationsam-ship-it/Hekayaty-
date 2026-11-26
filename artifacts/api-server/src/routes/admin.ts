@@ -1555,11 +1555,11 @@ router.post('/publications/:id/publish', async (req, res) => {
 const DEFAULT_POWERS = [
   { id: 'p_super_strength', nameAr: 'القوة الخارقة', nameEn: 'Super Strength', category: 'جسدي', descriptionAr: 'قدرة فائقة على تحطيم المعادن ورفع أطنان هائلة تفوق قدرة البشر.', icon: '💪', level: 90, weaknesses: 'المجالات المضادة للجاذبية' },
   { id: 'p_light_speed', nameAr: 'سرعة البرق', nameEn: 'Light Speed', category: 'حركي', descriptionAr: 'التنقل بسرعة تفوق الصوت مع ردود أفعال لحظية متناهية الدقة.', icon: '⚡', level: 85, weaknesses: 'الاحتكاك الشديد والمستنقعات الكثيفة' },
-  { id: 'p_cosmic_fire', nameAr: 'اللهب الكوزمي', nameEn: 'Cosmic Fire', category: 'عنصري', descriptionAr: 'إطلاق ألسنة لهب أرجوانية تحرق الطاقة السحرية والكيانات الأثيرية.', icon: '🔥', level: 95, weaknesses: 'الماء الميتافيزيقي والجليد الأزلي' },
+  { id: 'p_cosmic_fire', nameAr: 'اللهب الأسطوري', nameEn: 'Cosmic Fire', category: 'عنصري', descriptionAr: 'إطلاق ألسنة لهب أرجوانية تحرق الطاقة السحرية والكيانات الأثيرية.', icon: '🔥', level: 95, weaknesses: 'الماء الميتافيزيقي والجليد الأزلي' },
   { id: 'p_telepathy', nameAr: 'التخاطر العقلي', nameEn: 'Telepathy', category: 'ذهني', descriptionAr: 'قراءة أفكار الخصوم والتواصل الذهني وتثبيط العقول المعادية.', icon: '🧠', level: 80, weaknesses: 'الدروع الفكرية والخوذات المعزولة' },
-  { id: 'p_shadow_walk', nameAr: 'التحكم بالظلال', nameEn: 'Shadow Manipulation', category: 'أثيري', descriptionAr: 'الانتقال عبر الأبعاد المظلمة وتشكيل أسلحة ودروع من العتمة الخالصة.', icon: '🌑', level: 88, weaknesses: 'الضوء الكوزمي الشديد' },
+  { id: 'p_shadow_walk', nameAr: 'التحكم بالظلال', nameEn: 'Shadow Manipulation', category: 'أثيري', descriptionAr: 'الانتقال عبر الأبعاد المظلمة وتشكيل أسلحة ودروع من العتمة الخالصة.', icon: '🌑', level: 88, weaknesses: 'الضوء الأسطوري الشديد' },
   { id: 'p_healing_factor', nameAr: 'التجدد الذاتي', nameEn: 'Regeneration Factor', category: 'جسدي', descriptionAr: 'التئام فوري للجروح والكسور ومقاومة السموم والأوبئة الفتاكة.', icon: '✨', level: 85, weaknesses: 'حروق البلازما المستمرة' },
-  { id: 'p_reality_warp', nameAr: 'طمس الواقع', nameEn: 'Reality Warping', category: 'كوزمي', descriptionAr: 'إعادة تشكيل المادة والزمكان على نطاق موضعي بحسب الإرادة.', icon: '🌌', level: 99, weaknesses: 'استنزاف الطاقة الروحية الهائل' },
+  { id: 'p_reality_warp', nameAr: 'طمس الواقع', nameEn: 'Reality Warping', category: 'خارق', descriptionAr: 'إعادة تشكيل المادة والزمكان على نطاق موضعي بحسب الإرادة.', icon: '🌌', level: 99, weaknesses: 'استنزاف الطاقة الروحية الهائل' },
   { id: 'p_combat_mastery', nameAr: 'سيد الفنون القتالية', nameEn: 'Combat Mastery', category: 'مهاري', descriptionAr: 'إتقان تام لكافة أساليب القتال بالسلاح والالتحام الجسدي المباشر.', icon: '⚔️', level: 75, weaknesses: 'الهجمات بعيدة المدى' },
 ];
 

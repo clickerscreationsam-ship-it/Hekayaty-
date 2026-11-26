@@ -28,7 +28,7 @@ const RARITY_CONFIG: Record<
   }
 > = {
   mythic: {
-    nameAr: 'ميثيك أسطوري كوزمي',
+    nameAr: 'ميثيك أسطوري نادر',
     badgeCls: 'bg-gradient-to-r from-red-600 via-pink-600 to-amber-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.7)]',
     borderCls: 'border-red-500/60 hover:border-red-400',
     glowCls: 'shadow-[0_0_35px_rgba(239,68,68,0.35)] hover:shadow-[0_0_55px_rgba(239,68,68,0.6)]',
@@ -209,7 +209,7 @@ export function LegendaryCharacterCard({
           {(rarity === 'mythic' || rarity === 'legendary') && (
             <div className="absolute top-3 left-3 pointer-events-none flex items-center gap-1 bg-black/50 px-2 py-0.5 rounded-full border border-amber-400/30">
               <Sparkles className="w-3 h-3 text-amber-300 animate-pulse" />
-              <span className="text-[10px] font-bold text-amber-200">بطاقة كوزمية</span>
+              <span className="text-[10px] font-bold text-amber-200">بطاقة خارقة</span>
             </div>
           )}
 
@@ -234,7 +234,7 @@ export function LegendaryCharacterCard({
             </div>
 
             <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed mt-1">
-              {character.bioAr || 'شخصية وبطل أسطوري مسجل في سجلات عوالم حكاياتي الكوزمية.'}
+              {character.bioAr || 'شخصية وبطل أسطوري مسجل في سجلات عوالم حكاياتي الأسطورية.'}
             </p>
           </div>
 
@@ -267,7 +267,7 @@ export function LegendaryCharacterCard({
               color: '#FFFFFF',
             }}
           >
-            <span>الملف الكوزمي الكامل</span>
+            <span>الملف الأسطوري الكامل</span>
             <ChevronLeft className="w-3.5 h-3.5 group-hover/btn:-translate-x-1 transition-transform" />
           </Link>
         </div>

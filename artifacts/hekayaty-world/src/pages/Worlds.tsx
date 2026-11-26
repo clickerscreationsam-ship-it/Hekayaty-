@@ -36,7 +36,7 @@ export default function Worlds() {
       <div className="mb-12 text-center max-w-3xl mx-auto">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#087C7B]/10 dark:bg-[#C5A15B]/10 border border-[#087C7B]/30 dark:border-[#C5A15B]/30 text-[#087C7B] dark:text-[#E1C58B] text-xs font-semibold mb-3">
           <Globe className="w-3.5 h-3.5" />
-          <span>أطلس الأبعاد والعوالم الكوزمية</span>
+          <span>أطلس الأبعاد والعوالم الأسطورية</span>
         </div>
         <h1 className="text-3xl sm:text-5xl font-bold text-[#2A1F17] dark:text-white mb-4">
           عوالم <span className="gold-gradient">حكاياتي</span>

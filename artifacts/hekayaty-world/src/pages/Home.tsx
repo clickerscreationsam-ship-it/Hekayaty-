@@ -490,7 +490,7 @@ export default function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {topCharacters.map((char: any) => {
               const charImg = char.image || char.imageUrl || char.image_url || char.avatar_url || '/assets/generated_images/zayed.jpg';
-              const charName = char.nameAr || char.name_ar || char.name || 'بطل كوزمي';
+              const charName = char.nameAr || char.name_ar || char.name || 'بطل أسطوري';
               const charAlias = char.aliasAr || char.alias_ar || char.alias || char.title || 'سجل الأبطال';
               const rating = char.powerRating || char.stats?.powerRating || 85;
               const alignment = char.alignment || char.role || 'hero';

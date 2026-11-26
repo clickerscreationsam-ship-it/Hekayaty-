@@ -76,7 +76,7 @@ export default function EncyclopediaDetail() {
         <div className="space-y-4">
           <h3 className="text-sm font-bold text-deep-teal dark:text-antique-gold uppercase tracking-wider flex items-center gap-2 font-cinzel">
             <BookMarked className="w-4 h-4" />
-            <span>التوثيق والتحليل الكوزمي</span>
+            <span>التوثيق والتحليل الشامل</span>
           </h3>
           <p className="text-base sm:text-lg text-foreground/85 leading-relaxed font-normal">
             {entry.descriptionAr}

@@ -381,7 +381,7 @@ export function UnifiedCreationWizardModal({
     {
       id: 'book',
       title: 'كتاب فكري / موسوعي (Book)',
-      desc: 'كتب معرفية، أبحاث تاريخية، ووثائق الأكوان الكوزمية',
+      desc: 'كتب معرفية، أبحاث تاريخية، ووثائق الأكوان الخيالية',
       icon: Library,
       color: 'border-[#C5A15B] text-[#C5A15B]',
     },

@@ -214,7 +214,7 @@ export default function Comics() {
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 notranslate" dir="rtl" translate="no">
       <SEOHead
         title="مكتبة الكوميكس والقصص المصورة"
-        description="استكشف أكبر مكتبة للقصص المصورة والمانجا العربية، واقرأ فصول الملاحم الكوزمية بجودة فائقة."
+        description="استكشف أكبر مكتبة للقصص المصورة والمانجا العربية، واقرأ فصول الملاحم الأسطورية بجودة فائقة."
         canonicalUrl="/comics"
         ogType="website"
       />

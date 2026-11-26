@@ -15,6 +15,43 @@ export function MysteryMgmtPanel({ toast }: Props) {
   const [editingEpisode, setEditingEpisode] = useState<any | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const handleOpenInReader = (currentTitle: string, currentContent: string) => {
+    try {
+      localStorage.setItem('hekayaty_draft_mystery_title', currentTitle || '');
+      localStorage.setItem('hekayaty_draft_mystery_content', currentContent || '');
+      window.open('/reader?draft_mystery=1', '_blank');
+      toast({
+        title: '📖 تم فتح قارئ حكاياتي الذكي في نافذة جديدة',
+        description: 'اكتب محتوى الحلقة بتنسيق القارئ الكامل ثم اضغط "حفظ واعتماد النص".',
+      });
+    } catch {}
+  };
+
+  const handleImportFromReader = () => {
+    try {
+      const exported = localStorage.getItem('hekayaty_reader_exported_text');
+      if (exported && exported.trim()) {
+        const words = exported.trim().split(/\s+/).length;
+        const mins = Math.max(1, Math.ceil(words / 160));
+        setForm((f) => ({
+          ...f,
+          content_ar: exported,
+          reading_time_minutes: mins,
+        }));
+        toast({
+          title: '✅ تم استيراد النص من قارئ حكاياتي بنجاح!',
+          description: `تم إدراج ${words} كلمة وحساب مدة القراءة بـ ${mins} دقيقة تلقائياً.`,
+        });
+      } else {
+        toast({
+          title: 'لم يتم العثور على نص محفوظ من القارئ',
+          description: 'اضغط على "الكتابة في القارئ" واكتب النص ثم اضغط "اعتماد النص للوحة النشر".',
+          variant: 'destructive',
+        });
+      }
+    } catch {}
+  };
+
   const defaultForm = {
     title_ar: '',
     title_en: '',
@@ -355,7 +392,35 @@ export function MysteryMgmtPanel({ toast }: Props) {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className={labelCls}>نص الرواية ومحتوى الحلقة الكامل *</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className={labelCls + ' mb-0'}>نص الرواية ومحتوى الحلقة الكامل *</label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const exportedText = typeof window !== 'undefined' ? localStorage.getItem('hekayaty_reader_exported_text') : null;
+                          if (exportedText && exportedText.trim()) {
+                            const words = exportedText.trim().split(/\s+/).length;
+                            const mins = Math.max(1, Math.ceil(words / 160));
+                            setForm((f) => ({ ...f, content_ar: exportedText, reading_time_minutes: mins }));
+                            toast({ title: '✅ تم استيراد النص من القارئ الذكي!', description: `${words} كلمة — مدة قراءة ~${mins} دقيقة` });
+                          } else {
+                            toast({ title: 'لا يوجد نص محفوظ من القارئ', description: 'افتح القارئ الذكي، اكتب النص، ثم اضغط "اعتماد النص"', variant: 'destructive' });
+                          }
+                        }}
+                        className="text-[11px] text-[#087C7B] hover:underline font-bold flex items-center gap-1"
+                      >
+                        ↓ استيراد من القارئ
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenInReader(form.title_ar, form.content_ar)}
+                        className="text-[11px] text-[#C5A15B] hover:underline font-bold flex items-center gap-1"
+                      >
+                        📖 الكتابة في القارئ
+                      </button>
+                    </div>
+                  </div>
                   <textarea
                     rows={8}
                     required
@@ -505,7 +570,25 @@ export function MysteryMgmtPanel({ toast }: Props) {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className={labelCls}>نص الرواية ومحتوى الحلقة الكامل *</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className={labelCls + ' mb-0'}>نص الرواية ومحتوى الحلقة الكامل *</label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleImportFromReader()}
+                        className="text-[11px] text-[#087C7B] hover:underline font-bold"
+                      >
+                        ↓ استيراد من القارئ
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenInReader(form.title_ar, form.content_ar)}
+                        className="text-[11px] text-[#C5A15B] hover:underline font-bold"
+                      >
+                        📖 الكتابة في القارئ
+                      </button>
+                    </div>
+                  </div>
                   <textarea
                     rows={8}
                     required

@@ -162,7 +162,7 @@ export default function WorldDetail() {
           <div className="glass-panel p-6 sm:p-8 rounded-3xl space-y-4">
             <h3 className="text-lg font-bold text-[#2A1F17] dark:text-white flex items-center gap-2">
               <Clock className="w-5 h-5 text-[#087C7B] dark:text-[#C5A15B]" />
-              <span>التاريخ والأصل الكوزمي</span>
+              <span>التاريخ وقصة البداية والأصل</span>
             </h3>
             <p className="text-sm sm:text-base text-[#604735] dark:text-zinc-300 leading-relaxed">
               {world.historyAr}

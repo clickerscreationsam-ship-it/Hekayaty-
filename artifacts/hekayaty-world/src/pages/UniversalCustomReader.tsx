@@ -54,11 +54,16 @@ export default function UniversalCustomReader() {
   const storyIdParam = searchParams.get('storyId');
   const comicIdParam = searchParams.get('comicId');
   const pdfUrlParam = searchParams.get('pdf');
+  const mysterySlugParam = searchParams.get('mystery') || searchParams.get('episode');
+  const draftMysteryParam = searchParams.get('draft_mystery') === '1' || searchParams.get('mode') === 'draft_mystery';
 
   // Modes: 'story' (novel chapters), 'comic' (page-based), 'pdf' (document), 'custom' (pasted text)
   const [mode, setMode] = useState<'story' | 'comic' | 'pdf' | 'custom'>(
     storyIdParam ? 'story' : comicIdParam ? 'comic' : pdfUrlParam ? 'pdf' : 'custom'
   );
+
+  // Mystery State
+  const [mysteryData, setMysteryData] = useState<any>(null);
 
   // Story / Novel State
   const [storyData, setStoryData] = useState<any>(null);
@@ -135,6 +140,42 @@ export default function UniversalCustomReader() {
     }
   }, [comicIdParam]);
 
+  // Load Mystery episode if mystery parameter is present
+  useEffect(() => {
+    if (mysterySlugParam) {
+      setLoading(true);
+      setMode('custom');
+      api
+        .getMysteryEpisodeDetail(mysterySlugParam)
+        .then((ep) => {
+          if (ep) {
+            setMysteryData(ep);
+            setContentTitle(`لغز حكاياتي #${ep.episode_number}: ${ep.title_ar}`);
+            setTextContent(ep.content_ar || '');
+            setIsReadingMode(true);
+          }
+        })
+        .catch(() => {
+          toast({ title: 'تعذر تحميل حلقة اللغز', variant: 'destructive' });
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [mysterySlugParam]);
+
+  // Handle draft mystery authoring inside the reader
+  useEffect(() => {
+    if (draftMysteryParam) {
+      setMode('custom');
+      setIsReadingMode(false);
+      try {
+        const draftTitle = localStorage.getItem('hekayaty_draft_mystery_title');
+        const draftContent = localStorage.getItem('hekayaty_draft_mystery_content');
+        if (draftTitle) setContentTitle(draftTitle);
+        if (draftContent) setTextContent(draftContent);
+      } catch {}
+    }
+  }, [draftMysteryParam]);
+
   // Restore saved reader cache from localStorage
   useEffect(() => {
     try {
@@ -142,7 +183,7 @@ export default function UniversalCustomReader() {
       const savedTitle = localStorage.getItem('hekayaty_custom_reader_title');
       if (savedText && !storyIdParam && !comicIdParam) setTextContent(savedText);
       if (savedTitle && !storyIdParam && !comicIdParam) setContentTitle(savedTitle);
-    } catch {}
+    } catch { }
   }, [storyIdParam, comicIdParam]);
 
   // Auto-save reading progress to API
@@ -157,7 +198,7 @@ export default function UniversalCustomReader() {
           isCompleted: false,
         });
       }
-    } catch {}
+    } catch { }
   };
 
   const handleNextChapter = () => {
@@ -271,27 +312,24 @@ export default function UniversalCustomReader() {
           <div className="flex rounded-xl bg-black/5 dark:bg-white/5 p-1 border border-black/10 dark:border-white/10 text-xs">
             <button
               onClick={() => setThemeMode('dark')}
-              className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                themeMode === 'dark' ? 'bg-black/60 text-antique-gold shadow' : 'text-foreground/50'
-              }`}
+              className={`w-7 h-7 rounded-lg flex items-center justify-center ${themeMode === 'dark' ? 'bg-black/60 text-antique-gold shadow' : 'text-foreground/50'
+                }`}
               title="الوضع الداكن السينمائي"
             >
               <Moon className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setThemeMode('sepia')}
-              className={`w-7 h-7 rounded-lg flex items-center justify-center font-serif font-bold text-xs ${
-                themeMode === 'sepia' ? 'bg-[#E5D7B7] text-[#433422] shadow' : 'text-foreground/50'
-              }`}
+              className={`w-7 h-7 rounded-lg flex items-center justify-center font-serif font-bold text-xs ${themeMode === 'sepia' ? 'bg-[#E5D7B7] text-[#433422] shadow' : 'text-foreground/50'
+                }`}
               title="ورق كلاسيكي Sepia"
             >
               ورق
             </button>
             <button
               onClick={() => setThemeMode('light')}
-              className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                themeMode === 'light' ? 'bg-white text-zinc-900 shadow' : 'text-foreground/50'
-              }`}
+              className={`w-7 h-7 rounded-lg flex items-center justify-center ${themeMode === 'light' ? 'bg-white text-zinc-900 shadow' : 'text-foreground/50'
+                }`}
               title="نهاري ناصع"
             >
               <Sun className="w-3.5 h-3.5" />
@@ -337,10 +375,10 @@ export default function UniversalCustomReader() {
           <button
             onClick={() => {
               if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(() => {});
+                document.documentElement.requestFullscreen().catch(() => { });
                 setIsFullscreen(true);
               } else {
-                document.exitFullscreen().catch(() => {});
+                document.exitFullscreen().catch(() => { });
                 setIsFullscreen(false);
               }
             }}
@@ -387,11 +425,10 @@ export default function UniversalCustomReader() {
                         saveProgressDebounced(idx, 0);
                         mainScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
-                      className={`w-full p-3 rounded-2xl text-right transition-all flex items-center justify-between ${
-                        isActive
-                          ? 'bg-[#087C7B] text-white font-bold shadow-md'
-                          : 'bg-[#152033] hover:bg-[#1D2B44] text-zinc-300'
-                      }`}
+                      className={`w-full p-3 rounded-2xl text-right transition-all flex items-center justify-between ${isActive
+                        ? 'bg-[#087C7B] text-white font-bold shadow-md'
+                        : 'bg-[#152033] hover:bg-[#1D2B44] text-zinc-300'
+                        }`}
                     >
                       <div className="truncate flex-1">
                         <div className="text-[11px] font-mono opacity-75">#{ch.chapterNumber}</div>
@@ -599,25 +636,99 @@ export default function UniversalCustomReader() {
             <div className="max-w-3xl mx-auto space-y-6">
               {!isReadingMode ? (
                 <div className="p-6 rounded-3xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] space-y-4 shadow-lg">
-                  <h2 className="text-base font-bold text-antique-gold flex items-center gap-2">
-                    <Sparkles className="w-4 h-4" />
-                    <span>محرر القراءة الحرة</span>
-                  </h2>
+                  {draftMysteryParam && (
+                    <div className="p-4 rounded-2xl bg-[#C5A15B]/15 border border-[#C5A15B]/40 flex flex-wrap items-center justify-between gap-3">
+                      <div className="space-y-0.5">
+                        <span className="text-xs font-black text-[#E1C58B] flex items-center gap-1.5">
+                          <Sparkles className="w-4 h-4 text-amber-400" />
+                          <span>بيئة كتابة وتحرير حلقة لغز حكاياتي في القارئ الذكي</span>
+                        </span>
+                        <p className="text-[11px] text-foreground/70">
+                          اكتب السرد والقرائن هنا بحرية، ثم اضغط حفظ لتطبيق النص فوراً في لوحة النشر.
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!textContent.trim()) {
+                              toast({ title: 'يرجى كتابة نص الحلقة أولاً', variant: 'destructive' });
+                              return;
+                            }
+                            localStorage.setItem('hekayaty_reader_exported_text', textContent);
+                            localStorage.setItem('hekayaty_draft_mystery_content', textContent);
+                            localStorage.setItem('hekayaty_draft_mystery_title', contentTitle);
+                            toast({
+                              title: '✅ تم حفظ النص بنجاح في القارئ!',
+                              description: 'تم تحديث المسودة، يمكنك الآن العودة للوحة الإدارة واستيراده بنقرة واحدة.',
+                            });
+                          }}
+                          className="px-4 py-2 rounded-xl bg-[#C5A15B] hover:bg-[#E5C77D] text-black font-extrabold text-xs shadow-md transition-all flex items-center gap-1.5"
+                        >
+                          <Bookmark className="w-3.5 h-3.5" />
+                          <span>حفظ واعتماد النص للوحة النشر</span>
+                        </button>
+                        <Link href="/admin">
+                          <button
+                            type="button"
+                            className="px-3 py-2 rounded-xl bg-black/30 border border-white/10 hover:border-white/30 text-xs font-bold text-foreground/80"
+                          >
+                            لوحة الإدارة
+                          </button>
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-base font-bold text-antique-gold flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" />
+                      <span>{draftMysteryParam ? 'محرر حلقة اللغز' : 'محرر القراءة الحرة'}</span>
+                    </h2>
+                    <div className="flex items-center gap-3 text-xs text-foreground/60 font-mono">
+                      <span>الكلمات: {textContent.trim() ? textContent.trim().split(/\s+/).length : 0}</span>
+                      <span>•</span>
+                      <span>وقت القراءة: ~{Math.max(1, Math.ceil((textContent.trim() ? textContent.trim().split(/\s+/).length : 0) / 160))} د</span>
+                    </div>
+                  </div>
+
                   <input
                     type="text"
                     value={contentTitle}
                     onChange={(e) => setContentTitle(e.target.value)}
                     className="w-full px-4 py-2 rounded-xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm font-bold outline-none"
-                    placeholder="عنوان العمل..."
+                    placeholder="عنوان العمل أو الحلقة..."
                   />
                   <textarea
-                    rows={12}
+                    rows={14}
                     value={textContent}
                     onChange={(e) => setTextContent(e.target.value)}
                     className="w-full p-4 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-sm leading-relaxed outline-none resize-y"
-                    placeholder="الصق نص الرواية أو المحتوى الأدبي هنا..."
+                    placeholder="اكتب أو الصق نص الرواية، القصة، أو حلقة اللغز هنا..."
                   />
-                  <div className="flex justify-end">
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                    {draftMysteryParam && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!textContent.trim()) {
+                            toast({ title: 'يرجى كتابة نص الحلقة أولاً', variant: 'destructive' });
+                            return;
+                          }
+                          localStorage.setItem('hekayaty_reader_exported_text', textContent);
+                          localStorage.setItem('hekayaty_draft_mystery_content', textContent);
+                          localStorage.setItem('hekayaty_draft_mystery_title', contentTitle);
+                          toast({
+                            title: '✅ تم حفظ النص واعتماده!',
+                            description: 'يمكنك الانتقال للوحة الإدارة والضغط على "استيراد النص من القارئ".',
+                          });
+                        }}
+                        className="px-5 py-2.5 rounded-2xl bg-[#C5A15B] hover:bg-[#E5C77D] text-black font-extrabold text-xs shadow-md transition-all flex items-center gap-1.5"
+                      >
+                        <Bookmark className="w-4 h-4" />
+                        <span>اعتماد النص للوحة التحكم</span>
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => {
@@ -627,22 +738,49 @@ export default function UniversalCustomReader() {
                         }
                         setIsReadingMode(true);
                       }}
-                      className="px-6 py-2.5 rounded-2xl bg-deep-teal text-white font-bold text-xs shadow-md"
+                      className="px-6 py-2.5 rounded-2xl bg-deep-teal text-white hover:brightness-110 font-bold text-xs shadow-md transition-all mr-auto"
                     >
-                      بدء القراءة السينمائية
+                      بدء القراءة السينمائية (معاينة)
                     </button>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-6">
+                  {mysteryData && (
+                    <div className="p-4 sm:p-5 rounded-2xl bg-black/40 border border-[#C5A15B]/30 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="px-3 py-1 rounded-full text-xs font-black bg-[#C5A15B] text-black">
+                          لغز حكاياتي #{mysteryData.episode_number}
+                        </span>
+                        <span className="text-xs text-foreground/60 font-mono">
+                          {mysteryData.reading_time_minutes || 3} دقائق قراءة
+                        </span>
+                      </div>
+                      {mysteryData.clues && mysteryData.clues.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          {mysteryData.clues.map((c: string, idx: number) => (
+                            <span key={idx} className="px-2.5 py-1 rounded-xl bg-black/30 border border-white/10 text-xs font-bold text-amber-200">
+                              🔍 {c}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between pb-4 border-b border-black/10 dark:border-white/10">
                     <button
                       onClick={() => setIsReadingMode(false)}
                       className="text-xs text-antique-gold font-bold hover:underline flex items-center gap-1"
                     >
                       <ChevronRight className="w-4 h-4" />
-                      <span>تعديل النص</span>
+                      <span>{draftMysteryParam ? 'العودة لمحرر الحلقة' : 'تعديل النص'}</span>
                     </button>
+                    {draftMysteryParam && (
+                      <span className="text-xs text-foreground/50 font-mono">
+                        معاينة القارئ المتقدم
+                      </span>
+                    )}
                   </div>
                   <article
                     className={`${fontClasses[fontSize]} ${lineClasses[lineHeight]} whitespace-pre-line text-justify tracking-wide leading-relaxed`}

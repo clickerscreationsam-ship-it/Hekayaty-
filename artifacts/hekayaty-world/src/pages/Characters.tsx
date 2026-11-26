@@ -64,7 +64,7 @@ export default function Characters() {
     <div className="relative min-h-screen text-white font-arabic notranslate overflow-hidden bg-[#070B12]" dir="rtl" translate="no">
       <SEOHead
         title="موسوعة وبطاقات الشخصيات الأسطورية | عالم حكاياتي"
-        description="استكشف سجل الأبطال والشخصيات والكيانات الكوزمية في عوالم حكاياتي مع بطاقات تداول أسطورية تفاعلية ومؤشرات قوة شاملة."
+        description="استكشف سجل الأبطال والشخصيات والكيانات الأسطورية في عوالم حكاياتي مع بطاقات تداول أسطورية تفاعلية ومؤشرات قوة شاملة."
         canonicalUrl="https://hekayaty.com/characters"
         ogType="website"
       />
@@ -108,7 +108,7 @@ export default function Characters() {
           <div className="space-y-3 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#C5A15B]/20 border border-[#C5A15B]/40 text-[#E1C58B] text-xs font-bold shadow-md">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>موسوعة وبطاقات الأبطال والكيانات الكوزمية</span>
+              <span>موسوعة وبطاقات الأبطال والكيانات الأسطورية</span>
             </div>
 
             <h1 className="text-3xl sm:text-5xl font-black text-white leading-tight drop-shadow-[0_4px_25px_rgba(0,0,0,0.9)]">

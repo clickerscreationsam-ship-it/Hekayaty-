@@ -86,7 +86,7 @@ export default function CharacterDetail() {
     speed: 'السرعة والمناورة والتحليق',
     durability: 'الصلابة والدروع والتحمل',
     intelligence: 'الذكاء والتخطيط التكتيكي',
-    magic: 'السحر والطاقة الكوزمية',
+    magic: 'السحر والطاقة الخارقة',
     combat: 'مهارات النزال والمواجهة',
   };
 
@@ -220,7 +220,7 @@ export default function CharacterDetail() {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-zinc-300 flex items-center gap-2">
                   <Zap className="w-4 h-4 text-[#C5A15B]" />
-                  <span>المستوى الكوزمي العام</span>
+                  <span>مستوى القوة العام</span>
                 </span>
                 <span className="text-2xl font-black" style={{ color: ratingColor }}>
                   {ratingNum}<span className="text-xs text-zinc-500 font-normal">/100</span>
@@ -316,7 +316,7 @@ export default function CharacterDetail() {
                 <div className="pt-4 border-t border-white/10 space-y-2">
                   <h3 className="text-sm font-bold text-teal-400 flex items-center gap-2">
                     <Sparkles className="w-4 h-4" />
-                    <span>قصة البداية والأصل الكوزمي</span>
+                    <span>قصة البداية وقصة البداية والأصل</span>
                   </h3>
                   <p className="text-zinc-300 text-sm sm:text-base leading-relaxed whitespace-pre-line bg-black/40 p-4 rounded-2xl border border-white/5">
                     {character.originAr}

@@ -45,6 +45,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         return;
       }
 
+      // If we have cached credentials, maintain active session immediately while refreshing in background
+      if (cachedUser && cachedToken) {
+        set({
+          user: cachedUser,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+      }
+
       const res = await api.getMe();
       if (res && res.isAuthenticated && res.user) {
         storage.setAuthUser(res.user);
@@ -55,13 +64,14 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           isLoading: false,
         });
         useAppStore.getState().syncWithBackend().catch(() => {});
-      } else {
+      } else if (!cachedUser) {
         storage.clearAuthSession();
         set({ user: null, isAuthenticated: false, subscription: null, isLoading: false });
       }
     } catch {
+      // In case of network glitch or offline, preserve existing cached session
       if (storage.getAuthUser() && storage.getAuthToken()) {
-        set({ isLoading: false });
+        set({ isLoading: false, isAuthenticated: true, user: storage.getAuthUser() });
       } else {
         storage.clearAuthSession();
         set({ user: null, isAuthenticated: false, subscription: null, isLoading: false });

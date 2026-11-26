@@ -117,7 +117,7 @@ export default function Encyclopedia() {
           <span>
             عرض <strong className="text-deep-teal dark:text-antique-gold">{filteredEntries.length}</strong> مادة توثيقية
           </span>
-          <span className="text-[11px] text-foreground/40">تم التحديث طبقاً للارشيف الكوزمي الأخير</span>
+          <span className="text-[11px] text-foreground/40">تم التحديث طبقاً للارشيف الأسطوري الأخير</span>
         </div>
       </div>
 

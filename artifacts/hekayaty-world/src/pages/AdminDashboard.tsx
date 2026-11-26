@@ -2202,7 +2202,7 @@ export default function AdminDashboard() {
                   .map((ch) => {
                     const heroImg = ch.image_url || ch.imageUrl || ch.avatar_url || ch.image;
                     const heroName = ch.name_ar || ch.nameAr || ch.name || 'بطل غير مسمى';
-                    const heroAlias = ch.alias_ar || ch.aliasAr || ch.alias || ch.title || 'بطل كوزمي';
+                    const heroAlias = ch.alias_ar || ch.aliasAr || ch.alias || ch.title || 'بطل أسطوري';
                     const heroBio = ch.bio_ar || ch.bioAr || ch.description || ch.bio_en || ch.bioEn || '';
                     const heroRole = ch.alignment || ch.role || 'hero';
                     const rating = ch.powerRating || ch.stats?.powerRating || 85;

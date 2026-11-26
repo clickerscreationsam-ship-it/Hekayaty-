@@ -56,7 +56,7 @@ export function CharacterCreationModal({
       magic: 90,
       combat: 85,
     },
-    powers: ['تحكم بالطاقة الكوزمية', 'طيران أسرع من الصوت'] as string[],
+    powers: ['تحكم بالطاقة السحرية', 'طيران أسرع من الصوت'] as string[],
     weaknesses: ['المعادن المعتمة', 'الاستنزاف الروحي'] as string[],
   });
 
@@ -81,7 +81,7 @@ export function CharacterCreationModal({
           magic: 90,
           combat: 85,
         },
-        powers: characterToEdit.powers || characterToEdit.powers_ar || ['تحكم بالطاقة الكوزمية', 'طيران أسرع من الصوت'],
+        powers: characterToEdit.powers || characterToEdit.powers_ar || ['تحكم بالطاقة السحرية', 'طيران أسرع من الصوت'],
         weaknesses: characterToEdit.weaknesses || characterToEdit.weaknesses_ar || ['المعادن المعتمة', 'الاستنزاف الروحي'],
       });
     } else {
@@ -104,7 +104,7 @@ export function CharacterCreationModal({
           magic: 90,
           combat: 85,
         },
-        powers: ['تحكم بالطاقة الكوزمية', 'طيران أسرع من الصوت'],
+        powers: ['تحكم بالطاقة السحرية', 'طيران أسرع من الصوت'],
         weaknesses: ['المعادن المعتمة', 'الاستنزاف الروحي'],
       });
     }
@@ -278,7 +278,7 @@ export function CharacterCreationModal({
               <div className="grid grid-cols-3 gap-2">
                 {[
                   { role: 'hero', align: 'protagonist', label: 'بطل خارق (Hero)', color: 'text-teal-400 border-[#087C7B]' },
-                  { role: 'villain', align: 'antagonist', label: 'شرير كوزمي (Villain)', color: 'text-red-400 border-red-500' },
+                  { role: 'villain', align: 'antagonist', label: 'شرير خارق (Villain)', color: 'text-red-400 border-red-500' },
                   { role: 'antihero', align: 'neutral', label: 'بطل غامض (Antihero)', color: 'text-purple-400 border-purple-500' },
                 ].map((item) => (
                   <button
