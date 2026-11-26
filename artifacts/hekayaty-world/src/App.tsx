@@ -18,6 +18,11 @@ const Register = lazy(() => import('@/pages/Register'));
 const ForgotPassword = lazy(() => import('@/pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
 
+// Subscriptions & Membership
+const SubscriptionPlansPage = lazy(() => import('@/pages/SubscriptionPlansPage'));
+const SubscriptionPaymentPage = lazy(() => import('@/pages/SubscriptionPaymentPage'));
+const SubscriptionRedeemPage = lazy(() => import('@/pages/SubscriptionRedeemPage'));
+
 // Comics & Reader
 const Comics = lazy(() => import('@/pages/Comics'));
 const ComicDetail = lazy(() => import('@/pages/ComicDetail'));
@@ -100,6 +105,12 @@ function Router() {
           <Route path="/register" component={Register} />
           <Route path="/forgot-password" component={ForgotPassword} />
           <Route path="/reset-password" component={ResetPassword} />
+
+          {/* Subscriptions & Membership */}
+          <Route path="/subscribe" component={SubscriptionPlansPage} />
+          <Route path="/subscriptions" component={SubscriptionPlansPage} />
+          <Route path="/subscribe/payment" component={SubscriptionPaymentPage} />
+          <Route path="/subscribe/redeem" component={SubscriptionRedeemPage} />
 
           {/* Comics Ecosystem */}
           <Route path="/comics" component={Comics} />

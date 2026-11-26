@@ -390,27 +390,27 @@ export function SeriesPlatformMgmtPanel({ toast }: Props) {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <div className="p-3.5 rounded-2xl bg-[#0F172A] border border-white/10 text-center">
             <span className="text-[11px] text-zinc-400 font-bold block">إجمالي السلاسل</span>
-            <span className="text-xl font-black text-white">{analytics.total_series}</span>
+            <span className="text-xl font-black text-white">{analytics.total_series ?? 0}</span>
           </div>
           <div className="p-3.5 rounded-2xl bg-[#0F172A] border border-white/10 text-center">
             <span className="text-[11px] text-zinc-400 font-bold block">المواسم والمجلدات</span>
-            <span className="text-xl font-black text-[#E1C58B]">{analytics.total_seasons}</span>
+            <span className="text-xl font-black text-[#E1C58B]">{analytics.total_seasons ?? 0}</span>
           </div>
           <div className="p-3.5 rounded-2xl bg-[#0F172A] border border-white/10 text-center">
             <span className="text-[11px] text-zinc-400 font-bold block">الفصول والأعداد</span>
-            <span className="text-xl font-black text-teal-400">{analytics.total_episodes}</span>
+            <span className="text-xl font-black text-teal-400">{analytics.total_episodes ?? 0}</span>
           </div>
           <div className="p-3.5 rounded-2xl bg-[#0F172A] border border-white/10 text-center">
             <span className="text-[11px] text-zinc-400 font-bold block">المشاهدات والقراءات</span>
-            <span className="text-xl font-black text-blue-400">{analytics.total_views.toLocaleString()}</span>
+            <span className="text-xl font-black text-blue-400">{(analytics.total_views ?? 0).toLocaleString()}</span>
           </div>
           <div className="p-3.5 rounded-2xl bg-[#0F172A] border border-white/10 text-center">
             <span className="text-[11px] text-zinc-400 font-bold block">المتابعون للسلاسل</span>
-            <span className="text-xl font-black text-amber-400">{analytics.total_followers.toLocaleString()}</span>
+            <span className="text-xl font-black text-amber-400">{(analytics.total_followers ?? 0).toLocaleString()}</span>
           </div>
           <div className="p-3.5 rounded-2xl bg-[#0F172A] border border-white/10 text-center">
             <span className="text-[11px] text-zinc-400 font-bold block">القراء النشطون</span>
-            <span className="text-xl font-black text-emerald-400">~{analytics.active_readers_metric}</span>
+            <span className="text-xl font-black text-emerald-400">~{analytics.active_readers_metric ?? 0}</span>
           </div>
         </div>
       )}

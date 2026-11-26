@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { SEOHead } from '@/components/common/SEOHead';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { SubscriptionPaywall } from '@/components/subscription/SubscriptionPaywall';
 import {
   BookOpen,
   ChevronLeft,
@@ -209,15 +210,36 @@ export default function SeriesEpisodeReader() {
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         {/* NOVEL MODE */}
         {!isComic && (
-          <article className={`whitespace-pre-line tracking-wide text-justify font-normal selection:bg-[#C5A15B] selection:text-black ${fontClass}`}>
-            {episode.content_ar}
-          </article>
+          <div className="space-y-6">
+            <article className={`whitespace-pre-line tracking-wide text-justify font-normal selection:bg-[#C5A15B] selection:text-black ${fontClass}`}>
+              {episode.content_ar}
+            </article>
+
+            {(episode.is_locked || episode.requires_subscription) && (
+              <div className="pt-6">
+                <SubscriptionPaywall returnUrl={window.location.pathname} />
+              </div>
+            )}
+          </div>
         )}
 
         {/* COMIC MODE */}
         {isComic && (
           <div className="space-y-6">
-            {comicPages.length === 0 && !episode.pdf_url ? (
+            {(episode.is_locked || episode.requires_subscription) ? (
+              <div className="space-y-6">
+                {comicPages.length > 0 && (
+                  <div className="relative rounded-3xl overflow-hidden border border-white/15 bg-black shadow-2xl flex items-center justify-center max-h-[600px]">
+                    <img
+                      src={comicPages[0]?.image_url}
+                      alt="معاينة الصفحة الأولى"
+                      className="max-h-[600px] w-auto object-contain mx-auto"
+                    />
+                  </div>
+                )}
+                <SubscriptionPaywall returnUrl={window.location.pathname} />
+              </div>
+            ) : comicPages.length === 0 && !episode.pdf_url ? (
               <div className="p-12 text-center rounded-3xl border border-white/10 text-xs opacity-60">
                 لا توجد صفحات مرفوعة لهذا العدد بعد.
               </div>

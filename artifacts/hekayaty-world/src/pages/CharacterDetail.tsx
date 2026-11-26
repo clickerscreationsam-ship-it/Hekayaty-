@@ -32,6 +32,7 @@ import { useToast } from '@/hooks/use-toast';
 import { SEOHead } from '@/components/common/SEOHead';
 import { SocialShareModal } from '@/components/common/SocialShareModal';
 import { getCharacterRarity } from '@/components/characters/LegendaryCharacterCard';
+import { TCGCardGameCard } from '@/components/characters/TCGCardGameCard';
 
 // ─── TCG Card Component ────────────────────────────────────────────────────────
 function TradingCard({ character, rarity, ratingNum, ratingColor, world }: {
@@ -227,6 +228,7 @@ export default function CharacterDetail() {
   const { addToFavorites, isInFavorites, removeFromFavorites } = useAppStore();
   const { toast } = useToast();
   const [shareOpen, setShareOpen] = useState(false);
+  const [isZenMode, setIsZenMode] = useState(false);
 
   if (!character) {
     return (
@@ -280,7 +282,7 @@ export default function CharacterDetail() {
   };
 
   return (
-    <div className="relative min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto font-arabic notranslate text-white bg-[#070B12] overflow-hidden" dir="rtl" translate="no">
+    <div className="relative min-h-screen py-8 px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto font-arabic notranslate text-white overflow-hidden" dir="rtl" translate="no">
       <SEOHead
         title={`${character.nameAr} (${character.aliasAr || character.nameEn}) | بطاقة البطل وسجل القوة`}
         description={character.bioAr || `سجل شخصية ${character.nameAr} في الأكوان القصصية`}
@@ -307,66 +309,70 @@ export default function CharacterDetail() {
       />
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          1. IMMERSIVE FULL-PAGE ARTWORK BACKGROUND — Clear, Vivid, Minimal Overlay
+          1. CRYSTAL-CLEAR SCENIC BACKGROUND — No Dark Veil, No Heavy Blur
           ───────────────────────────────────────────────────────────────────────────── */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <img
-          src={character.image}
+          src={world?.image || character.image}
           alt={character.nameAr}
-          className="w-full h-full object-cover object-top filter brightness-[0.65] contrast-105 saturate-120"
+          className="w-full h-full object-cover object-center filter brightness-100 contrast-[1.02] saturate-[1.08] transition-all duration-700"
         />
-        {/* Only edge-fade gradients — no thick dark overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#070B12] via-[#070B12]/25 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#070B12]/75 via-transparent to-transparent" />
+        {/* Soft edge shade only at the top/bottom edges for UI contrast, keeping the panorama 100% bright and clear */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/50 pointer-events-none" />
       </div>
 
-      <div className="relative z-10 space-y-8">
-        {/* Breadcrumb Navigation */}
-        <div className="flex items-center gap-2 text-xs text-zinc-400">
-          <Link href="/" className="hover:text-white transition-colors">
-            الرئيسية
-          </Link>
-          <ChevronLeft className="w-3.5 h-3.5" />
-          <Link href="/characters" className="hover:text-white transition-colors">
-            سجل الشخصيات
-          </Link>
-          <ChevronLeft className="w-3.5 h-3.5" />
-          <span className="text-[#E1C58B] font-bold">{character.nameAr}</span>
+      <div className="relative z-10 space-y-6">
+        {/* Top Control Bar with Breadcrumbs & Zen Clear-View Mode Toggle */}
+        <div className="flex items-center justify-between gap-4 flex-wrap bg-black/40 backdrop-blur-sm p-3 rounded-2xl border border-white/15">
+          <div className="flex items-center gap-2 text-xs text-zinc-300">
+            <Link href="/" className="hover:text-amber-300 transition-colors">
+              الرئيسية
+            </Link>
+            <ChevronLeft className="w-3.5 h-3.5 text-zinc-500" />
+            <Link href="/characters" className="hover:text-amber-300 transition-colors">
+              سجل الشخصيات
+            </Link>
+            <ChevronLeft className="w-3.5 h-3.5 text-zinc-500" />
+            <span className="text-amber-300 font-bold">{character.nameAr}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setIsZenMode((prev) => !prev)}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border shadow-md ${
+                isZenMode
+                  ? 'bg-amber-500 text-black border-amber-400 shadow-[0_0_15px_rgba(245,194,83,0.4)]'
+                  : 'bg-black/60 text-zinc-200 border-white/20 hover:border-amber-400'
+              }`}
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>{isZenMode ? 'إظهار تفاصيل السيرة' : 'نمط المشهد الصافي (إخفاء اللوحات)'}</span>
+            </button>
+          </div>
         </div>
 
         {/* ─────────────────────────────────────────────────────────────────────────────
-            2. HERO SECTION: CINEMATIC SPLIT SHOWCASE
+            2. HERO SECTION: CINEMATIC SPLIT SHOWCASE (TCG CARD + TRANSPARENT DOSSIER)
             ───────────────────────────────────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Right Column (RTL): TCG-Style Character Card */}
+          {/* Right Column (RTL): Professional TCG Card Game Card */}
           <div className="lg:col-span-5 space-y-6">
-            {/* Professional Trading Card */}
-            <TradingCard
+            <TCGCardGameCard
               character={character}
-              rarity={rarity}
-              ratingNum={ratingNum}
-              ratingColor={ratingColor}
               world={world}
+              onShare={() => setShareOpen(true)}
             />
 
-            {/* Action Buttons below the card */}
+            {/* Quick Action Pills */}
             <div className="flex items-center gap-3 justify-center flex-wrap">
-              <button
-                type="button"
-                onClick={() => setShareOpen(true)}
-                className="px-5 py-2.5 rounded-2xl text-xs font-bold backdrop-blur-md border bg-black/60 text-white border-white/20 hover:border-[#C5A15B] transition-all shadow-lg flex items-center gap-2"
-              >
-                <Share2 className="w-4 h-4" />
-                <span>مشاركة البطاقة</span>
-              </button>
-
               <button
                 type="button"
                 onClick={toggleFavorite}
                 className={`px-5 py-2.5 rounded-2xl text-xs font-bold backdrop-blur-md border transition-all shadow-lg flex items-center gap-2 ${
                   isFav
-                    ? 'bg-red-500/20 text-red-400 border-red-500/40'
-                    : 'bg-black/60 text-white border-white/20 hover:border-[#C5A15B]'
+                    ? 'bg-red-500/25 text-red-300 border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)]'
+                    : 'bg-black/65 text-white border-white/20 hover:border-amber-400'
                 }`}
               >
                 <Heart className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
@@ -376,164 +382,193 @@ export default function CharacterDetail() {
               {world && (
                 <Link
                   href={`/worlds/${world.id}`}
-                  className="px-5 py-2.5 rounded-2xl text-xs font-bold bg-black/60 backdrop-blur-md text-[#E1C58B] border border-white/20 hover:border-[#C5A15B] flex items-center gap-2 transition-all shadow-lg"
+                  className="px-5 py-2.5 rounded-2xl text-xs font-bold bg-black/65 backdrop-blur-md text-amber-300 border border-white/20 hover:border-amber-400 flex items-center gap-2 transition-all shadow-lg"
                 >
                   <Globe className="w-4 h-4" />
                   <span>{world.nameAr}</span>
                 </Link>
               )}
+
+              <Link
+                href="/card-game"
+                className="px-5 py-2.5 rounded-2xl text-xs font-bold bg-gradient-to-r from-amber-500/30 to-amber-700/30 text-amber-200 border border-amber-400/40 hover:border-amber-400 flex items-center gap-2 transition-all shadow-lg"
+              >
+                <Swords className="w-4 h-4 text-amber-400" />
+                <span>معرض البطاقات التكتيكية</span>
+              </Link>
             </div>
           </div>
 
-          {/* Left Column (RTL): Dossier & Rich Lore Content */}
-          <div className="lg:col-span-7 space-y-6">
-            {/* Identity Header */}
-            <div className="bg-[#0D1524]/90 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <span className="px-3 py-1 rounded-full text-xs font-black bg-[#C5A15B]/20 text-[#E1C58B] border border-[#C5A15B]/40">
-                  {character.classification === 'original'
-                    ? 'شخصية أصلية'
-                    : character.classification === 'hekayaty_selected'
-                    ? 'حكاياتي المختارة'
-                    : 'تعاون رسمي'}
-                </span>
+          {/* Left Column (RTL): Dossier & Rich Lore Content (Translucent Glassmorphism) */}
+          {!isZenMode && (
+            <div className="lg:col-span-7 space-y-6">
+              {/* Identity Header */}
+              <div className="bg-[#0A101F]/45 backdrop-blur-[3px] border border-white/20 rounded-3xl p-6 sm:p-8 space-y-4 shadow-2xl">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <span className="px-3 py-1 rounded-full text-xs font-black bg-amber-500/25 text-amber-300 border border-amber-400/40 shadow-sm">
+                    {character.classification === 'original'
+                      ? 'شخصية أصلية'
+                      : character.classification === 'hekayaty_selected'
+                      ? 'حكاياتي المختارة'
+                      : 'تعاون رسمي'}
+                  </span>
 
-                <span className="px-3 py-1 rounded-full text-xs font-black bg-black/60 text-zinc-300 border border-white/15">
-                  {character.alignment === 'hero'
-                    ? '🛡️ بطل حليف'
-                    : character.alignment === 'villain'
-                    ? '⚔️ خصم وشرير'
-                    : '🔮 كيان غامض'}
-                </span>
+                  <span className="px-3 py-1 rounded-full text-xs font-black bg-black/60 text-zinc-200 border border-white/20">
+                    {character.alignment === 'hero'
+                      ? '🛡️ بطل حليف'
+                      : character.alignment === 'villain'
+                      ? '⚔️ خصم وشرير'
+                      : '🔮 كيان غامض'}
+                  </span>
 
-                <span className="px-3 py-1 rounded-full text-xs font-black uppercase" style={{ color: ratingColor }}>
-                  فئة {rarity}
-                </span>
-              </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-black uppercase text-amber-300 bg-amber-950/60 border border-amber-500/40">
+                    فئة {rarity}
+                  </span>
+                </div>
 
-              <div>
-                <h1 className="text-3xl sm:text-5xl font-black text-white leading-tight drop-shadow-md">
-                  {character.nameAr}
-                </h1>
-                {character.nameEn && (
-                  <p className="text-base text-zinc-400 font-mono mt-1" dir="ltr">
-                    {character.nameEn}
+                <div>
+                  <h1 className="text-3xl sm:text-5xl font-black text-white leading-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+                    {character.nameAr}
+                  </h1>
+                  {character.aliasAr && (
+                    <p className="text-sm sm:text-base text-amber-300 font-bold mt-1 drop-shadow">
+                      {character.aliasAr}
+                    </p>
+                  )}
+                  {character.nameEn && (
+                    <p className="text-xs sm:text-sm text-zinc-300 font-mono mt-0.5" dir="ltr">
+                      {character.nameEn}
+                    </p>
+                  )}
+                </div>
+
+                {/* Bio Text */}
+                <div className="pt-2 border-t border-white/15">
+                  <h3 className="text-sm font-bold text-amber-300 mb-2 flex items-center gap-2">
+                    <Scroll className="w-4 h-4" />
+                    <span>السيرة الذاتية</span>
+                  </h3>
+                  <p className="text-zinc-100 text-base leading-relaxed whitespace-pre-line drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
+                    {character.bioAr || 'شخصية محورية في صياغة أحداث ووقائع هذا العالم.'}
                   </p>
+                </div>
+
+                {/* Origin Story */}
+                {character.originAr && (
+                  <div className="pt-4 border-t border-white/15 space-y-2">
+                    <h3 className="text-sm font-bold text-teal-300 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4" />
+                      <span>قصة البداية والأصل</span>
+                    </h3>
+                    <p className="text-zinc-100 text-sm sm:text-base leading-relaxed whitespace-pre-line bg-black/40 p-4 rounded-2xl border border-white/10">
+                      {character.originAr}
+                    </p>
+                  </div>
                 )}
               </div>
 
-              {/* Bio Text */}
-              <div className="pt-2 border-t border-white/10">
-                <h3 className="text-sm font-bold text-[#C5A15B] mb-2 flex items-center gap-2">
-                  <Scroll className="w-4 h-4" />
-                  <span>السيرة الذاتية</span>
-                </h3>
-                <p className="text-zinc-200 text-base leading-relaxed whitespace-pre-line">
-                  {character.bioAr || 'شخصية محورية في صياغة أحداث ووقائع هذا العالم.'}
-                </p>
-              </div>
+              {/* Powers and Abilities Showcase (TCG Card Game Powers Breakdown) */}
+              {character.powersAr && character.powersAr.length > 0 && (
+                <div className="bg-[#0A101F]/45 backdrop-blur-[3px] border border-white/20 rounded-3xl p-6 sm:p-8 space-y-4 shadow-2xl">
+                  <div className="flex items-center justify-between border-b border-white/15 pb-3 flex-wrap gap-2">
+                    <h3 className="text-lg font-black text-white flex items-center gap-2">
+                      <Zap className="w-5 h-5 text-amber-400" />
+                      <span>القدرات والخوارق القتالية ({character.powersAr.length})</span>
+                    </h3>
+                    <span className="text-xs text-amber-300 font-mono bg-amber-950/60 px-2.5 py-1 rounded-full border border-amber-500/40">
+                      قدرات بطاقة المعركة التكتيكية
+                    </span>
+                  </div>
 
-              {/* Origin Story */}
-              {character.originAr && (
-                <div className="pt-4 border-t border-white/10 space-y-2">
-                  <h3 className="text-sm font-bold text-teal-400 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4" />
-                    <span>قصة البداية وقصة البداية والأصل</span>
-                  </h3>
-                  <p className="text-zinc-300 text-sm sm:text-base leading-relaxed whitespace-pre-line bg-black/40 p-4 rounded-2xl border border-white/5">
-                    {character.originAr}
-                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    {character.powersAr.map((power, idx) => (
+                      <div
+                        key={idx}
+                        className="p-4 rounded-2xl bg-black/55 border border-white/15 hover:border-amber-400/60 transition-all flex items-start gap-3.5 shadow-lg group"
+                      >
+                        <span className="w-9 h-9 rounded-xl bg-amber-500/25 text-amber-300 border border-amber-500/40 flex items-center justify-center font-bold text-sm shrink-0 group-hover:scale-110 transition-transform">
+                          ⚡
+                        </span>
+                        <div className="space-y-1 min-w-0">
+                          <h4 className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors">
+                            {power}
+                          </h4>
+                          <p className="text-xs text-zinc-300 leading-snug">
+                            {idx === 0
+                              ? 'قدرة هجومية كوزمية رئيسية تخترق دفاعات الخصم وتمنح تحكماً استراتيجياً بميدان النزال.'
+                              : 'قدرة مناورة فائقة ترفع سرعة الاستجابة والتفادي الجوي وتمنح تفوقاً تكتيكياً حاسماً.'}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
-            </div>
 
-            {/* Powers and Abilities Showcase */}
-            {character.powersAr && character.powersAr.length > 0 && (
-              <div className="bg-[#0D1524]/90 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 space-y-4 shadow-xl">
-                <h3 className="text-lg font-black text-white flex items-center gap-2 border-b border-white/10 pb-3">
-                  <Zap className="w-5 h-5 text-amber-400" />
-                  <span>القدرات والخوارق ({character.powersAr.length})</span>
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {character.powersAr.map((power, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3.5 rounded-2xl bg-black/50 border border-white/10 hover:border-[#C5A15B]/50 transition-all flex items-center gap-3 shadow-md"
-                    >
-                      <span className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center justify-center font-bold text-xs shrink-0">
-                        ⚡
-                      </span>
-                      <span className="text-sm font-bold text-zinc-100">{power}</span>
+              {/* Weaknesses and Affiliations */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {character.weaknessesAr && character.weaknessesAr.length > 0 && (
+                  <div className="bg-[#0A101F]/45 backdrop-blur-[3px] border border-red-500/30 rounded-2xl p-5 space-y-3 shadow-xl">
+                    <h4 className="text-xs font-bold text-red-300 flex items-center gap-1.5">
+                      <AlertTriangle className="w-4 h-4 text-red-400" />
+                      <span>نقاط الضعف والتحديات</span>
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {character.weaknessesAr.map((w, i) => (
+                        <span key={i} className="px-2.5 py-1 rounded-lg bg-red-950/60 border border-red-500/40 text-xs text-red-200 font-semibold shadow-sm">
+                          {w}
+                        </span>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Weaknesses and Affiliations */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {character.weaknessesAr && character.weaknessesAr.length > 0 && (
-                <div className="bg-[#0D1524]/90 backdrop-blur-xl border border-red-500/20 rounded-2xl p-5 space-y-3">
-                  <h4 className="text-xs font-bold text-red-400 flex items-center gap-1.5">
-                    <AlertTriangle className="w-4 h-4" />
-                    <span>نقاط الضعف والتحديات</span>
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {character.weaknessesAr.map((w, i) => (
-                      <span key={i} className="px-2.5 py-1 rounded-lg bg-red-950/40 border border-red-500/30 text-xs text-red-300 font-semibold">
-                        {w}
-                      </span>
-                    ))}
                   </div>
-                </div>
-              )}
+                )}
 
-              {character.affiliationsAr && character.affiliationsAr.length > 0 && (
-                <div className="bg-[#0D1524]/90 backdrop-blur-xl border border-white/10 rounded-2xl p-5 space-y-3">
-                  <h4 className="text-xs font-bold text-teal-400 flex items-center gap-1.5">
-                    <Users className="w-4 h-4" />
-                    <span>الانتماءات والتحالفات</span>
-                  </h4>
-                  <div className="flex flex-wrap gap-2">
-                    {character.affiliationsAr.map((a, i) => (
-                      <span key={i} className="px-2.5 py-1 rounded-lg bg-teal-950/40 border border-teal-500/30 text-xs text-teal-300 font-semibold">
-                        {a}
-                      </span>
+                {character.affiliationsAr && character.affiliationsAr.length > 0 && (
+                  <div className="bg-[#0A101F]/45 backdrop-blur-[3px] border border-teal-500/30 rounded-2xl p-5 space-y-3 shadow-xl">
+                    <h4 className="text-xs font-bold text-teal-300 flex items-center gap-1.5">
+                      <Users className="w-4 h-4 text-teal-400" />
+                      <span>الانتماءات والتحالفات</span>
+                    </h4>
+                    <div className="flex flex-wrap gap-2">
+                      {character.affiliationsAr.map((a, i) => (
+                        <span key={i} className="px-2.5 py-1 rounded-lg bg-teal-950/60 border border-teal-500/40 text-xs text-teal-200 font-semibold shadow-sm">
+                          {a}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Connected Comics and Stories */}
+              {relatedComics.length > 0 && (
+                <div className="bg-[#0A101F]/45 backdrop-blur-[3px] border border-white/20 rounded-3xl p-6 space-y-4 shadow-2xl">
+                  <h3 className="text-base font-bold text-white flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-amber-400" />
+                    <span>الظهور في القصص المصورة</span>
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {relatedComics.map((comic) => (
+                      <Link
+                        key={comic.id}
+                        href={`/comics/${comic.id}`}
+                        className="group/comic block p-2 rounded-xl bg-black/50 border border-white/10 hover:border-amber-400 transition-all"
+                      >
+                        <img
+                          src={comic.coverImage}
+                          alt={comic.titleAr}
+                          className="w-full aspect-[2/3] object-cover rounded-lg mb-2"
+                        />
+                        <h5 className="text-xs font-bold text-zinc-200 group-hover/comic:text-amber-300 truncate">
+                          {comic.titleAr}
+                        </h5>
+                      </Link>
                     ))}
                   </div>
                 </div>
               )}
             </div>
-
-            {/* Connected Comics and Stories */}
-            {relatedComics.length > 0 && (
-              <div className="bg-[#0D1524]/90 backdrop-blur-xl border border-white/10 rounded-3xl p-6 space-y-4">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-[#C5A15B]" />
-                  <span>الظهور في القصص المصورة</span>
-                </h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {relatedComics.map((comic) => (
-                    <Link
-                      key={comic.id}
-                      href={`/comics/${comic.id}`}
-                      className="group/comic block p-2 rounded-xl bg-black/40 border border-white/5 hover:border-[#C5A15B] transition-all"
-                    >
-                      <img
-                        src={comic.coverImage}
-                        alt={comic.titleAr}
-                        className="w-full aspect-[2/3] object-cover rounded-lg mb-2"
-                      />
-                      <h5 className="text-xs font-bold text-zinc-200 group-hover/comic:text-[#E1C58B] truncate">
-                        {comic.titleAr}
-                      </h5>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </div>
     </div>

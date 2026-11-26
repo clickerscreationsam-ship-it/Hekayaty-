@@ -1,6 +1,7 @@
 import { Router, type IRouter } from 'express';
 import { requireAuth, requireRole } from '../middlewares/auth';
 import { supabaseAdmin } from '../lib/supabase';
+import { checkUserSubscriptionStatus } from '../services/subscriptionService';
 import crypto from 'crypto';
 
 export const seriesPlatformRouter: IRouter = Router();
@@ -107,284 +108,38 @@ interface SeriesItem {
   updated_at: string;
 }
 
-// In-memory store + Supabase sync
-let inMemorySeries: SeriesItem[] = [
-  {
-    id: 's_crossers',
-    slug: 'the-crossers',
-    title_ar: 'ملحمة العابرين: أسرار الأبعاد السبعة',
-    title_en: 'The Crossers: Secrets of the Seven Dimensions',
-    short_description_ar: 'ملحمة خيالية تجمع بين الروايات والقصص المصورة، تروي صراع حماة الأبعاد ضد قوى الانفصال في عوالم حكاياتي.',
-    description_ar: 'عندما تمزق نسيج الأثير بفعل صدع قديم، وجد نخبة من المسافرين الأسطوريين أنفسهم مكلفين بحماية بوابات النجوم. سلسلة تجمع بين فصول سردية مشوقة وفصول مصورة بجودة سينمائية فائقة ترسم مصير الكون وأبطاله عبر أجيال ومواسم متعاقبة.',
-    cover_image_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80',
-    banner_image_url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1600&q=80',
-    thumbnail_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80',
-    format: 'hybrid',
-    status: 'ongoing',
-    genre: 'خيال علمي أسطوري',
-    subgenres: ['مغامرات أبعاد', 'قتال ملحمي', 'أساطير'],
-    tags: ['أبطال', 'بوابات', 'سحر', 'أبعاد'],
-    language: 'ar',
-    age_rating: '13+',
-    world_id: 'w1',
-    world_name_ar: 'نوفا قديم',
-    is_original: true,
-    classification: 'original',
-    publisher_name: 'دار حكاياتي للنشر الرقمي',
-    author_name: 'طارق بن ليث',
-    artist_name: 'ريشة الأثير',
-    editor_name: 'فريق التحرير الكوني',
-    structure_type: 'season_episode',
-    structure_label: 'الموسم',
-    release_schedule: 'weekly',
-    release_day_time: 'كل جمعة الساعة 8 مساءً',
-    is_featured: true,
-    banner_priority: 1,
-    views_count: 14200,
-    followers_count: 2450,
-    rating: 4.9,
-    created_at: '2026-10-01T00:00:00Z',
-    updated_at: '2026-11-20T00:00:00Z',
-  },
-  {
-    id: 's_knights',
-    slug: 'knights-of-the-stars',
-    title_ar: 'فرسان النجوم: عهد الشفق',
-    title_en: 'Knights of the Stars: Twilight Oath',
-    short_description_ar: 'سلسلة روايات أدبية ضخمة تسرد تاريخ الفرسان السبعة الذين حرسوا مشكاة النور في أعظم عصور السلام.',
-    description_ar: 'سلسلة روائية مقسمة إلى مجلدات كلاسيكية تحكي ملحمة الفروسية، الشرف، والخيانة في مملكة الأفق الذهبي. صياغة أدبية رفيعة تغوص في أعماق الشخصيات ونزاعاتهم الفلسفية والإنسانية.',
-    cover_image_url: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80',
-    banner_image_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=1600&q=80',
-    thumbnail_url: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=400&q=80',
-    format: 'novel',
-    status: 'ongoing',
-    genre: 'فانتازيا ملحمية',
-    subgenres: ['فروسية', 'ممالك', 'أدب كلاسيكي'],
-    tags: ['سيوف', 'شرف', 'ممالك', 'مؤامرات'],
-    language: 'ar',
-    age_rating: 'all',
-    world_id: 'w2',
-    world_name_ar: 'أوتار الشفق',
-    is_original: true,
-    classification: 'original',
-    publisher_name: 'منشورات أفق حكاياتي',
-    author_name: 'ليان الراوي',
-    structure_type: 'volume_chapter',
-    structure_label: 'المجلد',
-    release_schedule: 'biweekly',
-    release_day_time: 'كل أسبوعين يوم الأحد',
-    is_featured: true,
-    banner_priority: 2,
-    views_count: 9800,
-    followers_count: 1820,
-    rating: 4.8,
-    created_at: '2026-10-15T00:00:00Z',
-    updated_at: '2026-11-22T00:00:00Z',
-  },
-  {
-    id: 's_shadow',
-    slug: 'shadow-chronicles',
-    title_ar: 'سجلات الظل: أسرار المدينة الخفية',
-    title_en: 'Shadow Chronicles: Secrets of the Hidden City',
-    short_description_ar: 'سلسلة كوميكس بصرية مشوقة تتبع المحقق الغامض في أزقة المدينة المظلمة لحل ألغاز سرقة الآثار القديمة.',
-    description_ar: 'قصة مصورة تمزج بين الغموض البوليسي والقدرات الخارقة. رسومات تفصيلية مذهلة وتصميم فني فريد يأخذ القارئ في رحلة بصرية بين شوارع المدينة الرطبة وأسرار حكامها الخفيين.',
-    cover_image_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
-    banner_image_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1600&q=80',
-    thumbnail_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80',
-    format: 'comic',
-    status: 'ongoing',
-    genre: 'تحقيق وغموض خيالي',
-    subgenres: ['كوميكس نوار', 'قوى خارقة', 'تشويق'],
-    tags: ['تحقيق', 'كوميكس', 'مدينة', 'غموض'],
-    language: 'ar',
-    age_rating: '16+',
-    is_original: false,
-    classification: 'selected',
-    publisher_name: 'استوديو نوار للكوميكس العربي',
-    author_name: 'كريم المنصور',
-    artist_name: 'عمر النبراوي',
-    structure_type: 'direct_episodes',
-    structure_label: 'العدد',
-    release_schedule: 'monthly',
-    release_day_time: 'الأول من كل شهر',
-    is_featured: false,
-    banner_priority: 3,
-    views_count: 11200,
-    followers_count: 2100,
-    rating: 4.7,
-    created_at: '2026-09-10T00:00:00Z',
-    updated_at: '2026-11-18T00:00:00Z',
-  },
-];
+// Persistent store backed by Supabase with safe memory cache
+let inMemorySeries: SeriesItem[] = [];
+let inMemorySeasons: SeriesSeason[] = [];
+let inMemoryEpisodes: SeriesEpisode[] = [];
+let isStoreInitialized = false;
 
-let inMemorySeasons: SeriesSeason[] = [
-  {
-    id: 'sea_crossers_1',
-    series_id: 's_crossers',
-    number: 1,
-    title_ar: 'الموسم الأول: نداء الصدع الأثيري',
-    title_en: 'Season 1: Call of the Ether Rift',
-    description_ar: 'اكتشاف الصدع وظهور أولى علامات اضطراب التوازن الكوني.',
-    cover_image_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
-    status: 'published',
-    release_date: '2026-10-01',
-    created_at: '2026-10-01T00:00:00Z',
-  },
-  {
-    id: 'sea_crossers_2',
-    series_id: 's_crossers',
-    number: 2,
-    title_ar: 'الموسم الثاني: حروب الأفق المكسور',
-    title_en: 'Season 2: Wars of the Broken Horizon',
-    description_ar: 'اتساع المواجهة بين حماة البوابات والكيانات القادمة من الفراغ.',
-    cover_image_url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
-    status: 'published',
-    release_date: '2026-11-15',
-    created_at: '2026-11-15T00:00:00Z',
-  },
-  {
-    id: 'sea_knights_1',
-    series_id: 's_knights',
-    number: 1,
-    title_ar: 'المجلد الأول: قسم الشفق وحارس المشكاة',
-    title_en: 'Volume 1: Twilight Oath and the Lantern Keeper',
-    description_ar: 'تجمع الفرسان السبعة وأداء العهد في معبد الشمس الغاربة.',
-    cover_image_url: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=600&q=80',
-    status: 'published',
-    release_date: '2026-10-15',
-    created_at: '2026-10-15T00:00:00Z',
-  },
-];
+// Helper to load from Supabase or maintain clean persistent state
+async function ensureStoreLoaded(force = false) {
+  if (isStoreInitialized && !force) return;
+  try {
+    const [seriesRes, seasonsRes, episodesRes] = await Promise.all([
+      supabaseAdmin.from('series_platform').select('*').order('created_at', { ascending: false }),
+      supabaseAdmin.from('series_seasons').select('*').order('number', { ascending: true }),
+      supabaseAdmin.from('series_episodes').select('*').order('episode_number', { ascending: true }),
+    ]);
 
-let inMemoryEpisodes: SeriesEpisode[] = [
-  {
-    id: 'ep_crossers_1',
-    series_id: 's_crossers',
-    season_id: 'sea_crossers_1',
-    episode_number: 1,
-    title_ar: 'الحلقة الأولى: حين ارتجف نسيج السماء',
-    title_en: 'Episode 1: When the Sky Fabric Trembled',
-    short_description_ar: 'يبدأ الإنذار الأول في برج المراقبة الشمالي حين تلتقط مرايا الرصد ترددات غريبة من بعد مجهول.',
-    content_type: 'novel',
-    content_ar: `في الساعة الرابعة قبل الفجر، لم يكن في برج المراقبة العالي سوى صوت الرياح الشتوية تعزف بين أعمدة الرخام القديمة.
+    if (!seriesRes.error && Array.isArray(seriesRes.data)) {
+      inMemorySeries = seriesRes.data;
+    }
+    if (!seasonsRes.error && Array.isArray(seasonsRes.data)) {
+      inMemorySeasons = seasonsRes.data;
+    }
+    if (!episodesRes.error && Array.isArray(episodesRes.data)) {
+      inMemoryEpisodes = episodesRes.data;
+    }
+    isStoreInitialized = true;
+  } catch (err) {
+    // If Supabase table is not yet created, maintain clean empty memory store
+    isStoreInitialized = true;
+  }
+}
 
-كان المهندس الفلكي يقف أمام عدسة التلسكوب البلوري، يراقب مدارات النجوم في هدوء اعتاد عليه منذ ثلاثين عاماً. لكن شيئاً ما تلك الليلة لم يكن معتاداً. خط أزرق دقيق، يشبه خيطاً من البرق المتجمد، انشق فجأة في وسط كوكبة العقرب.
-
-"مستحيل..." همس لنفسه وهو يدير عجلات التكبير النحاسية.
-
-لم تكن شهباً ولا مذنباً هارباً، بل كان فراغاً حقيقياً يبتلع النور من حوله. انطلقت أجراس الإنذار النحاسية في أرجاء القلعة، معلنة بداية عهد جديد لن تعود فيه العوالم كما كانت.
-
-خرج الحراس إلى الشرفات، وأعينهم شاخصة نحو السماء الممزقة، وفي تلك اللحظة بالذات، في قاع الوادي السفلي، فتحت أول بوابة أثيرية غير مسجلة في خرائط الحكماء.`,
-    cover_image_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
-    reading_time_minutes: 5,
-    word_count: 240,
-    status: 'published',
-    publication_date: '2026-10-01T20:00:00Z',
-    access_level: 'free',
-    author_notes: 'بداية رحلة العابرين عبر الأبعاد. نتمنى لكم قراءة ممتعة!',
-    views_count: 5400,
-    likes_count: 420,
-    created_at: '2026-10-01T20:00:00Z',
-  },
-  {
-    id: 'ep_crossers_2',
-    series_id: 's_crossers',
-    season_id: 'sea_crossers_1',
-    episode_number: 2,
-    title_ar: 'الحلقة الثانية: خطى في العاصفة (فصل مصور)',
-    title_en: 'Episode 2: Steps in the Storm (Comic Issue)',
-    short_description_ar: 'فصل مصور كامل يجسد اللقاء الأول بين طارق بن ليث وحارس البوابة في مهب العاصفة الرعدية.',
-    content_type: 'comic',
-    comic_pages: [
-      { id: 'p1', page_number: 1, image_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80', description: 'لوحة البداية: العاصفة تضرب أسوار القلعة' },
-      { id: 'p2', page_number: 2, image_url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80', description: 'ظهور طارق بن ليث متسلحاً برداء الأثير' },
-      { id: 'p3', page_number: 3, image_url: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=800&q=80', description: 'اشتباك البرق وسقوط البوابة الأولى' },
-    ],
-    cover_image_url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
-    reading_time_minutes: 4,
-    status: 'published',
-    publication_date: '2026-10-08T20:00:00Z',
-    access_level: 'free',
-    author_notes: 'الفصل المصور الأول بدقة عالية وألوان ملحمية.',
-    views_count: 4800,
-    likes_count: 380,
-    created_at: '2026-10-08T20:00:00Z',
-  },
-  {
-    id: 'ep_crossers_3',
-    series_id: 's_crossers',
-    season_id: 'sea_crossers_1',
-    episode_number: 3,
-    title_ar: 'الحلقة الثالثة: أسرار المخطوطة البلورية',
-    title_en: 'Episode 3: Secrets of the Crystal Scroll',
-    short_description_ar: 'فك الشفرة الأولى التي تركتها الحضارة القديمة قبل اختفاء بواباتها بألف عام.',
-    content_type: 'novel',
-    content_ar: `وضعت ليان المخطوطة الحجرية على طاولة الخشب العتيقة، وبدأت أصابعها ترسم الخطوط المنحوتة بنعومة.
-
-"هذا ليس حبراً عادياً يا طارق،" قالت وهي ترفع عينيها الممتلئتين بالدهشة، "هذا غبار نجوم مذاب تم ختمه بطاقة سحرية لا تنطفئ."
-
-اقترب طارق ووضع سيفه جانباً، وانحنى ليرى الحروف وهي تضيء ببطء استجابةً لحرارة يديها. كانت الكلمات تتحدث عن سبع بوابات، وسبعة مفاتيح، وكيان نائم في قعر البعد المظلم ينتظر من يكسر الأقفال السبعة.
-
-"إذا كانت هذه الترجمة صحيحة،" قال طارق بصوت منخفض وحازم، "فإن ما حدث الليلة الماضية لم يكن حادثاً... بل كان شخص ما يختبر القفل الأول."`,
-    cover_image_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=600&q=80',
-    reading_time_minutes: 6,
-    word_count: 280,
-    status: 'published',
-    publication_date: '2026-10-15T20:00:00Z',
-    access_level: 'free',
-    author_notes: 'تكشف هذه الحلقة اللغز المركزي للموسم الأول.',
-    views_count: 4200,
-    likes_count: 360,
-    created_at: '2026-10-15T20:00:00Z',
-  },
-  {
-    id: 'ep_knights_1',
-    series_id: 's_knights',
-    season_id: 'sea_knights_1',
-    episode_number: 1,
-    title_ar: 'الفصل الأول: عند بزوغ النجمة الحمراء',
-    title_en: 'Chapter 1: At the Rising of the Red Star',
-    short_description_ar: 'في ساحة القلعة الكبرى، يقف الفرسان الشبان أمام شعلة الاختبار في انتظار مصيرهم.',
-    content_type: 'novel',
-    content_ar: `كان الصمت مهيباً في الباحة الكبرى لقلعة الأفق. مئات المشاعل المصنوعة من البرونز كانت تلقي ظلالاً راقصة على الدروع الفضية المصقولة.
-
-وقف الفارس الشاب في الصف الأمامي، وعيناه لا تفارقان المذبح المرتفع حيث ترقد الشعلة الأبدية. كانت تلك الليلة هي ليلة القسم—الليلة التي يتحول فيها المتدرب إلى فارس يحمل شرف الدفاع عن المملكة حتى آخر رمق.
-
-تقدم الحكيم ذو الرداء الأبيض، ورفع يديه داعياً ببركة السماء: "من يدخل هذا العهد، يترك وراءه اسمه القديم، ويصبح سيفاً للحق ودرعاً للمظلوم."`,
-    cover_image_url: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b675?auto=format&fit=crop&w=600&q=80',
-    reading_time_minutes: 5,
-    word_count: 210,
-    status: 'published',
-    publication_date: '2026-10-15T18:00:00Z',
-    access_level: 'free',
-    author_notes: 'بداية ملحمة فرسان النجوم.',
-    views_count: 3600,
-    likes_count: 290,
-    created_at: '2026-10-15T18:00:00Z',
-  },
-  {
-    id: 'ep_shadow_1',
-    series_id: 's_shadow',
-    episode_number: 1,
-    title_ar: 'العدد الأول: أزقة المطر الأسود',
-    title_en: 'Issue 1: Alleys of Black Rain',
-    short_description_ar: 'الظهور الأول للمحقق السري في شوارع حي الميناء بعد اختفاء الجوهرة الملكية.',
-    content_type: 'comic',
-    comic_pages: [
-      { id: 'sp1', page_number: 1, image_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80', description: 'أمطار غزيرة تغرق واجهات المتاجر القديمة' },
-      { id: 'sp2', page_number: 2, image_url: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80', description: 'المحقق يقف تحت مصباح الغاز الباهت' },
-    ],
-    cover_image_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80',
-    reading_time_minutes: 3,
-    status: 'published',
-    publication_date: '2026-09-10T19:00:00Z',
-    access_level: 'free',
-    author_notes: 'العدد الافتتاحي لسلسلة سجلات الظل.',
-    views_count: 4900,
-    likes_count: 340,
-    created_at: '2026-09-10T19:00:00Z',
-  },
-];
 
 // User interaction memory: follows & progress
 // key: userId:seriesId -> boolean
@@ -426,6 +181,7 @@ setInterval(() => {
 // GET /api/series-platform — List published series with filters
 seriesPlatformRouter.get('/', async (req, res) => {
   try {
+    await ensureStoreLoaded();
     const { format, status, genre, worldId, search, collection, sort } = req.query;
 
     let list = inMemorySeries.filter((s) => s.status !== 'draft' && s.status !== 'archived');
@@ -485,8 +241,12 @@ seriesPlatformRouter.get('/', async (req, res) => {
 // GET /api/series-platform/featured — Featured Hero series
 seriesPlatformRouter.get('/featured', async (_req, res) => {
   try {
+    await ensureStoreLoaded();
     const featured = inMemorySeries.filter((s) => s.is_featured && s.status !== 'draft');
     const hero = featured[0] || inMemorySeries[0];
+    if (!hero) {
+      return res.json(null);
+    }
     const eps = inMemoryEpisodes.filter((e) => e.series_id === hero.id && e.status === 'published');
     const seasons = inMemorySeasons.filter((sea) => sea.series_id === hero.id);
 
@@ -505,6 +265,7 @@ seriesPlatformRouter.get('/featured', async (_req, res) => {
 // GET /api/series-platform/collections — Curated collections for homepage & discovery
 seriesPlatformRouter.get('/collections', async (_req, res) => {
   try {
+    await ensureStoreLoaded();
     const attachMeta = (items: SeriesItem[]) =>
       items.map((s) => {
         const eps = inMemoryEpisodes.filter((e) => e.series_id === s.id && e.status === 'published');
@@ -541,6 +302,7 @@ seriesPlatformRouter.get('/collections', async (_req, res) => {
 // GET /api/series-platform/user/library — User's followed and in-progress series
 seriesPlatformRouter.get('/user/library', requireAuth, async (req: any, res) => {
   try {
+    await ensureStoreLoaded();
     const userId = req.user.id;
 
     const following: any[] = [];
@@ -571,6 +333,7 @@ seriesPlatformRouter.get('/user/library', requireAuth, async (req: any, res) => 
 // GET /api/series-platform/:slug — Full Series Landing Page
 seriesPlatformRouter.get('/:slug', async (req, res) => {
   try {
+    await ensureStoreLoaded();
     const slug = req.params.slug;
     const series = inMemorySeries.find((s) => s.slug === slug || s.id === slug);
 
@@ -638,6 +401,30 @@ seriesPlatformRouter.get('/:slug/episodes/:episodeId', async (req, res) => {
     // Season info
     const season = episode.season_id ? inMemorySeasons.find((sea) => sea.id === episode.season_id) : null;
 
+    // Subscription & Content Protection Check
+    const isFree = !episode.access_level || episode.access_level === 'free';
+    const subStatus = await checkUserSubscriptionStatus((req as any).user?.id, (req as any).user?.role);
+    const hasAccess = isFree || subStatus.isSubscriber;
+
+    let sanitizedEpisode: any = { ...episode };
+    if (!hasAccess) {
+      sanitizedEpisode.is_locked = true;
+      sanitizedEpisode.requires_subscription = true;
+      if (episode.content_type === 'novel' && episode.content_ar) {
+        const words = episode.content_ar.split(/\s+/).filter(Boolean);
+        sanitizedEpisode.content_ar = words.slice(0, 60).join(' ') + '\n\n[🔒 هذا الفصل متاح حصرياً لأعضاء حكاياتي بلس المشتركين. اشترك الآن لإكمال القراءة.]';
+      } else if (episode.content_type === 'comic' && episode.comic_pages) {
+        sanitizedEpisode.comic_pages = episode.comic_pages.map((p, idx) => ({
+          ...p,
+          image_url: idx === 0 ? p.image_url : '/assets/generated_images/locked_page_placeholder.png',
+          is_locked: idx > 0,
+        }));
+      }
+    } else {
+      sanitizedEpisode.is_locked = false;
+      sanitizedEpisode.requires_subscription = false;
+    }
+
     return res.json({
       series: {
         id: series.id,
@@ -647,7 +434,7 @@ seriesPlatformRouter.get('/:slug/episodes/:episodeId', async (req, res) => {
         structure_label: series.structure_label,
       },
       season,
-      episode,
+      episode: sanitizedEpisode,
       all_episodes_list: allPublished.map((e) => ({
         id: e.id,
         episode_number: e.episode_number,
@@ -760,6 +547,7 @@ adminSeriesPlatformRouter.use(requireRole('admin'));
 // GET /api/admin/series-platform — List all series (including drafts) with tree counts
 adminSeriesPlatformRouter.get('/', async (_req, res) => {
   try {
+    await ensureStoreLoaded();
     const list = inMemorySeries.map((s) => {
       const seasons = inMemorySeasons.filter((sea) => sea.series_id === s.id);
       const episodes = inMemoryEpisodes.filter((ep) => ep.series_id === s.id);
@@ -865,6 +653,11 @@ adminSeriesPlatformRouter.post('/', async (req: any, res) => {
       updated_at: new Date().toISOString(),
     };
 
+    try {
+      await supabaseAdmin.from('series_platform').insert(newSeries);
+    } catch (dbErr) {
+      console.error('Failed to persist series to Supabase:', dbErr);
+    }
     inMemorySeries.unshift(newSeries);
 
     await logSeriesAction(userId, 'create_series', 'series', newSeries.id, newSeries);
@@ -899,6 +692,11 @@ adminSeriesPlatformRouter.put('/:id', async (req: any, res) => {
       updated_at: new Date().toISOString(),
     };
 
+    try {
+      await supabaseAdmin.from('series_platform').update(updated).eq('id', seriesId);
+    } catch (dbErr) {
+      console.error('Failed to update series in Supabase:', dbErr);
+    }
     inMemorySeries[idx] = updated;
 
     await logSeriesAction(userId, 'update_series', 'series', seriesId, updated);
@@ -919,6 +717,11 @@ adminSeriesPlatformRouter.delete('/:id', async (req: any, res) => {
     const userId = req.user.id;
     const seriesId = req.params.id;
 
+    try {
+      await supabaseAdmin.from('series_platform').delete().eq('id', seriesId);
+    } catch (dbErr) {
+      console.error('Failed to delete series from Supabase:', dbErr);
+    }
     inMemorySeries = inMemorySeries.filter((s) => s.id !== seriesId);
     inMemorySeasons = inMemorySeasons.filter((sea) => sea.series_id !== seriesId);
     inMemoryEpisodes = inMemoryEpisodes.filter((ep) => ep.series_id !== seriesId);
@@ -963,6 +766,11 @@ adminSeriesPlatformRouter.post('/:id/seasons', async (req: any, res) => {
       created_at: new Date().toISOString(),
     };
 
+    try {
+      await supabaseAdmin.from('series_seasons').insert(newSeason);
+    } catch (dbErr) {
+      console.error('Failed to persist season to Supabase:', dbErr);
+    }
     inMemorySeasons.push(newSeason);
 
     await logSeriesAction(userId, 'create_season', 'season', newSeason.id, newSeason);
@@ -983,6 +791,11 @@ adminSeriesPlatformRouter.delete('/:id/seasons/:seasonId', async (req: any, res)
     const userId = req.user.id;
     const { seasonId } = req.params;
 
+    try {
+      await supabaseAdmin.from('series_seasons').delete().eq('id', seasonId);
+    } catch (dbErr) {
+      console.error('Failed to delete season from Supabase:', dbErr);
+    }
     inMemorySeasons = inMemorySeasons.filter((sea) => sea.id !== seasonId);
 
     await logSeriesAction(userId, 'delete_season', 'season', seasonId);
@@ -1059,6 +872,11 @@ adminSeriesPlatformRouter.post('/:id/episodes', async (req: any, res) => {
       created_at: new Date().toISOString(),
     };
 
+    try {
+      await supabaseAdmin.from('series_episodes').insert(newEpisode);
+    } catch (dbErr) {
+      console.error('Failed to persist episode to Supabase:', dbErr);
+    }
     inMemoryEpisodes.push(newEpisode);
 
     await logSeriesAction(userId, 'create_episode', 'episode', newEpisode.id, newEpisode);
@@ -1101,6 +919,11 @@ adminSeriesPlatformRouter.put('/:id/episodes/:episodeId', async (req: any, res) 
       series_id: current.series_id,
     };
 
+    try {
+      await supabaseAdmin.from('series_episodes').update(updated).eq('id', episodeId);
+    } catch (dbErr) {
+      console.error('Failed to update episode in Supabase:', dbErr);
+    }
     inMemoryEpisodes[idx] = updated;
 
     await logSeriesAction(userId, 'update_episode', 'episode', episodeId, updated);
@@ -1121,6 +944,11 @@ adminSeriesPlatformRouter.delete('/:id/episodes/:episodeId', async (req: any, re
     const userId = req.user.id;
     const { episodeId } = req.params;
 
+    try {
+      await supabaseAdmin.from('series_episodes').delete().eq('id', episodeId);
+    } catch (dbErr) {
+      console.error('Failed to delete episode from Supabase:', dbErr);
+    }
     inMemoryEpisodes = inMemoryEpisodes.filter((e) => e.id !== episodeId);
 
     await logSeriesAction(userId, 'delete_episode', 'episode', episodeId);
@@ -1134,6 +962,7 @@ adminSeriesPlatformRouter.delete('/:id/episodes/:episodeId', async (req: any, re
 // GET /api/admin/series-platform/analytics — Real Aggregate Analytics
 adminSeriesPlatformRouter.get('/analytics', async (_req, res) => {
   try {
+    await ensureStoreLoaded();
     const totalSeries = inMemorySeries.length;
     const totalEpisodes = inMemoryEpisodes.length;
     const totalSeasons = inMemorySeasons.length;

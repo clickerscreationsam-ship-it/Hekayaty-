@@ -1,6 +1,7 @@
 import { Router, type IRouter } from 'express';
 import { supabaseAdmin } from '../lib/supabase';
 import { getPublicationStatus, isDraft } from '../lib/publicationStatus';
+import { checkUserSubscriptionStatus } from '../services/subscriptionService';
 
 const router: IRouter = Router();
 
@@ -329,6 +330,9 @@ router.get('/comics/:id/pages', async (req, res) => {
       return res.status(404).json({ error: 'صفحات الكوميكس غير منشورة للجمهور بعد' });
     }
 
+    // Subscription Entitlement Check
+    const isSubscribedOrAdmin = comic.isFree || (await checkUserSubscriptionStatus((req as any).user?.id, (req as any).user?.role)).isSubscriber;
+
     // Query real pages from comic_pages table
     const { data: dbPages } = await supabaseAdmin
       .from('comic_pages')
@@ -338,26 +342,36 @@ router.get('/comics/:id/pages', async (req, res) => {
 
     let pages: any[] = [];
     if (dbPages && dbPages.length > 0) {
-      pages = dbPages.map((p) => ({
-        id: p.id,
-        pageNumber: p.page_number,
-        imageUrl: p.image_url,
-        title: `الصفحة ${p.page_number} — ${comic.titleAr}`,
-        isPreview: p.is_preview,
-      }));
+      pages = dbPages.map((p) => {
+        const canView = isSubscribedOrAdmin || p.is_preview || p.page_number === 1;
+        return {
+          id: p.id,
+          pageNumber: p.page_number,
+          imageUrl: canView ? p.image_url : '/assets/generated_images/locked_page_placeholder.png',
+          title: `الصفحة ${p.page_number} — ${comic.titleAr}`,
+          isPreview: p.is_preview,
+          isLocked: !canView,
+        };
+      });
     } else {
       const totalPages = comic.pageCount || 24;
-      pages = Array.from({ length: totalPages }, (_, i) => ({
-        pageNumber: i + 1,
-        imageUrl: comic.coverImage || comic.imageUrl,
-        title: `الصفحة ${i + 1} — ${comic.titleAr}`,
-      }));
+      pages = Array.from({ length: totalPages }, (_, i) => {
+        const canView = isSubscribedOrAdmin || i === 0;
+        return {
+          pageNumber: i + 1,
+          imageUrl: canView ? (comic.coverImage || comic.imageUrl) : '/assets/generated_images/locked_page_placeholder.png',
+          title: `الصفحة ${i + 1} — ${comic.titleAr}`,
+          isLocked: !canView,
+        };
+      });
     }
 
     return res.json({
       comicId: comic.id,
       titleAr: comic.titleAr,
       totalPages: pages.length,
+      isLocked: !isSubscribedOrAdmin,
+      requiresSubscription: !isSubscribedOrAdmin,
       pages,
     });
   } catch {

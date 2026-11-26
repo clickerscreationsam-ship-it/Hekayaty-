@@ -1,6 +1,10 @@
 import { Router, type IRouter } from 'express';
 import { requireAuth, createSessionToken } from '../middlewares/auth';
-import { authRateLimiter } from '../middlewares/rateLimiter';
+import {
+  authLoginLimiter,
+  authRegisterLimiter,
+  authPasswordResetLimiter,
+} from '../middlewares/rateLimiter';
 import { supabaseAdmin } from '../lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 
@@ -19,7 +23,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // ---------------------------------------------------------------------------
 // POST /api/auth/register (Rate-limited against automated spam / account stuffing)
 // ---------------------------------------------------------------------------
-router.post('/register', authRateLimiter, async (req, res) => {
+router.post('/register', authRegisterLimiter, async (req, res) => {
   try {
     const { email, password, displayName, role } = req.body;
 
@@ -115,7 +119,7 @@ router.post('/register', authRateLimiter, async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/auth/login
 // ---------------------------------------------------------------------------
-router.post('/login', authRateLimiter, async (req, res) => {
+router.post('/login', authLoginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -247,7 +251,7 @@ router.post('/logout', async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/auth/forgot-password
 // ---------------------------------------------------------------------------
-router.post('/forgot-password', authRateLimiter, async (req, res) => {
+router.post('/forgot-password', authPasswordResetLimiter, async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) {
@@ -272,7 +276,7 @@ router.post('/forgot-password', authRateLimiter, async (req, res) => {
 // ---------------------------------------------------------------------------
 // POST /api/auth/reset-password
 // ---------------------------------------------------------------------------
-router.post('/reset-password', authRateLimiter, async (req, res) => {
+router.post('/reset-password', authPasswordResetLimiter, async (req, res) => {
   try {
     const { newPassword, accessToken } = req.body;
 

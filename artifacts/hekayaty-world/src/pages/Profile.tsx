@@ -28,6 +28,10 @@ import {
   FileText,
   RefreshCw,
   Camera,
+  Crown,
+  CreditCard,
+  Ticket,
+  Calendar,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useAppStore } from '@/stores/useAppStore';
@@ -48,7 +52,19 @@ export default function Profile() {
   const isWriter = user?.role === 'writer' || user?.role === 'publishing_house';
   const isAdmin = user?.role === 'admin';
 
-  const [activeTab, setActiveTab] = useState<'reading' | 'favorites' | 'collections' | 'submissions' | 'notifications' | 'settings'>('reading');
+  const [activeTab, setActiveTab] = useState<'reading' | 'favorites' | 'collections' | 'submissions' | 'notifications' | 'membership' | 'settings'>('reading');
+
+  // Subscription / Membership State
+  const [subscriptionData, setSubscriptionData] = useState<{
+    hasActiveSubscription: boolean;
+    isAdminBypass: boolean;
+    daysRemaining: number;
+    activeSubscription: any;
+    queuedSubscriptions: any[];
+    history: any[];
+    recentPaymentRequests: any[];
+  } | null>(null);
+  const [subLoading, setSubLoading] = useState(false);
 
   // Profile Edit State
   const [displayName, setDisplayName] = useState(user?.displayName || '');
@@ -100,6 +116,19 @@ export default function Profile() {
     if (activeTab === 'notifications' && isAuthenticated) {
       setNotifLoading(true);
       api.getNotifications().then(d => { setNotifications(Array.isArray(d) ? d : []); setNotifLoading(false); }).catch(() => setNotifLoading(false));
+    }
+  }, [activeTab, isAuthenticated]);
+
+  // Load subscription details when membership tab opens
+  useEffect(() => {
+    if (activeTab === 'membership' && isAuthenticated) {
+      setSubLoading(true);
+      api.getMySubscription()
+        .then((data) => {
+          setSubscriptionData(data);
+          setSubLoading(false);
+        })
+        .catch(() => setSubLoading(false));
     }
   }, [activeTab, isAuthenticated]);
 
@@ -317,6 +346,7 @@ export default function Profile() {
           { key: 'favorites', icon: Heart, label: `المفضلة (${favorites.length})` },
           { key: 'collections', icon: FolderHeart, label: `مجموعاتي (${collections.length})` },
           ...(isWriter || isAdmin ? [{ key: 'submissions', icon: FileText, label: 'تقديماتي' }] : []),
+          ...(isAuthenticated ? [{ key: 'membership', icon: Crown, label: 'عضويتي واشتراكي' }] : []),
           ...(isAuthenticated ? [{ key: 'notifications', icon: Bell, label: 'الإشعارات' }] : []),
           ...(isAuthenticated ? [{ key: 'settings', icon: Settings, label: 'إعدادات الحساب' }] : []),
         ] as Array<{ key: string; icon: React.ElementType; label: string }>).map((tab) => (
@@ -617,6 +647,256 @@ export default function Profile() {
                   {!n.is_read && <span className="w-2 h-2 rounded-full bg-deep-teal dark:bg-antique-gold shrink-0 mt-1.5" />}
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ══ Tab: Membership & Subscriptions ══ */}
+      {activeTab === 'membership' && isAuthenticated && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h3 className="text-base font-bold text-foreground font-cinzel flex items-center gap-2">
+              <Crown className="w-5 h-5 text-antique-gold" />
+              <span>بيانات العضوية والاشتراك المميز</span>
+            </h3>
+            <button
+              onClick={() => {
+                setSubLoading(true);
+                api.getMySubscription()
+                  .then((d) => { setSubscriptionData(d); setSubLoading(false); })
+                  .catch(() => setSubLoading(false));
+              }}
+              className="text-xs text-deep-teal dark:text-antique-gold flex items-center gap-1.5 hover:underline"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${subLoading ? 'animate-spin' : ''}`} />
+              <span>تحديث الحالة</span>
+            </button>
+          </div>
+
+          {subLoading ? (
+            <div className="text-center py-16 text-foreground/50 text-sm flex flex-col items-center gap-3">
+              <div className="w-8 h-8 rounded-full border-2 border-antique-gold/30 border-t-antique-gold animate-spin" />
+              <span>جاري تحميل بيانات العضوية...</span>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Main Subscription Card */}
+              <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-soft-sand/50 dark:border-white/10 relative overflow-hidden">
+                <div className="absolute -top-12 -left-12 w-48 h-48 bg-antique-gold/10 rounded-full blur-3xl pointer-events-none" />
+
+                {subscriptionData?.isAdminBypass ? (
+                  <div className="space-y-4">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold">
+                      <Shield className="w-4 h-4" />
+                      <span>عضوية مسؤولي المنصة (وصول كامل دائم)</span>
+                    </div>
+                    <h2 className="text-2xl font-bold text-foreground font-cinzel">وصول فوري وشامل لجميع الأعداد الحصرية</h2>
+                    <p className="text-xs sm:text-sm text-foreground/70 max-w-xl leading-relaxed">
+                      حسابك يتمتع بصلاحيات الإشراف الإداري على منصة حكاياتي، مما يمنحك وصولاً مباشراً لجميع الروايات المصورة والفصول المحمية دون قيود اشتراك.
+                    </p>
+                  </div>
+                ) : subscriptionData?.hasActiveSubscription ? (
+                  <div className="space-y-6">
+                    <div className="flex flex-wrap items-center justify-between gap-4">
+                      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold">
+                        <Sparkles className="w-3.5 h-3.5 text-antique-gold" />
+                        <span>اشتراكك نشط وفعال</span>
+                      </div>
+                      <span className="text-xs text-foreground/60 font-mono">
+                        معرّف الاشتراك: #{subscriptionData.activeSubscription?.id}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+                      <div className="md:col-span-2 space-y-3">
+                        <h2 className="text-xl sm:text-2xl font-black text-foreground font-cinzel">
+                          {subscriptionData.activeSubscription?.plan?.name_ar || 'اشتراك حكاياتي بلس الشهري'}
+                        </h2>
+                        <p className="text-xs text-foreground/70 leading-relaxed">
+                          {subscriptionData.activeSubscription?.plan?.description_ar || 'وصول كامل لجميع الروايات المصورة والفصول الحصرية وأعلى دقة عرض.'}
+                        </p>
+
+                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-soft-sand/40 dark:border-white/10 text-xs">
+                          <div>
+                            <span className="text-foreground/50 block mb-1">تاريخ البداية:</span>
+                            <span className="font-bold text-foreground">
+                              {subscriptionData.activeSubscription?.current_period_start
+                                ? new Date(subscriptionData.activeSubscription.current_period_start).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })
+                                : '—'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-foreground/50 block mb-1">تاريخ الانتهاء:</span>
+                            <span className="font-bold text-foreground">
+                              {subscriptionData.activeSubscription?.current_period_end
+                                ? new Date(subscriptionData.activeSubscription.current_period_end).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })
+                                : '—'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Remaining Days Counter */}
+                      <div className="p-5 rounded-2xl bg-antique-gold/10 border border-antique-gold/30 flex flex-col items-center justify-center text-center">
+                        <Clock className="w-6 h-6 text-antique-gold mb-2" />
+                        <span className="text-4xl font-black text-antique-gold font-mono">
+                          {subscriptionData.daysRemaining}
+                        </span>
+                        <span className="text-xs font-bold text-foreground/80 mt-1">
+                          {subscriptionData.daysRemaining === 1 ? 'يوم متبقي' : 'أيام متبقية'}
+                        </span>
+                        <span className="text-[10px] text-foreground/50 mt-1">تجديد تلقائي متسلسل عند التمديد</span>
+                      </div>
+                    </div>
+
+                    {/* Queued Subscriptions Notice */}
+                    {subscriptionData.queuedSubscriptions && subscriptionData.queuedSubscriptions.length > 0 && (
+                      <div className="p-4 rounded-2xl bg-blue-500/10 border border-blue-500/25 space-y-2">
+                        <div className="flex items-center gap-2 text-xs font-bold text-blue-400">
+                          <Calendar className="w-4 h-4" />
+                          <span>لديك {subscriptionData.queuedSubscriptions.length} باقة مجدولة في الانتظار (Queue)</span>
+                        </div>
+                        <p className="text-[11px] text-foreground/75 leading-relaxed">
+                          تم حفظ وتأمين أيام اشتراكك الإضافية، وستبدأ الباقات المجدولة تلقائياً فور انتهاء باقتك الحالية دون فقدان أي يوم!
+                        </p>
+                        <div className="space-y-1.5 pt-1">
+                          {subscriptionData.queuedSubscriptions.map((q: any) => (
+                            <div key={q.id} className="text-[11px] flex justify-between p-2 rounded-xl bg-black/20 text-foreground/80 font-mono">
+                              <span>{q.plan?.name_ar || 'باقة مجدولة'}</span>
+                              <span>يبدأ: {new Date(q.current_period_start).toLocaleDateString('ar-EG')} • ينتهي: {new Date(q.current_period_end).toLocaleDateString('ar-EG')}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-6 space-y-4">
+                    <div className="w-16 h-16 rounded-3xl bg-antique-gold/10 border border-antique-gold/30 flex items-center justify-center mx-auto text-antique-gold">
+                      <Crown className="w-8 h-8" />
+                    </div>
+                    <div className="space-y-1">
+                      <h2 className="text-xl sm:text-2xl font-bold text-foreground font-cinzel">ليس لديك اشتراك نشط حالياً</h2>
+                      <p className="text-xs text-foreground/60 max-w-md mx-auto leading-relaxed">
+                        انضم لعالم حكاياتي بلس واستمتع بقراءة غير محدودة لجميع الروايات المصورة والفصول الحصرية بـ 99 ج.م فقط شهرياً.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-center gap-3 pt-3">
+                      <Link
+                        href="/subscribe"
+                        className="px-6 py-2.5 rounded-xl bg-deep-teal text-white dark:bg-antique-gold dark:text-midnight-navy font-bold text-xs shadow-md hover:brightness-110 transition-all flex items-center gap-2"
+                      >
+                        <Crown className="w-4 h-4" />
+                        <span>عرض باقات الاشتراك (99 ج.م)</span>
+                      </Link>
+                      <Link
+                        href="/subscribe/redeem"
+                        className="px-6 py-2.5 rounded-xl border border-soft-sand dark:border-white/10 hover:border-antique-gold text-foreground font-bold text-xs transition-colors flex items-center gap-2"
+                      >
+                        <Ticket className="w-4 h-4 text-antique-gold" />
+                        <span>شحن كود اشتراك / هدية</span>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Pending / In-Review Payment Requests */}
+              {subscriptionData?.recentPaymentRequests && subscriptionData.recentPaymentRequests.length > 0 && (
+                <div className="glass-panel p-5 rounded-3xl border border-soft-sand/50 dark:border-white/10 space-y-3">
+                  <h4 className="text-xs font-bold text-foreground font-cinzel flex items-center gap-2">
+                    <CreditCard className="w-4 h-4 text-antique-gold" />
+                    <span>طلبات الدفع والتحويل الأخيرة عبر InstaPay</span>
+                  </h4>
+
+                  <div className="space-y-2">
+                    {subscriptionData.recentPaymentRequests.map((req: any) => (
+                      <div key={req.id} className="p-3.5 rounded-2xl bg-black/5 dark:bg-white/[0.02] border border-soft-sand/40 dark:border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 font-bold text-foreground">
+                            <span>{req.plan?.name_ar || 'باقة اشتراك'}</span>
+                            <span className="text-foreground/40 font-mono">#{req.id.slice(0, 8)}</span>
+                          </div>
+                          <div className="text-[11px] text-foreground/60 flex items-center gap-3">
+                            <span>المبلغ: {Number(req.amount_egp || 0).toFixed(2)} ج.م</span>
+                            {req.transaction_reference && <span>الرقم المرجعي: {req.transaction_reference}</span>}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                            req.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                            req.status === 'under_review' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+                            req.status === 'rejected' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
+                            'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                          }`}>
+                            {req.status === 'approved' ? 'تمت الموافقة وتفعيل الاشتراك' :
+                             req.status === 'under_review' ? 'قيد مراجعة الإشعار' :
+                             req.status === 'rejected' ? 'تم الرفض' : 'بانتظار إرسال الإشعار'}
+                          </span>
+
+                          {req.status === 'pending_payment' && (
+                            <Link
+                              href={`/subscribe/payment?plan=${req.plan_id}&requestId=${req.id}`}
+                              className="px-3 py-1 rounded-xl bg-antique-gold text-midnight-navy font-bold text-[10px] hover:brightness-110"
+                            >
+                              إرسال الإشعار
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Action Buttons for active users */}
+              {subscriptionData?.hasActiveSubscription && (
+                <div className="flex flex-wrap gap-3">
+                  <Link
+                    href="/subscribe"
+                    className="px-5 py-2.5 rounded-xl bg-deep-teal text-white dark:bg-antique-gold dark:text-midnight-navy font-bold text-xs shadow-md hover:brightness-110 transition-all flex items-center gap-2"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>تجديد أو تمديد الباقة الحالية</span>
+                  </Link>
+                  <Link
+                    href="/subscribe/redeem"
+                    className="px-5 py-2.5 rounded-xl border border-soft-sand dark:border-white/10 hover:border-antique-gold text-foreground font-bold text-xs transition-colors flex items-center gap-2"
+                  >
+                    <Ticket className="w-3.5 h-3.5 text-antique-gold" />
+                    <span>تفعيل كود هدية</span>
+                  </Link>
+                </div>
+              )}
+
+              {/* Previous Subscription History */}
+              {subscriptionData?.history && subscriptionData.history.length > 0 && (
+                <div className="glass-panel p-5 rounded-3xl border border-soft-sand/50 dark:border-white/10 space-y-3">
+                  <h4 className="text-xs font-bold text-foreground font-cinzel flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-foreground/60" />
+                    <span>سجل الاشتراكات السابقة</span>
+                  </h4>
+
+                  <div className="divide-y divide-soft-sand/40 dark:divide-white/5 text-xs">
+                    {subscriptionData.history.map((sub: any) => (
+                      <div key={sub.id} className="py-2.5 flex items-center justify-between">
+                        <div>
+                          <p className="font-bold text-foreground">{sub.plan?.name_ar || 'باقة سابقة'}</p>
+                          <span className="text-[11px] text-foreground/50 font-mono">
+                            {new Date(sub.current_period_start).toLocaleDateString('ar-EG')} - {new Date(sub.current_period_end).toLocaleDateString('ar-EG')}
+                          </span>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] bg-white/5 text-foreground/60">
+                          {sub.status === 'expired' ? 'منتهي' : sub.status === 'revoked' ? 'ملغي' : sub.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

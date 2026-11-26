@@ -6,7 +6,13 @@
       "entrypoint": "src/index.ts"
     },
     "hekayaty-world": {
-      "root": "artifacts/hekayaty-world"
+      "root": "artifacts/hekayaty-world",
+      "rewrites": [
+        {
+          "source": "/(.*)",
+          "destination": "/index.html"
+        }
+      ]
     },
     "mockup-sandbox": {
       "root": "artifacts/mockup-sandbox"

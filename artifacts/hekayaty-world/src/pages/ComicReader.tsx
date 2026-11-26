@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, AlignJustify, Square, Sun, BookOpen } from 'lucide-react';
 import { useComic } from '@/lib/hooks';
 import type { Comic } from '@/types';
+import { api } from '@/lib/api';
+import { SubscriptionPaywall } from '@/components/subscription/SubscriptionPaywall';
 
 function getTitleAr(comic: Comic): string {
   return (comic as any).titleAr || (comic as any).title || '';
@@ -48,6 +50,21 @@ export default function ComicReader() {
   const [resumeBanner, setResumeBanner] = useState<number | null>(null);
   const saveTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Subscription Entitlement State
+  const [subStatus, setSubStatus] = useState<any>(null);
+  useEffect(() => {
+    api.getMySubscription().then(setSubStatus).catch(() => {});
+  }, []);
+
+  const comicAny = comic as any;
+  const isLocked = Boolean(
+    comicAny &&
+    !comicAny.isFree &&
+    (comicAny.accessLevel === 'subscribers_only' || comicAny.accessLevel === 'paid') &&
+    !subStatus?.hasActiveSubscription &&
+    !subStatus?.isAdminBypass
+  );
 
   // Load saved progress on mount
   useEffect(() => {
@@ -294,7 +311,7 @@ export default function ComicReader() {
       {/* ── Scroll mode ── */}
       {mode === 'scroll' && (
         <div className="pt-14 flex flex-col items-center gap-1" ref={scrollRef}>
-          {pages.map((pageUrl, i) => (
+          {(isLocked ? pages.slice(0, 1) : pages).map((pageUrl, i) => (
             <img
               key={i}
               src={pageUrl}
@@ -305,28 +322,41 @@ export default function ComicReader() {
               }}
             />
           ))}
-          <div className="py-10 text-warm-ivory/40 text-sm font-arabic">نهاية العدد</div>
+
+          {isLocked ? (
+            <div className="my-8 max-w-xl w-full px-4">
+              <SubscriptionPaywall returnUrl={`/comics/${comic.id}/read`} />
+            </div>
+          ) : (
+            <div className="py-10 text-warm-ivory/40 text-sm font-arabic">نهاية العدد</div>
+          )}
         </div>
       )}
 
       {/* ── Page-by-page mode ── */}
       {mode === 'page' && (
         <div className="flex-1 flex items-center justify-center pt-14 relative">
-          <AnimatePresence mode="wait">
-            <motion.img
-              key={currentPage}
-              src={pages[currentPage]}
-              alt={`صفحة ${currentPage + 1}`}
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -30 }}
-              transition={{ duration: 0.25 }}
-              className="max-h-[calc(100vh-5rem)] w-auto max-w-full object-contain select-none"
-              onError={(e) => {
-                (e.target as HTMLImageElement).alt = `خطأ في تحميل الصفحة ${currentPage + 1}`;
-              }}
-            />
-          </AnimatePresence>
+          {isLocked && currentPage > 0 ? (
+            <div className="max-w-xl w-full p-4">
+              <SubscriptionPaywall returnUrl={`/comics/${comic.id}/read`} />
+            </div>
+          ) : (
+            <AnimatePresence mode="wait">
+              <motion.img
+                key={currentPage}
+                src={pages[currentPage]}
+                alt={`صفحة ${currentPage + 1}`}
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -30 }}
+                transition={{ duration: 0.25 }}
+                className="max-h-[calc(100vh-5rem)] w-auto max-w-full object-contain select-none"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).alt = `خطأ في تحميل الصفحة ${currentPage + 1}`;
+                }}
+              />
+            </AnimatePresence>
+          )}
 
           {/* Page nav buttons */}
           <button

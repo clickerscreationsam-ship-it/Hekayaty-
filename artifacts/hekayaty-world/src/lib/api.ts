@@ -745,6 +745,161 @@ export const api = {
     return safeFetch<any>(`${BASE_URL}/admin/series-platform/${seriesId}/episodes/${episodeId}`, { method: 'DELETE' });
   },
   async adminGetSeriesAnalytics(): Promise<any> {
-    return safeFetch<any>(`${BASE_URL}/admin/series-platform/analytics`, {}, {});
+    return safeFetch<any>(`${BASE_URL}/admin/series-platform/analytics`, {}, {
+      total_series: 0,
+      total_seasons: 0,
+      total_episodes: 0,
+      total_views: 0,
+      total_followers: 0,
+      active_readers_metric: 0,
+      top_series: [],
+    });
+  },
+
+  // -------------------------------------------------------------------------
+  // Subscription System APIs
+  // -------------------------------------------------------------------------
+  async getSubscriptionPlans(): Promise<any[]> {
+    return safeFetch<any[]>(`${BASE_URL}/subscriptions/plans`, {}, []);
+  },
+  async getSubscriptionSettings(): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/subscriptions/settings`, {}, {});
+  },
+  async getMySubscription(): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/subscriptions/me`, {}, {
+      isSubscriber: false,
+      isAdmin: false,
+      status: 'none',
+      remainingDays: 0,
+      activeSubscription: null,
+      scheduledSubscriptions: [],
+      activePaymentRequest: null,
+      history: [],
+    });
+  },
+  async createSubscriptionPaymentRequest(planId: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/subscriptions/payment-requests`, {
+      method: 'POST',
+      body: JSON.stringify({ planId }),
+    });
+  },
+  async submitSubscriptionProof(
+    requestId: string | number,
+    payload: {
+      proofImageUrl: string;
+      transactionReference: string;
+      transferAmount?: number;
+      transferDatetime?: string;
+      userNotes?: string;
+    }
+  ): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/subscriptions/payment-requests/${requestId}/submit-proof`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+  async cancelSubscriptionPaymentRequest(requestId: string | number): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/subscriptions/payment-requests/${requestId}/cancel`, {
+      method: 'POST',
+    });
+  },
+  async redeemSubscriptionCode(code: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/subscriptions/redeem`, {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    });
+  },
+
+  // Admin Subscriptions APIs
+  async adminGetSubscriptionOverview(): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/subscriptions/overview`, {}, {});
+  },
+  async adminGetSubscriptionPlans(): Promise<any[]> {
+    return safeFetch<any[]>(`${BASE_URL}/admin/subscriptions/plans`, {}, []);
+  },
+  async adminCreateSubscriptionPlan(planData: any): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/subscriptions/plans`, {
+      method: 'POST',
+      body: JSON.stringify(planData),
+    });
+  },
+  async adminUpdateSubscriptionPlan(id: string, planData: any): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/subscriptions/plans/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(planData),
+    });
+  },
+  async adminArchiveSubscriptionPlan(id: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/subscriptions/plans/${id}`, {
+      method: 'DELETE',
+    });
+  },
+  async adminGetPaymentRequests(status?: string, search?: string): Promise<any[]> {
+    const q = new URLSearchParams();
+    if (status) q.append('status', status);
+    if (search) q.append('search', search);
+    return safeFetch<any[]>(`${BASE_URL}/admin/subscriptions/payment-requests?${q.toString()}`, {}, []);
+  },
+  async adminApprovePaymentRequest(id: string | number, adminNotes?: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/subscriptions/payment-requests/${id}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ adminNotes }),
+    });
+  },
+  async adminRejectPaymentRequest(id: string | number, rejectionReason: string, adminNotes?: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/subscriptions/payment-requests/${id}/reject`, {
+      method: 'POST',
+      body: JSON.stringify({ rejectionReason, adminNotes }),
+    });
+  },
+  async adminGetActiveSubscriptions(status?: string, search?: string): Promise<any[]> {
+    const q = new URLSearchParams();
+    if (status) q.append('status', status);
+    if (search) q.append('search', search);
+    return safeFetch<any[]>(`${BASE_URL}/admin/subscriptions/active?${q.toString()}`, {}, []);
+  },
+  async adminGrantSubscription(userId: string, durationDays: number, grantReason: string, internalNote?: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/subscriptions/grant`, {
+      method: 'POST',
+      body: JSON.stringify({ userId, durationDays, grantReason, internalNote }),
+    });
+  },
+  async adminRevokeSubscription(subscriptionId: string | number, revocationReason: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/subscriptions/revoke`, {
+      method: 'POST',
+      body: JSON.stringify({ subscriptionId, revocationReason }),
+    });
+  },
+  async adminGenerateSubscriptionCodes(payload: {
+    count: number;
+    durationDays: number;
+    batchName?: string;
+    campaignNotes?: string;
+    expiresAt?: string;
+  }): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/subscriptions/codes/generate`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+  async adminGetSubscriptionCodes(status?: string, search?: string): Promise<any[]> {
+    const q = new URLSearchParams();
+    if (status) q.append('status', status);
+    if (search) q.append('search', search);
+    return safeFetch<any[]>(`${BASE_URL}/admin/subscriptions/codes?${q.toString()}`, {}, []);
+  },
+  async adminToggleSubscriptionCode(id: string | number): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/subscriptions/codes/${id}/toggle`, {
+      method: 'POST',
+    });
+  },
+  async adminGetSubscriptionSettings(): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/subscriptions/settings`, {}, {});
+  },
+  async adminUpdateSubscriptionSettings(payload: any): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/subscriptions/settings`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
   },
 };

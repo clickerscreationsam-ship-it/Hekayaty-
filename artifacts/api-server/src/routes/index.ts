@@ -11,6 +11,7 @@ import uploadRouter from "./upload";
 import eventsRouter, { adminEventsRouter } from "./events";
 import mysteryRouter, { adminMysteryRouter } from "./mystery";
 import { seriesPlatformRouter, adminSeriesPlatformRouter } from "./seriesPlatform";
+import { subscriptionsRouter, adminSubscriptionsRouter } from "./subscriptions";
 import seoRouter from "./seo";
 
 const router: IRouter = Router();
@@ -18,6 +19,8 @@ const router: IRouter = Router();
 router.use(healthRouter);
 router.use(seoRouter);
 router.use("/auth", authRouter);
+router.use("/subscriptions", subscriptionsRouter);
+router.use("/admin/subscriptions", adminSubscriptionsRouter);
 router.use("/events", eventsRouter);
 router.use("/admin/events", adminEventsRouter);
 router.use("/mystery", mysteryRouter);

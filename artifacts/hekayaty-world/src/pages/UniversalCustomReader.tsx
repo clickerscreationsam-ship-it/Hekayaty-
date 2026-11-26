@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
+import { SubscriptionPaywall } from '@/components/subscription/SubscriptionPaywall';
 
 interface ChapterItem {
   id: string;
@@ -172,7 +173,7 @@ export default function UniversalCustomReader() {
         const draftContent = localStorage.getItem('hekayaty_draft_mystery_content');
         if (draftTitle) setContentTitle(draftTitle);
         if (draftContent) setTextContent(draftContent);
-      } catch {}
+      } catch { }
     }
   }, [draftMysteryParam]);
 
@@ -471,30 +472,16 @@ export default function UniversalCustomReader() {
 
                   {/* Chapter Body or Locked Banner */}
                   {currentChapter.isLocked ? (
-                    <div className="p-8 sm:p-12 rounded-3xl bg-[#162135] border border-amber-500/30 text-white text-center space-y-4 shadow-2xl">
-                      <div className="w-16 h-16 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto shadow-inner">
-                        <Lock className="w-8 h-8" />
-                      </div>
-                      <h3 className="text-xl font-bold text-amber-400">هذا الفصل مقفل ومتاح حصرياً للمشتركين</h3>
-                      <p className="text-xs sm:text-sm text-zinc-300 max-w-md mx-auto leading-relaxed">
-                        يتطلب هذا الفصل اشتراكاً نشطاً في حكاياتي للوصول إلى كامل السرد الروائي والأحداث الكونية.
-                      </p>
-
+                    <div className="space-y-6">
                       {/* Free Preview Teaser */}
-                      <div className="p-4 rounded-xl bg-black/40 text-right text-xs leading-relaxed text-zinc-400 italic">
-                        <span className="font-bold text-amber-400 block mb-1">مقتطف تمهيدي من الفصل:</span>
-                        {currentChapter.content}
-                      </div>
+                      {currentChapter.content && (
+                        <div className="p-4 sm:p-6 rounded-2xl bg-black/40 border border-white/10 text-right text-xs leading-relaxed text-zinc-300 italic">
+                          <span className="font-bold text-antique-gold block mb-2">مقتطف تمهيدي من الفصل:</span>
+                          <p className="whitespace-pre-line">{currentChapter.content}</p>
+                        </div>
+                      )}
 
-                      <div className="pt-2">
-                        <Link
-                          href="/pricing"
-                          className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:brightness-110 text-black font-bold text-xs shadow-lg inline-flex items-center gap-2"
-                        >
-                          <Sparkles className="w-4 h-4" />
-                          <span>ترقية العضوية وقراءة الفصل فوراً</span>
-                        </Link>
-                      </div>
+                      <SubscriptionPaywall returnUrl={window.location.pathname + window.location.search} />
                     </div>
                   ) : (
                     <article
