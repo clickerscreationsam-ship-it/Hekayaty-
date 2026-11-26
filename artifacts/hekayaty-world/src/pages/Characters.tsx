@@ -83,17 +83,16 @@ export default function Characters() {
               transition={{ duration: 0.8, ease: 'easeOut' }}
               className="absolute inset-0"
             >
-              {/* Actual High-Res Artwork of the Character */}
+              {/* Actual High-Res Artwork of the Character — Maximum Visibility */}
               <img
                 src={activeChar.image}
                 alt={activeChar.nameAr}
-                className="w-full h-full object-cover object-top filter brightness-[0.45] contrast-110 saturate-125"
+                className="w-full h-full object-cover object-top filter brightness-[0.75] contrast-105 saturate-120"
               />
 
-              {/* Multilayered Cinematic Gradients & Lighting (Clean Artwork Visibility) */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#070B12] via-[#070B12]/80 to-transparent" />
-              <div className="absolute inset-0 bg-gradient-to-r from-[#070B12] via-[#070B12]/60 to-transparent" />
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-[#070B12]/40 to-[#070B12]" />
+              {/* Minimal edge gradients only — artwork stays vivid & clear */}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#070B12] via-[#070B12]/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-r from-[#070B12]/70 via-transparent to-transparent" />
             </motion.div>
           )}
         </AnimatePresence>

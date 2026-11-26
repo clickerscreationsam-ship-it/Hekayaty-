@@ -20,12 +20,201 @@ import {
   Flame,
   Swords,
   Scroll,
+  Star,
+  Sword,
+  Crown,
+  Eye,
+  Dna,
+  Target,
 } from 'lucide-react';
 import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
 import { SEOHead } from '@/components/common/SEOHead';
 import { SocialShareModal } from '@/components/common/SocialShareModal';
 import { getCharacterRarity } from '@/components/characters/LegendaryCharacterCard';
+
+// ─── TCG Card Component ────────────────────────────────────────────────────────
+function TradingCard({ character, rarity, ratingNum, ratingColor, world }: {
+  character: any;
+  rarity: string;
+  ratingNum: number;
+  ratingColor: string;
+  world?: any;
+}) {
+  const rarityGradients: Record<string, string> = {
+    mythic:    'from-red-900 via-orange-800 to-amber-700',
+    legendary: 'from-amber-900 via-yellow-800 to-amber-600',
+    epic:      'from-purple-900 via-violet-800 to-purple-600',
+    rare:      'from-teal-900 via-cyan-800 to-teal-600',
+    common:    'from-zinc-800 via-zinc-700 to-zinc-600',
+  };
+  const rarityBorder: Record<string, string> = {
+    mythic:    'border-orange-400/80',
+    legendary: 'border-amber-400/80',
+    epic:      'border-purple-400/80',
+    rare:      'border-teal-400/80',
+    common:    'border-zinc-400/60',
+  };
+  const rarityGlow: Record<string, string> = {
+    mythic:    'shadow-[0_0_60px_rgba(251,146,60,0.60),0_0_120px_rgba(220,38,38,0.30)]',
+    legendary: 'shadow-[0_0_60px_rgba(197,161,91,0.70),0_0_120px_rgba(234,179,8,0.35)]',
+    epic:      'shadow-[0_0_60px_rgba(168,85,247,0.60),0_0_120px_rgba(109,40,217,0.35)]',
+    rare:      'shadow-[0_0_60px_rgba(20,184,166,0.55),0_0_100px_rgba(8,124,123,0.30)]',
+    common:    'shadow-[0_0_30px_rgba(255,255,255,0.15)]',
+  };
+  const rarityLabel: Record<string, string> = {
+    mythic: '✦ ميثيك', legendary: '◆ ليجندري', epic: '◈ ملحمي', rare: '◇ نادر', common: '○ عادي',
+  };
+  const rarityTextColor: Record<string, string> = {
+    mythic: 'text-orange-300', legendary: 'text-amber-300', epic: 'text-purple-300',
+    rare: 'text-teal-300', common: 'text-zinc-300',
+  };
+
+  const statDefs = [
+    { key: 'strength',     icon: Swords,   label: 'القوة',    color: 'text-red-400',    bg: 'bg-red-500/15',    border: 'border-red-500/30' },
+    { key: 'speed',        icon: Zap,       label: 'السرعة',   color: 'text-yellow-400', bg: 'bg-yellow-500/15', border: 'border-yellow-500/30' },
+    { key: 'durability',   icon: Shield,    label: 'الصلابة',  color: 'text-blue-400',   bg: 'bg-blue-500/15',   border: 'border-blue-500/30' },
+    { key: 'intelligence', icon: Eye,       label: 'الذكاء',   color: 'text-cyan-400',   bg: 'bg-cyan-500/15',   border: 'border-cyan-500/30' },
+    { key: 'magic',        icon: Sparkles,  label: 'السحر',    color: 'text-purple-400', bg: 'bg-purple-500/15', border: 'border-purple-500/30' },
+    { key: 'combat',       icon: Target,    label: 'النزال',   color: 'text-orange-400', bg: 'bg-orange-500/15', border: 'border-orange-500/30' },
+  ];
+
+  const hasStats = character.stats && Object.keys(character.stats).some(k => k !== 'powerRating');
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 40, rotateY: -15 }}
+      animate={{ opacity: 1, y: 0, rotateY: 0 }}
+      transition={{ duration: 0.8, ease: 'easeOut' }}
+      className={`relative mx-auto w-full max-w-[340px] rounded-[22px] border-2 ${rarityBorder[rarity] || rarityBorder.common} ${rarityGlow[rarity] || rarityGlow.common} overflow-hidden select-none`}
+      style={{ background: 'linear-gradient(145deg,#0a0e1a,#101828)' }}
+    >
+      {/* ── Top Header Ribbon ── */}
+      <div className={`relative h-10 flex items-center justify-between px-4 bg-gradient-to-r ${rarityGradients[rarity] || rarityGradients.common}`}>
+        <span className={`text-[11px] font-black uppercase tracking-widest ${rarityTextColor[rarity] || rarityTextColor.common} drop-shadow`}>
+          {rarityLabel[rarity] || '○ بطاقة'}
+        </span>
+        {world && (
+          <span className="text-[10px] font-bold text-white/70 bg-black/40 px-2 py-0.5 rounded-full border border-white/15">
+            {world.nameAr}
+          </span>
+        )}
+        <div
+          className="text-[11px] font-black px-2.5 py-0.5 rounded-full bg-black/60 border"
+          style={{ color: ratingColor, borderColor: ratingColor + '60' }}
+        >
+          {ratingNum}
+        </div>
+      </div>
+
+      {/* ── Holographic Shimmer Lines ── */}
+      <div className="absolute inset-0 pointer-events-none z-10 opacity-10"
+        style={{ backgroundImage: 'repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(255,255,255,0.08) 4px,rgba(255,255,255,0.08) 5px)' }}
+      />
+
+      {/* ── Character Artwork ── */}
+      <div className="relative h-[260px] overflow-hidden">
+        <img
+          src={character.image}
+          alt={character.nameAr}
+          className="w-full h-full object-cover object-top transform scale-[1.02]"
+        />
+        {/* Bottom fade into card body */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e1a] via-[#0a0e1a]/20 to-transparent" />
+        {/* Top vignette */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" />
+
+        {/* Alignment badge */}
+        <div className="absolute top-3 right-3">
+          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black backdrop-blur-md border ${
+            character.alignment === 'hero'
+              ? 'bg-blue-500/30 text-blue-200 border-blue-400/40'
+              : character.alignment === 'villain'
+              ? 'bg-red-500/30 text-red-200 border-red-400/40'
+              : 'bg-purple-500/30 text-purple-200 border-purple-400/40'
+          }`}>
+            {character.alignment === 'hero' ? '🛡 بطل' : character.alignment === 'villain' ? '⚔ شرير' : '🔮 غامض'}
+          </span>
+        </div>
+
+        {/* Power orb bottom-left */}
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-black/70 backdrop-blur-md border border-white/15 rounded-full px-3 py-1">
+          <Zap className="w-3.5 h-3.5" style={{ color: ratingColor }} />
+          <span className="text-[11px] font-black" style={{ color: ratingColor }}>{ratingNum}</span>
+          <span className="text-[9px] text-zinc-400 font-mono">/100</span>
+        </div>
+      </div>
+
+      {/* ── Card Name Plate ── */}
+      <div className="px-4 pt-3 pb-2 border-b border-white/10">
+        <h2 className="text-xl font-black text-white leading-tight tracking-wide drop-shadow">
+          {character.nameAr}
+        </h2>
+        {character.aliasAr && (
+          <p className="text-xs text-zinc-400 font-medium mt-0.5">{character.aliasAr}</p>
+        )}
+        {character.nameEn && (
+          <p className="text-[10px] text-zinc-500 font-mono mt-0.5" dir="ltr">{character.nameEn}</p>
+        )}
+      </div>
+
+      {/* ── Bio / Flavor Text ── */}
+      <div className="px-4 py-2.5 border-b border-white/10">
+        <p className="text-[11px] text-zinc-300 leading-relaxed italic line-clamp-2">
+          {character.bioAr || 'شخصية محورية في أحداث عوالم حكاياتي.'}
+        </p>
+      </div>
+
+      {/* ── Stats Grid ── */}
+      {hasStats && (
+        <div className="px-4 py-3 border-b border-white/10">
+          <div className="grid grid-cols-3 gap-1.5">
+            {statDefs.map(({ key, icon: Icon, label, color, bg, border }) => {
+              const val = character.stats?.[key];
+              if (val === undefined || val === null) return null;
+              return (
+                <div key={key} className={`flex flex-col items-center gap-1 rounded-xl p-2 ${bg} border ${border}`}>
+                  <Icon className={`w-3.5 h-3.5 ${color}`} />
+                  <span className={`text-sm font-black ${color}`}>{val}</span>
+                  <span className="text-[9px] text-zinc-400 font-bold leading-none">{label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Powers List ── */}
+      {character.powersAr && character.powersAr.length > 0 && (
+        <div className="px-4 py-3 border-b border-white/10">
+          <div className="flex items-center gap-1.5 mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span className="text-[10px] font-black text-amber-300 uppercase tracking-wider">القدرات الخارقة</span>
+          </div>
+          <div className="space-y-1">
+            {character.powersAr.slice(0, 4).map((p: string, i: number) => (
+              <div key={i} className="flex items-center gap-2 text-[11px] text-zinc-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
+                <span className="font-medium">{p}</span>
+              </div>
+            ))}
+            {character.powersAr.length > 4 && (
+              <p className="text-[10px] text-zinc-500 pt-0.5">+{character.powersAr.length - 4} قدرات إضافية...</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Bottom Footer ── */}
+      <div className={`h-8 flex items-center justify-between px-4 bg-gradient-to-r ${rarityGradients[rarity] || rarityGradients.common} opacity-70`}>
+        <span className="text-[9px] text-white/60 font-mono uppercase tracking-widest">HEKAYATY WORLD © 2027</span>
+        <span className="text-[9px] font-black" style={{ color: ratingColor + 'dd' }}>
+          {character.classification === 'original' ? 'ORIGINAL' : character.classification === 'hekayaty_selected' ? 'SELECTED' : 'COLLAB'}
+        </span>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function CharacterDetail() {
   const [, params] = useRoute('/characters/:id');
@@ -118,17 +307,17 @@ export default function CharacterDetail() {
       />
 
       {/* ─────────────────────────────────────────────────────────────────────────────
-          1. IMMERSIVE FULL-PAGE ARTWORK BACKGROUND
+          1. IMMERSIVE FULL-PAGE ARTWORK BACKGROUND — Clear, Vivid, Minimal Overlay
           ───────────────────────────────────────────────────────────────────────────── */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <img
           src={character.image}
           alt={character.nameAr}
-          className="w-full h-full object-cover object-top filter brightness-[0.35] contrast-110 saturate-125"
+          className="w-full h-full object-cover object-top filter brightness-[0.65] contrast-105 saturate-120"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#070B12] via-[#070B12]/85 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#070B12] via-[#070B12]/60 to-transparent" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-transparent via-[#070B12]/50 to-[#070B12]" />
+        {/* Only edge-fade gradients — no thick dark overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#070B12] via-[#070B12]/25 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#070B12]/75 via-transparent to-transparent" />
       </div>
 
       <div className="relative z-10 space-y-8">
@@ -149,116 +338,49 @@ export default function CharacterDetail() {
             2. HERO SECTION: CINEMATIC SPLIT SHOWCASE
             ───────────────────────────────────────────────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Right Column (RTL): Large Unobscured Character Artwork Portrait */}
-          <div className="lg:col-span-5 space-y-4">
-            <div className="relative rounded-3xl overflow-hidden border-2 border-[#C5A15B]/50 shadow-[0_0_50px_rgba(197,161,91,0.35)] bg-black/80 aspect-[4/5] group">
-              <img
-                src={character.image}
-                alt={character.nameAr}
-                className="w-full h-full object-cover object-top transform group-hover:scale-105 transition-transform duration-700"
-              />
+          {/* Right Column (RTL): TCG-Style Character Card */}
+          <div className="lg:col-span-5 space-y-6">
+            {/* Professional Trading Card */}
+            <TradingCard
+              character={character}
+              rarity={rarity}
+              ratingNum={ratingNum}
+              ratingColor={ratingColor}
+              world={world}
+            />
 
-              {/* Minimal soft shadow at the bottom for controls */}
-              <div className="absolute inset-0 bg-gradient-to-t from-[#070B12] via-transparent to-transparent opacity-90" />
+            {/* Action Buttons below the card */}
+            <div className="flex items-center gap-3 justify-center flex-wrap">
+              <button
+                type="button"
+                onClick={() => setShareOpen(true)}
+                className="px-5 py-2.5 rounded-2xl text-xs font-bold backdrop-blur-md border bg-black/60 text-white border-white/20 hover:border-[#C5A15B] transition-all shadow-lg flex items-center gap-2"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>مشاركة البطاقة</span>
+              </button>
 
-              {/* Top Badges */}
-              <div className="absolute top-4 right-4 left-4 flex items-center justify-between pointer-events-none">
-                <span className="px-3.5 py-1 rounded-full text-xs font-black bg-black/70 backdrop-blur-md border border-[#C5A15B]/50 text-[#E1C58B] shadow-xl">
-                  {character.aliasAr || character.nameAr}
-                </span>
+              <button
+                type="button"
+                onClick={toggleFavorite}
+                className={`px-5 py-2.5 rounded-2xl text-xs font-bold backdrop-blur-md border transition-all shadow-lg flex items-center gap-2 ${
+                  isFav
+                    ? 'bg-red-500/20 text-red-400 border-red-500/40'
+                    : 'bg-black/60 text-white border-white/20 hover:border-[#C5A15B]'
+                }`}
+              >
+                <Heart className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
+                <span>{isFav ? 'في المفضلة' : 'إضافة للمفضلة'}</span>
+              </button>
 
-                <div
-                  className="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-black/80 border shadow-xl"
-                  style={{ borderColor: ratingColor, color: ratingColor }}
+              {world && (
+                <Link
+                  href={`/worlds/${world.id}`}
+                  className="px-5 py-2.5 rounded-2xl text-xs font-bold bg-black/60 backdrop-blur-md text-[#E1C58B] border border-white/20 hover:border-[#C5A15B] flex items-center gap-2 transition-all shadow-lg"
                 >
-                  <Zap className="w-3.5 h-3.5 fill-current" />
-                  <span>مؤشر القوة {ratingNum}</span>
-                </div>
-              </div>
-
-              {/* Floating Action Buttons */}
-              <div className="absolute bottom-4 right-4 left-4 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setShareOpen(true)}
-                    className="p-2.5 rounded-xl text-xs font-bold backdrop-blur-md border bg-black/70 text-white border-white/20 hover:border-[#C5A15B] transition-all shadow-lg flex items-center gap-1.5"
-                    title="مشاركة البطل"
-                  >
-                    <Share2 className="w-4 h-4" />
-                    <span>مشاركة</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={toggleFavorite}
-                    className={`px-4 py-2.5 rounded-xl text-xs font-bold backdrop-blur-md border transition-all shadow-lg flex items-center gap-1.5 ${
-                      isFav
-                        ? 'bg-red-500/20 text-red-400 border-red-500/40'
-                        : 'bg-black/70 text-white border-white/20 hover:border-[#C5A15B]'
-                    }`}
-                  >
-                    <Heart className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
-                    <span>{isFav ? 'في المفضلة' : 'إضافة للمفضلة'}</span>
-                  </button>
-                </div>
-
-                {world && (
-                  <Link
-                    href={`/worlds/${world.id}`}
-                    className="px-3 py-2 rounded-xl text-xs font-bold bg-black/70 backdrop-blur-md text-[#E1C58B] border border-white/20 hover:border-[#C5A15B] flex items-center gap-1.5"
-                  >
-                    <Globe className="w-3.5 h-3.5" />
-                    <span>{world.nameAr}</span>
-                  </Link>
-                )}
-              </div>
-            </div>
-
-            {/* Overall Power Level Meter Card */}
-            <div className="bg-[#0D1524]/90 backdrop-blur-xl border border-white/10 rounded-2xl p-5 space-y-3 shadow-xl">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-zinc-300 flex items-center gap-2">
-                  <Zap className="w-4 h-4 text-[#C5A15B]" />
-                  <span>مستوى القوة العام</span>
-                </span>
-                <span className="text-2xl font-black" style={{ color: ratingColor }}>
-                  {ratingNum}<span className="text-xs text-zinc-500 font-normal">/100</span>
-                </span>
-              </div>
-
-              <div className="h-3 w-full bg-black/60 rounded-full overflow-hidden p-0.5 border border-white/10">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${ratingNum}%` }}
-                  transition={{ duration: 1.2, ease: 'easeOut' }}
-                  className="h-full rounded-full"
-                  style={{ background: `linear-gradient(to left, ${ratingColor}, ${ratingColor}88)` }}
-                />
-              </div>
-
-              {/* Individual Stats Bars */}
-              {character.stats && (
-                <div className="space-y-2.5 pt-3 border-t border-white/10">
-                  {Object.entries(character.stats)
-                    .filter(([k]) => k !== 'powerRating')
-                    .map(([statKey, val]) => (
-                      <div key={statKey}>
-                        <div className="flex justify-between text-xs mb-1 font-medium">
-                          <span className="text-zinc-400">{statLabels[statKey] || statKey}</span>
-                          <span className="text-[#E1C58B] font-bold font-mono">{val}%</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-black/60 rounded-full overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${val}%` }}
-                            transition={{ duration: 0.8, ease: 'easeOut' }}
-                            className="h-full bg-gradient-to-l from-[#C5A15B] to-[#087C7B] rounded-full"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                </div>
+                  <Globe className="w-4 h-4" />
+                  <span>{world.nameAr}</span>
+                </Link>
               )}
             </div>
           </div>
