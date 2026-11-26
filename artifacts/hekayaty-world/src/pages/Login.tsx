@@ -121,10 +121,8 @@ export default function Login() {
               <label htmlFor="login-password" className="text-xs font-semibold text-warm-ivory/70">
                 كلمة المرور
               </label>
-              <Link href="/forgot-password">
-                <a className="text-[11px] text-antique-gold/80 hover:text-antique-gold transition-colors">
-                  نسيت كلمة المرور؟
-                </a>
+              <Link href="/forgot-password" className="text-[11px] text-antique-gold/80 hover:text-antique-gold transition-colors">
+                نسيت كلمة المرور؟
               </Link>
             </div>
             <div className="relative">
@@ -175,20 +173,16 @@ export default function Login() {
         <div className="mt-6 pt-5 border-t border-white/[0.08] text-center">
           <p className="text-xs text-warm-ivory/40">
             ليس لديك حساب؟{' '}
-            <Link href="/register">
-              <a className="text-antique-gold font-bold hover:text-antique-gold/80 transition-colors">
-                إنشاء حساب مجاني
-              </a>
+            <Link href="/register" className="text-antique-gold font-bold hover:text-antique-gold/80 transition-colors">
+              إنشاء حساب مجاني
             </Link>
           </p>
         </div>
 
         {/* Back to home */}
         <div className="mt-3 text-center">
-          <Link href="/">
-            <a className="text-[11px] text-warm-ivory/25 hover:text-warm-ivory/50 transition-colors">
-              العودة إلى الصفحة الرئيسية
-            </a>
+          <Link href="/" className="text-[11px] text-warm-ivory/25 hover:text-warm-ivory/50 transition-colors">
+            العودة إلى الصفحة الرئيسية
           </Link>
         </div>
       </div>

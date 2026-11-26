@@ -391,10 +391,8 @@ export default function Register() {
         <div className="mt-5 pt-4 border-t border-white/[0.07] text-center">
           <p className="text-xs text-warm-ivory/35">
             لديك حساب بالفعل؟{' '}
-            <Link href="/login">
-              <a className="text-antique-gold font-bold hover:text-antique-gold/80 transition-colors">
-                تسجيل الدخول
-              </a>
+            <Link href="/login" className="text-antique-gold font-bold hover:text-antique-gold/80 transition-colors">
+              تسجيل الدخول
             </Link>
           </p>
         </div>

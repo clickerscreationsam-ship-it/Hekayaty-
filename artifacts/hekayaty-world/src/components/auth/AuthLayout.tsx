@@ -60,15 +60,13 @@ export function AuthLayout({ children }: AuthLayoutProps) {
 
       {/* ── HEKAYATY Logo / Back to home ───────────────────────────── */}
       <div className="absolute top-6 inset-x-0 flex justify-center z-10">
-        <Link href="/">
-          <a className="flex items-center gap-2 group select-none" aria-label="العودة إلى الرئيسية">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-deep-teal to-antique-gold flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-              <span className="text-white font-cinzel font-black text-sm">ح</span>
-            </div>
-            <span className="font-cinzel font-bold text-warm-ivory text-lg tracking-wide group-hover:text-antique-gold transition-colors">
-              HEKAYATY
-            </span>
-          </a>
+        <Link href="/" className="flex items-center gap-2 group select-none" aria-label="العودة إلى الرئيسية">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-deep-teal to-antique-gold flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+            <span className="text-white font-cinzel font-black text-sm">ح</span>
+          </div>
+          <span className="font-cinzel font-bold text-warm-ivory text-lg tracking-wide group-hover:text-antique-gold transition-colors">
+            HEKAYATY
+          </span>
         </Link>
       </div>
 

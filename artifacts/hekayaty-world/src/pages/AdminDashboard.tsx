@@ -954,6 +954,10 @@ export default function AdminDashboard() {
 
   // Fetch all core admin datasets
   const fetchAllData = useCallback(async () => {
+    if (!user || user.role !== 'admin') {
+      setIsLoading(false);
+      return;
+    }
     setIsLoading(true);
     try {
       const [
@@ -1018,8 +1022,10 @@ export default function AdminDashboard() {
   }, [toast]);
 
   useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
+    if (user && user.role === 'admin') {
+      fetchAllData();
+    }
+  }, [fetchAllData, user]);
 
   // Handle global search
   useEffect(() => {

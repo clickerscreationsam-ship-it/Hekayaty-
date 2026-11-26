@@ -96,28 +96,31 @@ export default function Welcome() {
       {/* ── Primary CTAs ────────────────────────────────────────────── */}
       <motion.div {...fadeUp(0.2)} className="relative z-10 w-full max-w-xs px-4 flex flex-col gap-3 mb-4">
         {/* Create Account — Primary */}
-        <Link href="/register">
-          <a className="w-full py-3.5 rounded-2xl bg-gradient-to-l from-deep-teal to-[#0A9A99] text-white font-bold text-sm shadow-lg shadow-deep-teal/30 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 ring-1 ring-white/10">
-            <span>إنشاء حساب جديد</span>
-            <ArrowLeft className="w-4 h-4" />
-          </a>
+        <Link
+          href="/register"
+          className="w-full py-3.5 rounded-2xl bg-gradient-to-l from-deep-teal to-[#0A9A99] text-white font-bold text-sm shadow-lg shadow-deep-teal/30 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 ring-1 ring-white/10"
+        >
+          <span>إنشاء حساب جديد</span>
+          <ArrowLeft className="w-4 h-4" />
         </Link>
 
         {/* Sign In — Secondary */}
-        <Link href="/login">
-          <a className="w-full py-3.5 rounded-2xl bg-white/8 backdrop-blur-sm border border-white/15 text-warm-ivory font-bold text-sm hover:bg-white/12 hover:border-antique-gold/40 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
-            <span>تسجيل الدخول</span>
-          </a>
+        <Link
+          href="/login"
+          className="w-full py-3.5 rounded-2xl bg-white/8 backdrop-blur-sm border border-white/15 text-warm-ivory font-bold text-sm hover:bg-white/12 hover:border-antique-gold/40 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+        >
+          <span>تسجيل الدخول</span>
         </Link>
       </motion.div>
 
       {/* ── Guest exploration link ───────────────────────────────────── */}
       <motion.div {...fadeUp(0.25)} className="relative z-10 mb-10">
-        <Link href="/">
-          <a className="flex items-center gap-1.5 text-xs text-warm-ivory/40 hover:text-warm-ivory/70 transition-colors">
-            <Compass className="w-3.5 h-3.5" />
-            <span>استكشف كزائر</span>
-          </a>
+        <Link
+          href="/"
+          className="flex items-center gap-1.5 text-xs text-warm-ivory/40 hover:text-warm-ivory/70 transition-colors"
+        >
+          <Compass className="w-3.5 h-3.5" />
+          <span>استكشف كزائر</span>
         </Link>
       </motion.div>
 
