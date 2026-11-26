@@ -4,7 +4,6 @@ import {
   XCircle,
   Shield,
   Zap,
-  Upload,
   Sparkles,
   Users,
   CheckCircle2,
@@ -14,6 +13,7 @@ import {
   Wind,
 } from 'lucide-react';
 import { api } from '@/lib/api';
+import { ImageUploadField } from '@/components/common/ImageUploadField';
 
 interface CharacterCreationModalProps {
   isOpen: boolean;
@@ -353,26 +353,12 @@ export function CharacterCreationModal({
 
             {/* Avatar Upload */}
             <div className="p-3.5 rounded-2xl bg-[#131C2E] border border-[#233147] space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="text-[11px] font-bold text-zinc-300">أفاتار البطل (Cloudinary)</label>
-                <label className="cursor-pointer text-[10px] text-[#087C7B] hover:text-[#C5A15B] font-bold flex items-center gap-1">
-                  <Upload className="w-3 h-3" />
-                  <span>{isUploading ? 'جاري الرفع...' : 'رفع من جهازك'}</span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    disabled={isUploading}
-                    onChange={handleFileUpload}
-                  />
-                </label>
-              </div>
-              <input
-                type="url"
-                placeholder="https://res.cloudinary.com/..."
+              <ImageUploadField
+                label="أفاتار البطل"
                 value={charData.avatar_url}
-                onChange={(e) => setCharData({ ...charData, avatar_url: e.target.value })}
-                className="w-full bg-[#152033] border border-[#2E3C51] rounded-xl px-3 py-1.5 text-white font-mono text-[11px]"
+                onChange={(url) => setCharData({ ...charData, avatar_url: url })}
+                folder="characters"
+                previewAspect="square"
               />
             </div>
 

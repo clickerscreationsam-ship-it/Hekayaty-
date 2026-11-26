@@ -34,6 +34,7 @@ import {
   Zap,
 } from 'lucide-react';
 import { Link } from 'wouter';
+import { ImageUploadField } from '@/components/common/ImageUploadField';
 import { UnifiedCreationWizardModal } from '@/components/admin/UnifiedCreationWizardModal';
 import { ComicPagesStudioModal } from '@/components/admin/ComicPagesStudioModal';
 import { PowersStudioModal } from '@/components/admin/PowersStudioModal';
@@ -243,7 +244,15 @@ function EventsMgmtPanel({ toast }: { toast: any }) {
                 <div><label className={labelCls}>الموقع</label><input className={inputCls} value={eventForm.location} onChange={e => setEventForm(f => ({ ...f, location: e.target.value }))} /></div>
                 <div><label className={labelCls}>تاريخ البداية</label><input type="date" className={inputCls} value={eventForm.start_date} onChange={e => setEventForm(f => ({ ...f, start_date: e.target.value }))} dir="ltr" /></div>
                 <div><label className={labelCls}>تاريخ النهاية</label><input type="date" className={inputCls} value={eventForm.end_date} onChange={e => setEventForm(f => ({ ...f, end_date: e.target.value }))} dir="ltr" /></div>
-                <div className="sm:col-span-2"><label className={labelCls}>رابط الغلاف (Cloudinary URL)</label><input type="url" className={inputCls} value={eventForm.image_url} onChange={e => setEventForm(f => ({ ...f, image_url: e.target.value }))} dir="ltr" /></div>
+                <div className="sm:col-span-2">
+                  <ImageUploadField
+                    label="صورة الغلاف"
+                    value={eventForm.image_url}
+                    onChange={(url) => setEventForm(f => ({ ...f, image_url: url }))}
+                    folder="events"
+                    previewAspect="cover"
+                  />
+                </div>
               </div>
               <div className="px-6 py-4 border-t border-zinc-800 bg-[#162235] flex items-center justify-end gap-3 shrink-0">
                 <button type="button" onClick={() => setShowCreateEvent(false)} className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-semibold">إلغاء</button>
@@ -2674,13 +2683,12 @@ export default function AdminDashboard() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-zinc-200 mb-1.5 font-semibold">رابط صورة الغلاف (Cloudinary)</label>
-                  <input
-                    type="url"
-                    placeholder="https://res.cloudinary.com/..."
+                  <ImageUploadField
+                    label="صورة الغلاف"
                     value={newSeries.cover_image_url}
-                    onChange={(e) => setNewSeries({ ...newSeries, cover_image_url: e.target.value })}
-                    className="w-full bg-[#0B1320] border border-[#2B3B52] rounded-xl px-3.5 py-2.5 text-white font-mono placeholder-zinc-500 focus:outline-none focus:border-[#087C7B]"
+                    onChange={(url) => setNewSeries({ ...newSeries, cover_image_url: url })}
+                    folder="series"
+                    previewAspect="portrait"
                   />
                 </div>
               </div>
@@ -2854,30 +2862,12 @@ export default function AdminDashboard() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-zinc-200 font-semibold">صورة الغلاف (Cloudinary)</label>
-                      <label className="cursor-pointer text-[10px] text-[#087C7B] hover:text-[#C5A15B] flex items-center gap-1 font-bold">
-                        <Upload className="w-3 h-3" />
-                        <span>{isUploading ? 'جاري الرفع...' : 'رفع من جهازك'}</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          disabled={isUploading}
-                          onChange={(e) =>
-                            handleFileUpload(e, 'comics', (url) =>
-                              setNewComic({ ...newComic, cover_image_url: url })
-                            )
-                          }
-                        />
-                      </label>
-                    </div>
-                    <input
-                      type="url"
-                      placeholder="https://res.cloudinary.com/..."
+                    <ImageUploadField
+                      label="صورة الغلاف"
                       value={newComic.cover_image_url}
-                      onChange={(e) => setNewComic({ ...newComic, cover_image_url: e.target.value })}
-                      className="w-full bg-[#0B1320] border border-[#2B3B52] rounded-xl px-3.5 py-2.5 text-white font-mono placeholder-zinc-500 focus:outline-none focus:border-[#087C7B]"
+                      onChange={(url) => setNewComic({ ...newComic, cover_image_url: url })}
+                      folder="comics"
+                      previewAspect="portrait"
                     />
                   </div>
                   <div>
@@ -3130,30 +3120,12 @@ export default function AdminDashboard() {
                     </select>
                   </div>
                   <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-zinc-200 font-semibold">أفاتار البطل (Cloudinary)</label>
-                      <label className="cursor-pointer text-[10px] text-[#087C7B] hover:text-[#C5A15B] flex items-center gap-1 font-bold">
-                        <Upload className="w-3 h-3" />
-                        <span>{isUploading ? 'جاري الرفع...' : 'رفع من جهازك'}</span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          disabled={isUploading}
-                          onChange={(e) =>
-                            handleFileUpload(e, 'characters', (url) =>
-                              setNewChar({ ...newChar, avatar_url: url })
-                            )
-                          }
-                        />
-                      </label>
-                    </div>
-                    <input
-                      type="url"
-                      placeholder="https://res.cloudinary.com/..."
+                    <ImageUploadField
+                      label="أفاتار البطل"
                       value={newChar.avatar_url}
-                      onChange={(e) => setNewChar({ ...newChar, avatar_url: e.target.value })}
-                      className="w-full bg-[#0B1320] border border-[#2B3B52] rounded-xl px-3.5 py-2.5 text-white font-mono focus:outline-none focus:border-[#087C7B]"
+                      onChange={(url) => setNewChar({ ...newChar, avatar_url: url })}
+                      folder="characters"
+                      previewAspect="square"
                     />
                   </div>
                 </div>
@@ -3470,13 +3442,12 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-zinc-200 mb-1.5 font-semibold">رابط صورة المنتج</label>
-                  <input
-                    type="url"
-                    placeholder="https://res.cloudinary.com/..."
+                  <ImageUploadField
+                    label="صورة المنتج"
                     value={newProduct.image_url}
-                    onChange={(e) => setNewProduct({ ...newProduct, image_url: e.target.value })}
-                    className="w-full bg-[#0B1320] border border-[#2B3B52] rounded-xl px-3.5 py-2.5 text-white font-mono focus:outline-none focus:border-[#087C7B]"
+                    onChange={(url) => setNewProduct({ ...newProduct, image_url: url })}
+                    folder="products"
+                    previewAspect="square"
                   />
                 </div>
               </div>

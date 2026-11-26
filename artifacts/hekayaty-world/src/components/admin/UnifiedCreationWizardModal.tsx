@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'wouter';
 import { ModalPortal } from './ModalPortal';
+import { ImageUploadField } from '@/components/common/ImageUploadField';
 import {
   XCircle,
   BookOpen,
@@ -593,32 +594,14 @@ export function UnifiedCreationWizardModal({
                   />
                 </div>
 
-                {/* Cover Image Upload (Cloudinary) */}
-                <div className="p-4 rounded-2xl bg-[#131C2E] border border-[#233147] space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-zinc-300 flex items-center gap-2">
-                      <Upload className="w-4 h-4 text-[#087C7B]" />
-                      <span>صورة غلاف العمل (Cloudinary)</span>
-                    </label>
-                    <label className="cursor-pointer px-3 py-1.5 rounded-lg bg-[#087C7B]/20 text-[#087C7B] hover:bg-[#087C7B] hover:text-white border border-[#087C7B]/40 text-xs font-bold transition-all flex items-center gap-1.5">
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>{isUploading ? 'جاري الرفع سحابياً...' : 'رفع صورة من جهازك'}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        disabled={isUploading}
-                        onChange={handleFileUpload}
-                      />
-                    </label>
-                  </div>
-
-                  <input
-                    type="url"
-                    placeholder="https://res.cloudinary.com/..."
+                {/* Cover Image Upload */}
+                <div className="p-4 rounded-2xl bg-[#131C2E] border border-[#233147]">
+                  <ImageUploadField
+                    label="صورة غلاف العمل"
                     value={formData.cover_image_url}
-                    onChange={(e) => setFormData({ ...formData, cover_image_url: e.target.value })}
-                    className="w-full bg-[#152033] border border-[#2E3C51] rounded-xl px-4 py-2 text-white font-mono text-xs"
+                    onChange={(url) => setFormData({ ...formData, cover_image_url: url })}
+                    folder="covers"
+                    previewAspect="portrait"
                   />
                 </div>
               </div>
