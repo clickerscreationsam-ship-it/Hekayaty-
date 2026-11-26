@@ -9,6 +9,7 @@ import editorialRouter from "./editorial";
 import adminRouter from "./admin";
 import uploadRouter from "./upload";
 import eventsRouter, { adminEventsRouter } from "./events";
+import mysteryRouter, { adminMysteryRouter } from "./mystery";
 import seoRouter from "./seo";
 
 const router: IRouter = Router();
@@ -18,6 +19,8 @@ router.use(seoRouter);
 router.use("/auth", authRouter);
 router.use("/events", eventsRouter);
 router.use("/admin/events", adminEventsRouter);
+router.use("/mystery", mysteryRouter);
+router.use("/admin/mystery", adminMysteryRouter);
 router.use("/", contentRouter);
 router.use("/user", userRouter);
 router.use("/", commerceRouter);

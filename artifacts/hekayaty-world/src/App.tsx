@@ -46,6 +46,8 @@ const News = lazy(() => import('@/pages/News'));
 const NewsDetail = lazy(() => import('@/pages/NewsDetail'));
 const Events = lazy(() => import('@/pages/Events'));
 const EventDetail = lazy(() => import('@/pages/EventDetail'));
+const Mystery = lazy(() => import('@/pages/Mystery'));
+const MysteryEpisodeReader = lazy(() => import('@/pages/MysteryEpisodeReader'));
 const VotingPage = lazy(() => import('@/pages/VotingPage'));
 const Awards = lazy(() => import('@/pages/Awards'));
 const AwardDetail = lazy(() => import('@/pages/AwardDetail'));
@@ -126,6 +128,8 @@ function Router() {
           <Route path="/news/:id" component={NewsDetail} />
           <Route path="/events" component={Events} />
           <Route path="/events/:slug" component={EventDetail} />
+          <Route path="/mystery" component={Mystery} />
+          <Route path="/mystery/:slug" component={MysteryEpisodeReader} />
           <Route path="/carnivals" component={Events} />
           <Route path="/carnivals/:slug" component={EventDetail} />
           <Route path="/competitions/:slug" component={CompetitionDetail} />

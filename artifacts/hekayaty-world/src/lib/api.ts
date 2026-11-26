@@ -639,4 +639,45 @@ export const api = {
       body: JSON.stringify({ type }),
     });
   },
+
+  // ── Daily Mystery ─────────────────────────────────────────────────────────
+  async getMysteryOverview(): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/mystery/overview`, {}, {
+      latestEpisode: null,
+      nextScheduledEpisode: null,
+      totalPublishedEpisodes: 0,
+      recentEpisodes: [],
+    });
+  },
+  async getMysteryEpisodes(): Promise<any[]> {
+    return safeFetch<any[]>(`${BASE_URL}/mystery/episodes`, {}, []);
+  },
+  async getMysteryEpisodeDetail(idOrSlug: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/mystery/episodes/${idOrSlug}`, {}, null);
+  },
+  async likeMysteryEpisode(id: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/mystery/episodes/${id}/like`, { method: 'POST' });
+  },
+
+  // Admin Mystery
+  async adminListMysteryEpisodes(): Promise<any[]> {
+    return safeFetch<any[]>(`${BASE_URL}/admin/mystery/episodes`, {}, []);
+  },
+  async adminCreateMysteryEpisode(data: any): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/mystery/episodes`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+  async adminUpdateMysteryEpisode(id: string, data: any): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/mystery/episodes/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+  async adminDeleteMysteryEpisode(id: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/mystery/episodes/${id}`, {
+      method: 'DELETE',
+    });
+  },
 };

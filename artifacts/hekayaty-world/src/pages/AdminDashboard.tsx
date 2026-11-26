@@ -43,6 +43,7 @@ import { CharacterCreationModal } from '@/components/admin/CharacterCreationModa
 import { NovelChapterEditorModal } from '@/components/admin/NovelChapterEditorModal';
 import { ModalPortal } from '@/components/admin/ModalPortal';
 import { SEOManagerSection } from '@/components/admin/SEOManagerSection';
+import { MysteryMgmtPanel } from '@/components/admin/MysteryMgmtPanel';
 
 type AdminTab =
   | 'overview'
@@ -53,6 +54,7 @@ type AdminTab =
   | 'publishing_mgmt'
   | 'operations'
   | 'events_mgmt'
+  | 'mystery_mgmt'
   | 'seo_mgmt';
 
 type ContentSubTab = 'comics' | 'stories' | 'series' | 'classification';
@@ -1503,6 +1505,21 @@ export default function AdminDashboard() {
             </button>
 
             <button
+              onClick={() => setActiveTab('mystery_mgmt')}
+              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-medium transition-all ${
+                activeTab === 'mystery_mgmt'
+                  ? 'bg-gradient-to-l from-[#C5A15B] to-[#a8873a] text-black shadow-md'
+                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-[#C5A15B]">🔍</span>
+                <span>لغز حكاياتي اليومي</span>
+              </div>
+              <ChevronRight className="w-4 h-4 opacity-70" />
+            </button>
+
+            <button
               onClick={() => setActiveTab('seo_mgmt')}
               className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-medium transition-all ${
                 activeTab === 'seo_mgmt'
@@ -2868,6 +2885,13 @@ export default function AdminDashboard() {
           {/* ══════════════════════════════════════════════════════════════════ */}
           {activeTab === 'events_mgmt' && (
             <EventsMgmtPanel toast={toast} />
+          )}
+
+          {/* ══════════════════════════════════════════════════════════════════ */}
+          {/* DAILY MYSTERY MANAGEMENT TAB                                       */}
+          {/* ══════════════════════════════════════════════════════════════════ */}
+          {activeTab === 'mystery_mgmt' && (
+            <MysteryMgmtPanel toast={toast} />
           )}
 
           {/* SEO & SOCIAL SHARING MANAGEMENT TAB */}
