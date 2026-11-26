@@ -67,18 +67,39 @@ function EventsMgmtPanel({ toast }: { toast: any }) {
 
   // Modals state
   const [showCreateEvent, setShowCreateEvent] = React.useState(false);
+  const [showEditEvent, setShowEditEvent] = React.useState(false);
+  const [editingEvent, setEditingEvent] = React.useState<any | null>(null);
   const [showCreateComp, setShowCreateComp] = React.useState(false);
   const [showCreateVoting, setShowCreateVoting] = React.useState(false);
   const [showIssueAward, setShowIssueAward] = React.useState(false);
 
   const [selectedEventId, setSelectedEventId] = React.useState('');
 
-  // Forms
-  const [eventForm, setEventForm] = React.useState({
-    title_ar: '', title_en: '', slug: '', description_ar: '',
-    event_type: 'carnival', status: 'draft', theme: '',
-    start_date: '', end_date: '', location: '', is_online: true, image_url: '',
-  });
+  // Default Event Form State
+  const defaultEventForm = {
+    title_ar: '',
+    title_en: '',
+    slug: '',
+    description_ar: '',
+    event_type: 'carnival',
+    status: 'active',
+    theme: '',
+    theme_color: '#C5A15B',
+    start_date: '',
+    end_date: '',
+    location: 'منصة حكاياتي الرقمية',
+    is_online: true,
+    image_url: '',
+    mobile_image_url: '',
+    is_featured: true,
+    banner_priority: 1,
+    show_announcement_bar: true,
+    countdown_enabled: true,
+    custom_cta_label: 'استكشف الفعالية الآن',
+    custom_cta_url: '',
+  };
+
+  const [eventForm, setEventForm] = React.useState(defaultEventForm);
   const [compForm, setCompForm] = React.useState({
     title_ar: '', description_ar: '', category: '', start_date: '', end_date: '', prizes: '',
   });
@@ -104,13 +125,69 @@ function EventsMgmtPanel({ toast }: { toast: any }) {
     setSubmitting(true);
     try {
       await api.adminCreateEvent(eventForm);
-      toast({ title: '✅ تم إنشاء الفعالية بنجاح!' });
+      toast({ title: '✅ تم إنشاء ونشر الكرنفال/الفعالية بنجاح!' });
       setShowCreateEvent(false);
-      setEventForm({ title_ar: '', title_en: '', slug: '', description_ar: '', event_type: 'carnival', status: 'draft', theme: '', start_date: '', end_date: '', location: '', is_online: true, image_url: '' });
+      setEventForm(defaultEventForm);
       refreshEvents();
     } catch (err: any) {
       toast({ title: err.message || 'خطأ في إنشاء الفعالية', variant: 'destructive' });
     } finally { setSubmitting(false); }
+  };
+
+  const handleOpenEdit = (ev: any) => {
+    setEditingEvent(ev);
+    setEventForm({
+      title_ar: ev.title_ar || '',
+      title_en: ev.title_en || '',
+      slug: ev.slug || ev.id || '',
+      description_ar: ev.description_ar || '',
+      event_type: ev.event_type || 'carnival',
+      status: ev.status || 'active',
+      theme: ev.theme || '',
+      theme_color: ev.theme_color || '#C5A15B',
+      start_date: ev.start_date ? ev.start_date.split('T')[0] : '',
+      end_date: ev.end_date ? ev.end_date.split('T')[0] : '',
+      location: ev.location || 'منصة حكاياتي الرقمية',
+      is_online: ev.is_online !== false,
+      image_url: ev.image_url || '',
+      mobile_image_url: ev.mobile_image_url || ev.image_url || '',
+      is_featured: ev.is_featured !== false,
+      banner_priority: ev.banner_priority || 1,
+      show_announcement_bar: ev.show_announcement_bar !== false,
+      countdown_enabled: ev.countdown_enabled !== false,
+      custom_cta_label: ev.custom_cta_label || 'استكشف الفعالية الآن',
+      custom_cta_url: ev.custom_cta_url || `/events/${ev.slug || ev.id}`,
+    });
+    setShowEditEvent(true);
+  };
+
+  const handleUpdateEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingEvent) return;
+    setSubmitting(true);
+    try {
+      await api.adminUpdateEvent(editingEvent.id || editingEvent.slug, eventForm);
+      toast({ title: '✅ تم تعديل بيانات الكرنفال بنجاح!' });
+      setShowEditEvent(false);
+      setEditingEvent(null);
+      setEventForm(defaultEventForm);
+      refreshEvents();
+    } catch (err: any) {
+      toast({ title: err.message || 'خطأ في تعديل الفعالية', variant: 'destructive' });
+    } finally { setSubmitting(false); }
+  };
+
+  const handleDeleteEvent = async (ev: any) => {
+    const confirmDelete = window.confirm(`هل أنت متأكد من رغبتك في حذف الكرنفال/الفعالية "${ev.title_ar}" نهائياً؟`);
+    if (!confirmDelete) return;
+
+    try {
+      await api.adminDeleteEvent(ev.id || ev.slug);
+      toast({ title: '🗑️ تم حذف الكرنفال بنجاح!' });
+      refreshEvents();
+    } catch (err: any) {
+      toast({ title: err.message || 'فشل في حذف الكرنفال', variant: 'destructive' });
+    }
   };
 
   const handleCreateComp = async (e: React.FormEvent) => {
@@ -155,22 +232,25 @@ function EventsMgmtPanel({ toast }: { toast: any }) {
   const inputCls = 'w-full bg-[#0B1320] border border-[#2B3B52] rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-[#C5A15B]';
   const labelCls = 'block text-zinc-300 text-sm mb-1.5 font-semibold';
   const modalCls = 'fixed inset-0 z-[9999] bg-black/85 backdrop-blur-md overflow-y-auto p-4 flex items-center justify-center';
-  const modalBoxCls = 'bg-[#141E2E] border border-zinc-700/80 rounded-2xl max-w-xl w-full shadow-[0_25px_80px_rgba(0,0,0,0.9)] flex flex-col max-h-[85vh] overflow-hidden my-auto';
+  const modalBoxCls = 'bg-[#141E2E] border border-zinc-700/80 rounded-2xl max-w-2xl w-full shadow-[0_25px_80px_rgba(0,0,0,0.9)] flex flex-col max-h-[90vh] overflow-hidden my-auto';
 
   return (
     <div className="space-y-8 font-arabic" dir="rtl">
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-[#C5A15B] flex items-center gap-2">
-          <span>🎪</span> مركز إدارة الكرنفالات والمسابقات
+          <span>🎪</span> مركز إدارة وتفعيل الكرنفالات والاحتفالات
         </h2>
-        <p className="text-zinc-400 text-sm mt-1">إنشاء وإدارة الفعاليات والمسابقات والتصويت والجوائز الرسمية.</p>
+        <p className="text-zinc-400 text-sm mt-1">
+          إنشاء، تعديل، حذف، وتفعيل الفعاليات الكبرى والكرنفالات الرسمية مع ربطها المباشر ببانر الصفحة الرئيسية وصفحات الهبوط التفاعلية.
+        </p>
       </div>
 
       {/* Quick Action Buttons */}
       <div className="flex flex-wrap gap-3">
-        <button onClick={() => setShowCreateEvent(true)} className="px-4 py-2.5 bg-[#C5A15B] text-black font-bold rounded-xl text-sm hover:opacity-90 transition-all">
-          + إنشاء فعالية / كرنفال
+        <button onClick={() => { setEventForm(defaultEventForm); setShowCreateEvent(true); }} className="px-5 py-2.5 bg-gradient-to-r from-[#C5A15B] to-[#E5C77D] text-black font-extrabold rounded-xl text-sm shadow-[0_0_20px_rgba(197,161,91,0.4)] hover:scale-105 transition-all flex items-center gap-2">
+          <span>✨</span>
+          <span>+ إنشاء كرنفال / فعالية جديدة</span>
         </button>
         <button onClick={() => setShowCreateComp(true)} className="px-4 py-2.5 bg-[#087C7B]/20 border border-[#087C7B]/50 text-[#087C7B] font-bold rounded-xl text-sm hover:bg-[#087C7B] hover:text-white transition-all">
           + إضافة مسابقة
@@ -185,32 +265,94 @@ function EventsMgmtPanel({ toast }: { toast: any }) {
 
       {/* Events List */}
       <div>
-        <h3 className="text-lg font-bold text-zinc-200 mb-4">الفعاليات المسجلة</h3>
+        <h3 className="text-lg font-bold text-zinc-200 mb-4 flex items-center justify-between">
+          <span>الكرنفالات والفعاليات المسجلة ({events.length})</span>
+          <button onClick={refreshEvents} className="text-xs text-[#087C7B] hover:underline">تحديث القائمة ⟳</button>
+        </h3>
         {loading && <div className="flex justify-center py-10"><div className="w-8 h-8 rounded-full border-4 border-[#C5A15B]/30 border-t-[#C5A15B] animate-spin" /></div>}
         {!loading && events.length === 0 && (
-          <div className="text-center py-12 text-zinc-500">
-            <p className="text-3xl mb-2">🎪</p>
-            <p>لا توجد فعاليات بعد. ابدأ بإنشاء أول كرنفال!</p>
+          <div className="text-center py-12 text-zinc-500 bg-[#101726] rounded-2xl border border-zinc-800">
+            <p className="text-4xl mb-3">🎪</p>
+            <p className="text-base text-zinc-300 font-bold">لا توجد فعاليات مسجلة حالياً</p>
+            <p className="text-sm mt-1">اضغط على زر إنشاء فعالية لبدء أول كرنفال واحتفال في المنصة.</p>
           </div>
         )}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {events.map(event => (
-            <div key={event.id} className="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 space-y-2 hover:border-[#C5A15B]/40 transition-all">
-              {event.image_url && (
-                <img src={event.image_url} alt={event.title_ar} className="w-full h-28 object-cover rounded-lg mb-2" />
-              )}
-              <div className="flex items-start justify-between gap-2">
-                <h4 className="font-bold text-sm leading-tight">{event.title_ar}</h4>
-                <span className={`text-[10px] px-2 py-0.5 rounded-full border shrink-0 ${
-                  event.status === 'active' ? 'bg-green-500/20 border-green-500/40 text-green-400'
-                  : event.status === 'voting_open' ? 'bg-purple-500/20 border-purple-500/40 text-purple-400'
-                  : 'bg-zinc-700/40 border-zinc-600 text-zinc-400'
-                }`}>{event.status}</span>
+            <div key={event.id || event.slug} className="bg-[#121A2A] border border-[#223048] rounded-2xl p-4 space-y-3 hover:border-[#C5A15B]/50 transition-all shadow-lg flex flex-col justify-between">
+              <div>
+                <div className="relative">
+                  <img
+                    src={event.image_url || 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=600&q=80'}
+                    alt={event.title_ar}
+                    className="w-full h-36 object-cover rounded-xl mb-3 border border-white/5"
+                  />
+                  {event.is_featured && (
+                    <span className="absolute top-2 right-2 bg-gradient-to-r from-amber-500 to-yellow-600 text-black text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-md">
+                      🌟 مميز في الرئيسية
+                    </span>
+                  )}
+                  {event.event_type && (
+                    <span className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-sm text-zinc-300 text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/10">
+                      {event.event_type}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-start justify-between gap-2">
+                  <h4 className="font-bold text-base text-white leading-snug line-clamp-2">{event.title_ar}</h4>
+                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${
+                    event.status === 'active' ? 'bg-green-500/20 border-green-500/40 text-green-400'
+                    : event.status === 'voting_open' ? 'bg-purple-500/20 border-purple-500/40 text-purple-400'
+                    : event.status === 'scheduled' ? 'bg-blue-500/20 border-blue-500/40 text-blue-400'
+                    : event.status === 'completed' ? 'bg-zinc-700/40 border-zinc-600 text-zinc-400'
+                    : 'bg-zinc-800 border-zinc-700 text-zinc-400'
+                  }`}>{event.status}</span>
+                </div>
+
+                {event.theme && (
+                  <p className="text-xs text-[#E1C58B] mt-1 font-semibold line-clamp-1">
+                    🎨 الهوية: {event.theme}
+                  </p>
+                )}
+
+                <p className="text-[11px] text-zinc-500 font-mono mt-1">
+                  المعرف: {event.slug || event.id}
+                </p>
               </div>
-              <p className="text-xs text-zinc-500 font-mono">{event.id || event.slug}</p>
-              <a href={`/events/${event.slug || event.id}`} target="_blank" rel="noopener noreferrer" className="text-xs text-[#087C7B] underline">
-                عرض الصفحة العامة ↗
-              </a>
+
+              {/* Action Buttons: Edit, Delete, View */}
+              <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between gap-2">
+                <a
+                  href={`/events/${event.slug || event.id}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-[#087C7B] hover:text-[#0AA3A2] font-semibold flex items-center gap-1"
+                >
+                  <span>عرض الصفحة</span>
+                  <span>↗</span>
+                </a>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => handleOpenEdit(event)}
+                    className="px-3 py-1 rounded-lg bg-[#C5A15B]/15 hover:bg-[#C5A15B]/30 text-[#E1C58B] border border-[#C5A15B]/30 text-xs font-bold transition-all flex items-center gap-1"
+                    title="تعديل بيانات الكرنفال"
+                  >
+                    <span>✏️</span>
+                    <span>تعديل</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleDeleteEvent(event)}
+                    className="px-3 py-1 rounded-lg bg-red-900/20 hover:bg-red-800/40 text-red-400 border border-red-500/30 text-xs font-bold transition-all flex items-center gap-1"
+                    title="حذف الكرنفال نهائياً"
+                  >
+                    <span>🗑️</span>
+                    <span>حذف</span>
+                  </button>
+                </div>
+              </div>
             </div>
           ))}
         </div>
@@ -221,42 +363,265 @@ function EventsMgmtPanel({ toast }: { toast: any }) {
         <div className={modalCls}>
           <div className={modalBoxCls}>
             <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-[#162235] shrink-0">
-              <h3 className="text-lg font-bold text-[#C5A15B]">🎪 إنشاء فعالية / كرنفال جديد</h3>
+              <h3 className="text-lg font-bold text-[#C5A15B] flex items-center gap-2">
+                <span>🎪</span>
+                <span>إنشاء فعالية / كرنفال احتفالي جديد</span>
+              </h3>
               <button onClick={() => setShowCreateEvent(false)} className="text-zinc-400 hover:text-white text-xl leading-none">×</button>
             </div>
             <form onSubmit={handleCreateEvent} className="overflow-y-auto">
               <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="sm:col-span-2"><label className={labelCls}>العنوان بالعربية *</label><input required className={inputCls} value={eventForm.title_ar} onChange={e => setEventForm(f => ({ ...f, title_ar: e.target.value }))} placeholder="كرنفال حكاياتي الكبير 2027" /></div>
-                <div><label className={labelCls}>العنوان بالإنجليزية</label><input className={inputCls} value={eventForm.title_en} onChange={e => setEventForm(f => ({ ...f, title_en: e.target.value }))} dir="ltr" /></div>
-                <div><label className={labelCls}>المعرّف (Slug) *</label><input required className={inputCls} value={eventForm.slug} onChange={e => setEventForm(f => ({ ...f, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') }))} dir="ltr" placeholder="hekayaty-carnival-2027" /></div>
-                <div><label className={labelCls}>نوع الفعالية</label>
+                <div className="sm:col-span-2">
+                  <label className={labelCls}>العنوان بالعربية *</label>
+                  <input required className={inputCls} value={eventForm.title_ar} onChange={e => setEventForm(f => ({ ...f, title_ar: e.target.value }))} placeholder="كرنفال حكاياتي الكبير 2027 — صراع الفصول والممالك" />
+                </div>
+                <div>
+                  <label className={labelCls}>العنوان بالإنجليزية</label>
+                  <input className={inputCls} value={eventForm.title_en} onChange={e => setEventForm(f => ({ ...f, title_en: e.target.value }))} dir="ltr" placeholder="Hekayaty Grand Carnival 2027" />
+                </div>
+                <div>
+                  <label className={labelCls}>المعرّف اللطيف (Slug) *</label>
+                  <input required className={inputCls} value={eventForm.slug} onChange={e => setEventForm(f => ({ ...f, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') }))} dir="ltr" placeholder="hekayaty-carnival-2027" />
+                </div>
+                <div>
+                  <label className={labelCls}>نوع الفعالية</label>
                   <select className={inputCls} value={eventForm.event_type} onChange={e => setEventForm(f => ({ ...f, event_type: e.target.value }))}>
-                    {['carnival','festival','awards','competition','reading_challenge','community'].map(t => <option key={t} value={t}>{t}</option>)}
+                    <option value="carnival">كرنفال (Carnival)</option>
+                    <option value="festival">مهرجان (Festival)</option>
+                    <option value="awards">جوائز سنوية (Awards)</option>
+                    <option value="competition">مسابقة كبرى (Competition)</option>
+                    <option value="reading_challenge">تحدي قراءة (Reading Challenge)</option>
+                    <option value="community">فعالية مجتمعية (Community Event)</option>
                   </select>
                 </div>
-                <div><label className={labelCls}>الحالة</label>
+                <div>
+                  <label className={labelCls}>حالة الفعالية والتفعيل</label>
                   <select className={inputCls} value={eventForm.status} onChange={e => setEventForm(f => ({ ...f, status: e.target.value }))}>
-                    {['draft','scheduled','registration_open','active','voting_open','completed','archived'].map(s => <option key={s} value={s}>{s}</option>)}
+                    <option value="active">🟢 نشط ومفعّل في المنصة (Active)</option>
+                    <option value="voting_open">🟣 التصويت مفتوح (Voting Open)</option>
+                    <option value="registration_open">🔵 التسجيل مفتوح (Registration Open)</option>
+                    <option value="scheduled">🟡 مجدول وقادم قريباً (Scheduled)</option>
+                    <option value="draft">⚪ مسودة قيد التحضير (Draft)</option>
+                    <option value="completed">⚫ منتهي ومكتمل (Completed)</option>
+                    <option value="archived">📦 مؤرشف (Archived)</option>
                   </select>
                 </div>
-                <div className="sm:col-span-2"><label className={labelCls}>الوصف</label><textarea rows={3} className={inputCls} value={eventForm.description_ar} onChange={e => setEventForm(f => ({ ...f, description_ar: e.target.value }))} /></div>
-                <div><label className={labelCls}>الثيم والهوية البصرية</label><input className={inputCls} value={eventForm.theme} onChange={e => setEventForm(f => ({ ...f, theme: e.target.value }))} /></div>
-                <div><label className={labelCls}>الموقع</label><input className={inputCls} value={eventForm.location} onChange={e => setEventForm(f => ({ ...f, location: e.target.value }))} /></div>
-                <div><label className={labelCls}>تاريخ البداية</label><input type="date" className={inputCls} value={eventForm.start_date} onChange={e => setEventForm(f => ({ ...f, start_date: e.target.value }))} dir="ltr" /></div>
-                <div><label className={labelCls}>تاريخ النهاية</label><input type="date" className={inputCls} value={eventForm.end_date} onChange={e => setEventForm(f => ({ ...f, end_date: e.target.value }))} dir="ltr" /></div>
+
+                <div className="sm:col-span-2">
+                  <label className={labelCls}>الوصف الترويجي الشامل *</label>
+                  <textarea rows={3} required className={inputCls} value={eventForm.description_ar} onChange={e => setEventForm(f => ({ ...f, description_ar: e.target.value }))} placeholder="تفاصيل الكرنفال، الأهداف، الفئات المستهدفة، وحجم الجوائز والمكافآت..." />
+                </div>
+
+                <div>
+                  <label className={labelCls}>الثيم والهوية البصرية</label>
+                  <input className={inputCls} value={eventForm.theme} onChange={e => setEventForm(f => ({ ...f, theme: e.target.value }))} placeholder="صراع الفصول والأبعاد الكونية" />
+                </div>
+                <div>
+                  <label className={labelCls}>لون السمة الترويجي الرئيسي</label>
+                  <div className="flex gap-2">
+                    <input type="color" className="w-12 h-10 rounded-lg cursor-pointer bg-transparent border border-zinc-700" value={eventForm.theme_color} onChange={e => setEventForm(f => ({ ...f, theme_color: e.target.value }))} />
+                    <input className={inputCls} value={eventForm.theme_color} onChange={e => setEventForm(f => ({ ...f, theme_color: e.target.value }))} dir="ltr" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelCls}>تاريخ الانطلاق (البداية)</label>
+                  <input type="date" className={inputCls} value={eventForm.start_date} onChange={e => setEventForm(f => ({ ...f, start_date: e.target.value }))} dir="ltr" />
+                </div>
+                <div>
+                  <label className={labelCls}>تاريخ الختام (النهاية)</label>
+                  <input type="date" className={inputCls} value={eventForm.end_date} onChange={e => setEventForm(f => ({ ...f, end_date: e.target.value }))} dir="ltr" />
+                </div>
+
+                <div>
+                  <label className={labelCls}>الموقع أو المكان</label>
+                  <input className={inputCls} value={eventForm.location} onChange={e => setEventForm(f => ({ ...f, location: e.target.value }))} placeholder="منصة حكاياتي الرقمية / الرياض" />
+                </div>
+                <div>
+                  <label className={labelCls}>نص زر الإجراء (CTA)</label>
+                  <input className={inputCls} value={eventForm.custom_cta_label} onChange={e => setEventForm(f => ({ ...f, custom_cta_label: e.target.value }))} placeholder="استكشف الكرنفال وشارك الآن" />
+                </div>
+
+                {/* Banner & Placement Toggles */}
+                <div className="sm:col-span-2 p-4 bg-[#0B1320] rounded-xl border border-zinc-800 space-y-3">
+                  <h4 className="text-xs font-bold text-[#E1C58B]">خيارات الظهور والترويج الشامل</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+                      <input type="checkbox" checked={eventForm.is_featured} onChange={e => setEventForm(f => ({ ...f, is_featured: e.target.checked }))} className="w-4 h-4 rounded text-[#C5A15B]" />
+                      <span>عرض في بانر الرئيسية</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+                      <input type="checkbox" checked={eventForm.show_announcement_bar} onChange={e => setEventForm(f => ({ ...f, show_announcement_bar: e.target.checked }))} className="w-4 h-4 rounded text-[#C5A15B]" />
+                      <span>تفعيل شريط التنبيه العلوي</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+                      <input type="checkbox" checked={eventForm.countdown_enabled} onChange={e => setEventForm(f => ({ ...f, countdown_enabled: e.target.checked }))} className="w-4 h-4 rounded text-[#C5A15B]" />
+                      <span>تفعيل العداد التنازلي</span>
+                    </label>
+                  </div>
+                </div>
+
                 <div className="sm:col-span-2">
                   <ImageUploadField
-                    label="صورة الغلاف"
+                    label="صورة البانر السينمائي الرئيسية (سطح المكتب)"
                     value={eventForm.image_url}
                     onChange={(url) => setEventForm(f => ({ ...f, image_url: url }))}
                     folder="events"
                     previewAspect="cover"
                   />
                 </div>
+
+                <div className="sm:col-span-2">
+                  <ImageUploadField
+                    label="صورة البانر المخصصة للهواتف (Mobile Artwork)"
+                    value={eventForm.mobile_image_url}
+                    onChange={(url) => setEventForm(f => ({ ...f, mobile_image_url: url }))}
+                    folder="events"
+                    previewAspect="cover"
+                  />
+                </div>
               </div>
+
               <div className="px-6 py-4 border-t border-zinc-800 bg-[#162235] flex items-center justify-end gap-3 shrink-0">
                 <button type="button" onClick={() => setShowCreateEvent(false)} className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-semibold">إلغاء</button>
-                <button type="submit" disabled={submitting} className="px-6 py-2 rounded-xl bg-[#C5A15B] text-black text-sm font-bold disabled:opacity-50">{submitting ? '⏳ جاري الإنشاء...' : '🚀 إنشاء الفعالية'}</button>
+                <button type="submit" disabled={submitting} className="px-6 py-2.5 rounded-xl bg-[#C5A15B] hover:bg-[#E5C77D] text-black text-sm font-extrabold shadow-lg disabled:opacity-50 transition-all">
+                  {submitting ? '⏳ جاري التأسيس والتفعيل...' : '🚀 إنشاء وتفعيل الكرنفال'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── EDIT EVENT MODAL ── */}
+      {showEditEvent && (
+        <div className={modalCls}>
+          <div className={modalBoxCls}>
+            <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-800 bg-[#162235] shrink-0">
+              <h3 className="text-lg font-bold text-[#C5A15B] flex items-center gap-2">
+                <span>✏️</span>
+                <span>تعديل بيانات الكرنفال: {editingEvent?.title_ar}</span>
+              </h3>
+              <button onClick={() => setShowEditEvent(false)} className="text-zinc-400 hover:text-white text-xl leading-none">×</button>
+            </div>
+            <form onSubmit={handleUpdateEvent} className="overflow-y-auto">
+              <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="sm:col-span-2">
+                  <label className={labelCls}>العنوان بالعربية *</label>
+                  <input required className={inputCls} value={eventForm.title_ar} onChange={e => setEventForm(f => ({ ...f, title_ar: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={labelCls}>العنوان بالإنجليزية</label>
+                  <input className={inputCls} value={eventForm.title_en} onChange={e => setEventForm(f => ({ ...f, title_en: e.target.value }))} dir="ltr" />
+                </div>
+                <div>
+                  <label className={labelCls}>المعرّف (Slug)</label>
+                  <input disabled className={inputCls + ' opacity-60 cursor-not-allowed'} value={eventForm.slug} dir="ltr" />
+                </div>
+                <div>
+                  <label className={labelCls}>نوع الفعالية</label>
+                  <select className={inputCls} value={eventForm.event_type} onChange={e => setEventForm(f => ({ ...f, event_type: e.target.value }))}>
+                    <option value="carnival">كرنفال (Carnival)</option>
+                    <option value="festival">مهرجان (Festival)</option>
+                    <option value="awards">جوائز سنوية (Awards)</option>
+                    <option value="competition">مسابقة كبرى (Competition)</option>
+                    <option value="reading_challenge">تحدي قراءة (Reading Challenge)</option>
+                    <option value="community">فعالية مجتمعية (Community Event)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className={labelCls}>حالة الفعالية والتفعيل</label>
+                  <select className={inputCls} value={eventForm.status} onChange={e => setEventForm(f => ({ ...f, status: e.target.value }))}>
+                    <option value="active">🟢 نشط ومفعّل في المنصة (Active)</option>
+                    <option value="voting_open">🟣 التصويت مفتوح (Voting Open)</option>
+                    <option value="registration_open">🔵 التسجيل مفتوح (Registration Open)</option>
+                    <option value="scheduled">🟡 مجدول وقادم قريباً (Scheduled)</option>
+                    <option value="draft">⚪ مسودة قيد التحضير (Draft)</option>
+                    <option value="completed">⚫ منتهي ومكتمل (Completed)</option>
+                    <option value="archived">📦 مؤرشف (Archived)</option>
+                  </select>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label className={labelCls}>الوصف الترويجي</label>
+                  <textarea rows={3} className={inputCls} value={eventForm.description_ar} onChange={e => setEventForm(f => ({ ...f, description_ar: e.target.value }))} />
+                </div>
+
+                <div>
+                  <label className={labelCls}>الثيم والهوية البصرية</label>
+                  <input className={inputCls} value={eventForm.theme} onChange={e => setEventForm(f => ({ ...f, theme: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={labelCls}>لون السمة الترويجي الرئيسي</label>
+                  <div className="flex gap-2">
+                    <input type="color" className="w-12 h-10 rounded-lg cursor-pointer bg-transparent border border-zinc-700" value={eventForm.theme_color} onChange={e => setEventForm(f => ({ ...f, theme_color: e.target.value }))} />
+                    <input className={inputCls} value={eventForm.theme_color} onChange={e => setEventForm(f => ({ ...f, theme_color: e.target.value }))} dir="ltr" />
+                  </div>
+                </div>
+
+                <div>
+                  <label className={labelCls}>تاريخ الانطلاق</label>
+                  <input type="date" className={inputCls} value={eventForm.start_date} onChange={e => setEventForm(f => ({ ...f, start_date: e.target.value }))} dir="ltr" />
+                </div>
+                <div>
+                  <label className={labelCls}>تاريخ الختام</label>
+                  <input type="date" className={inputCls} value={eventForm.end_date} onChange={e => setEventForm(f => ({ ...f, end_date: e.target.value }))} dir="ltr" />
+                </div>
+
+                <div>
+                  <label className={labelCls}>الموقع</label>
+                  <input className={inputCls} value={eventForm.location} onChange={e => setEventForm(f => ({ ...f, location: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={labelCls}>نص زر الإجراء (CTA)</label>
+                  <input className={inputCls} value={eventForm.custom_cta_label} onChange={e => setEventForm(f => ({ ...f, custom_cta_label: e.target.value }))} />
+                </div>
+
+                {/* Banner & Placement Toggles */}
+                <div className="sm:col-span-2 p-4 bg-[#0B1320] rounded-xl border border-zinc-800 space-y-3">
+                  <h4 className="text-xs font-bold text-[#E1C58B]">خيارات الظهور والترويج الشامل</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+                      <input type="checkbox" checked={eventForm.is_featured} onChange={e => setEventForm(f => ({ ...f, is_featured: e.target.checked }))} className="w-4 h-4 rounded text-[#C5A15B]" />
+                      <span>عرض في بانر الرئيسية</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+                      <input type="checkbox" checked={eventForm.show_announcement_bar} onChange={e => setEventForm(f => ({ ...f, show_announcement_bar: e.target.checked }))} className="w-4 h-4 rounded text-[#C5A15B]" />
+                      <span>شريط التنبيه العلوي</span>
+                    </label>
+                    <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+                      <input type="checkbox" checked={eventForm.countdown_enabled} onChange={e => setEventForm(f => ({ ...f, countdown_enabled: e.target.checked }))} className="w-4 h-4 rounded text-[#C5A15B]" />
+                      <span>العداد التنازلي</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="sm:col-span-2">
+                  <ImageUploadField
+                    label="صورة البانر السينمائي الرئيسية (سطح المكتب)"
+                    value={eventForm.image_url}
+                    onChange={(url) => setEventForm(f => ({ ...f, image_url: url }))}
+                    folder="events"
+                    previewAspect="cover"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <ImageUploadField
+                    label="صورة البانر المخصصة للهواتف (Mobile Artwork)"
+                    value={eventForm.mobile_image_url}
+                    onChange={(url) => setEventForm(f => ({ ...f, mobile_image_url: url }))}
+                    folder="events"
+                    previewAspect="cover"
+                  />
+                </div>
+              </div>
+
+              <div className="px-6 py-4 border-t border-zinc-800 bg-[#162235] flex items-center justify-end gap-3 shrink-0">
+                <button type="button" onClick={() => setShowEditEvent(false)} className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-sm font-semibold">إلغاء</button>
+                <button type="submit" disabled={submitting} className="px-6 py-2.5 rounded-xl bg-[#C5A15B] hover:bg-[#E5C77D] text-black text-sm font-extrabold shadow-lg disabled:opacity-50 transition-all">
+                  {submitting ? '⏳ جاري الحفظ...' : '💾 حفظ التعديلات'}
+                </button>
               </div>
             </form>
           </div>

@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'wouter';
 import { SEOHead } from '@/components/common/SEOHead';
+import { CinematicEventBanner } from '@/components/common/CinematicEventBanner';
+import { api } from '@/lib/api';
 import {
   useComics,
   useCharacters,
@@ -45,6 +47,15 @@ export default function Home() {
   const { data: newsArticles = [] } = useNews();
   const { data: timelineEvents = [] } = useTimeline();
   const { data: cardGameCards = [] } = useCards();
+
+  // Events & Carnivals for Cinematic Banner
+  const [activeEvents, setActiveEvents] = useState<any[]>([]);
+
+  useEffect(() => {
+    api.getEvents({ status: 'active' }).then((data) => {
+      setActiveEvents(Array.isArray(data) ? data : []);
+    }).catch(() => {});
+  }, []);
 
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 800], [0, 160]);
@@ -139,6 +150,11 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* 1.5 DYNAMIC CINEMATIC EVENT & CARNIVAL BANNER */}
+      {activeEvents.length > 0 && (
+        <CinematicEventBanner events={activeEvents} />
+      )}
 
       {/* 2. CONTINUE READING BANNER (If user has progress) */}
       {lastReadComic && lastReadProgress && (

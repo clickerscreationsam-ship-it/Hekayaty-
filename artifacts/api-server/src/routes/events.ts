@@ -104,7 +104,7 @@ async function getEventHydrated(idOrSlug: string) {
       (c) => c.id === idOrSlug || c.slug === idOrSlug
     );
     if (defaultItem) {
-      event = defaultItem;
+      event = { ...defaultItem };
     }
   }
 
@@ -117,6 +117,7 @@ async function getEventHydrated(idOrSlug: string) {
     .from('audit_logs')
     .select('*')
     .in('resource_type', [
+      'event',
       'competition',
       'voting_round',
       'vote',
@@ -128,6 +129,20 @@ async function getEventHydrated(idOrSlug: string) {
     .order('created_at', { ascending: false });
 
   const allLogs = logs || [];
+
+  // Check if event has updated metadata stored in audit_logs
+  const eventUpdateLog = allLogs.find(
+    (l) => l.resource_type === 'event' && (l.resource_id === eventId || l.metadata?.slug === eventId || l.metadata?.id === eventId)
+  );
+
+  if (eventUpdateLog?.metadata) {
+    event = {
+      ...event,
+      ...eventUpdateLog.metadata,
+      id: event.id,
+      title_ar: event.title_ar || eventUpdateLog.metadata.title_ar,
+    };
+  }
 
   // Filter competitions
   const competitions = allLogs
@@ -231,7 +246,7 @@ eventsRouter.get('/awards/verify/:certId', async (req, res) => {
 // GET /api/events — List all events, carnivals & festivals
 eventsRouter.get('/', async (req, res) => {
   try {
-    const { type, status } = req.query;
+    const { type, status, featured } = req.query;
 
     const { data: dbEvents, error } = await supabaseAdmin
       .from('events')
@@ -242,12 +257,46 @@ eventsRouter.get('/', async (req, res) => {
       console.error('Error fetching events:', error);
     }
 
-    let combined = [...(dbEvents || [])];
+    // Also fetch extended metadata / update logs
+    const { data: eventLogs } = await supabaseAdmin
+      .from('audit_logs')
+      .select('*')
+      .eq('resource_type', 'event')
+      .order('created_at', { ascending: false });
 
-    // If database has fewer than default carnivals, merge defaults
+    const deletedIds = new Set<string>();
+    const updatedMap = new Map<string, any>();
+
+    (eventLogs || []).forEach((l) => {
+      if (l.action === 'delete_event') {
+        deletedIds.add(l.resource_id);
+      } else if (!updatedMap.has(l.resource_id)) {
+        updatedMap.set(l.resource_id, l.metadata);
+      }
+    });
+
+    let combined: any[] = [];
+
+    (dbEvents || []).forEach((item) => {
+      if (deletedIds.has(item.id)) return;
+      const meta = updatedMap.get(item.id) || {};
+      combined.push({
+        ...item,
+        ...meta,
+        id: item.id,
+        title_ar: item.title_ar || meta.title_ar,
+      });
+    });
+
+    // If database has fewer than default carnivals, merge defaults (unless deleted)
     DEFAULT_CARNIVALS.forEach((def) => {
-      if (!combined.some((c) => c.id === def.id)) {
-        combined.push(def);
+      if (deletedIds.has(def.id) || deletedIds.has(def.slug)) return;
+      if (!combined.some((c) => c.id === def.id || c.slug === def.slug)) {
+        const meta = updatedMap.get(def.id) || updatedMap.get(def.slug) || {};
+        combined.push({
+          ...def,
+          ...meta,
+        });
       }
     });
 
@@ -256,6 +305,9 @@ eventsRouter.get('/', async (req, res) => {
     }
     if (status) {
       combined = combined.filter((e) => (e.status || 'active') === status);
+    }
+    if (featured === 'true') {
+      combined = combined.filter((e) => e.is_featured === true || e.status === 'active' || e.status === 'voting_open');
     }
 
     return res.json(combined);
@@ -420,28 +472,38 @@ adminEventsRouter.post('/', async (req: any, res) => {
       slug,
       description_ar,
       image_url,
+      mobile_image_url,
       location,
       is_online,
       event_type,
       status,
       theme,
+      theme_color,
       start_date,
       end_date,
+      registration_open,
+      is_featured,
+      banner_priority,
+      show_announcement_bar,
+      countdown_enabled,
+      custom_cta_label,
+      custom_cta_url,
+      sections_config,
     } = req.body;
 
     if (!title_ar || !slug) {
       return res.status(400).json({ error: 'العنوان والمعرف اللطيف (Slug) مطلوبان.' });
     }
 
-    const eventId = slug;
+    const eventId = slug.trim().toLowerCase().replace(/\s+/g, '-');
 
-    // Insert into events table
+    // Insert or upsert into events table
     const { data: createdEvent, error: insertError } = await supabaseAdmin
       .from('events')
-      .insert({
+      .upsert({
         id: eventId,
         title_ar,
-        title_en: title_en || slug,
+        title_en: title_en || eventId,
         description_ar,
         image_url,
         location: location || 'منصة حكاياتي الرقمية',
@@ -454,23 +516,165 @@ adminEventsRouter.post('/', async (req: any, res) => {
       console.error('Error inserting event:', insertError);
     }
 
-    // Log extended event properties
-    await logEventAction(userId, 'create_event', 'event', eventId, {
+    // Persist full rich metadata in audit_logs
+    const metadata = {
+      id: eventId,
+      slug: eventId,
+      title_ar,
+      title_en: title_en || eventId,
+      description_ar,
+      image_url,
+      mobile_image_url: mobile_image_url || image_url,
+      location: location || 'منصة حكاياتي الرقمية',
+      is_online: is_online !== false,
+      event_type: event_type || 'carnival',
+      status: status || 'active',
+      theme: theme || '',
+      theme_color: theme_color || '#C5A15B',
+      start_date,
+      end_date,
+      registration_open: registration_open !== false,
+      is_featured: is_featured === true || is_featured === 'true',
+      banner_priority: Number(banner_priority || 1),
+      show_announcement_bar: show_announcement_bar === true || show_announcement_bar === 'true',
+      countdown_enabled: countdown_enabled !== false,
+      custom_cta_label: custom_cta_label || 'استكشف الفعالية',
+      custom_cta_url: custom_cta_url || `/events/${eventId}`,
+      sections_config: sections_config || {
+        hero: true,
+        overview: true,
+        competitions: true,
+        voting: true,
+        announcements: true,
+        winners: true,
+        gallery: true,
+      },
+    };
+
+    await logEventAction(userId, 'create_event', 'event', eventId, metadata);
+
+    return res.json({
+      success: true,
+      event: { ...createdEvent, ...metadata },
+      message: 'تم تأسيس ونشر الكرنفال/الحدث بنجاح في المنظومة.',
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// PUT /api/admin/events/:id — Edit & Update existing event or carnival
+adminEventsRouter.put('/:id', async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    const eventId = req.params.id;
+    const {
       title_ar,
       title_en,
       slug,
-      event_type: event_type || 'carnival',
-      status: status || 'active',
+      description_ar,
+      image_url,
+      mobile_image_url,
+      location,
+      is_online,
+      event_type,
+      status,
       theme,
+      theme_color,
       start_date,
       end_date,
-      registration_open: true,
+      registration_open,
+      is_featured,
+      banner_priority,
+      show_announcement_bar,
+      countdown_enabled,
+      custom_cta_label,
+      custom_cta_url,
+      sections_config,
+    } = req.body;
+
+    if (!title_ar) {
+      return res.status(400).json({ error: 'العنوان بالعربية مطلوب.' });
+    }
+
+    // Update in database if present
+    await supabaseAdmin
+      .from('events')
+      .update({
+        title_ar,
+        title_en: title_en || eventId,
+        description_ar,
+        image_url,
+        location: location || 'منصة حكاياتي الرقمية',
+        is_online: is_online !== false,
+      })
+      .eq('id', eventId);
+
+    // Save updated full metadata in audit_logs
+    const updatedMetadata = {
+      id: eventId,
+      slug: slug || eventId,
+      title_ar,
+      title_en: title_en || eventId,
+      description_ar,
+      image_url,
+      mobile_image_url: mobile_image_url || image_url,
+      location: location || 'منصة حكاياتي الرقمية',
+      is_online: is_online !== false,
+      event_type: event_type || 'carnival',
+      status: status || 'active',
+      theme: theme || '',
+      theme_color: theme_color || '#C5A15B',
+      start_date,
+      end_date,
+      registration_open: registration_open !== false,
+      is_featured: is_featured === true || is_featured === 'true',
+      banner_priority: Number(banner_priority || 1),
+      show_announcement_bar: show_announcement_bar === true || show_announcement_bar === 'true',
+      countdown_enabled: countdown_enabled !== false,
+      custom_cta_label: custom_cta_label || 'استكشف الفعالية',
+      custom_cta_url: custom_cta_url || `/events/${eventId}`,
+      sections_config: sections_config || {
+        hero: true,
+        overview: true,
+        competitions: true,
+        voting: true,
+        announcements: true,
+        winners: true,
+        gallery: true,
+      },
+    };
+
+    await logEventAction(userId, 'update_event', 'event', eventId, updatedMetadata);
+
+    return res.json({
+      success: true,
+      event: updatedMetadata,
+      message: 'تم تحديث بيانات الكرنفال بنجاح.',
+    });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /api/admin/events/:id — Delete event or carnival
+adminEventsRouter.delete('/:id', async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+    const eventId = req.params.id;
+
+    // Delete from events table
+    await supabaseAdmin.from('events').delete().eq('id', eventId);
+
+    // Record soft-delete tombstone in audit_logs
+    await logEventAction(userId, 'delete_event', 'event', eventId, {
+      deletedAt: new Date().toISOString(),
+      deletedBy: userId,
     });
 
     return res.json({
       success: true,
-      event: createdEvent || { id: eventId, title_ar, slug },
-      message: 'تم تأسيس ونشر الكرنفال/الحدث بنجاح في المنظومة.',
+      message: 'تم حذف الفعالية/الكرنفال نهائياً بنجاح.',
     });
   } catch (err: any) {
     return res.status(500).json({ error: err.message });

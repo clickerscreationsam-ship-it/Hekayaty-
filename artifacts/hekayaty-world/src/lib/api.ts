@@ -600,6 +600,12 @@ export const api = {
   async adminCreateEvent(data: any): Promise<any> {
     return safeFetch<any>(`${BASE_URL}/admin/events`, { method: 'POST', body: JSON.stringify(data) });
   },
+  async adminUpdateEvent(eventId: string, data: any): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/events/${eventId}`, { method: 'PUT', body: JSON.stringify(data) });
+  },
+  async adminDeleteEvent(eventId: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/events/${eventId}`, { method: 'DELETE' });
+  },
   async adminListEvents(): Promise<any[]> {
     return safeFetch<any[]>(`${BASE_URL}/events`, {}, []);
   },
