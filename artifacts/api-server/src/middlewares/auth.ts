@@ -22,9 +22,21 @@ declare global {
 // ---------------------------------------------------------------------------
 // Crypto Utilities (Scrypt, Session Tokens & Timing-Safe Hashing)
 // ---------------------------------------------------------------------------
-const SESSION_SECRET = process.env.SESSION_SECRET || 'hekayaty_core_secret_key_2027_production';
+// Ensure high-entropy cryptographically secure session secret
+let SESSION_SECRET = process.env.SESSION_SECRET;
+if (!SESSION_SECRET || SESSION_SECRET.length < 32 || SESSION_SECRET === 'hekayaty_core_secret_key_2027_production') {
+  if (process.env.NODE_ENV === 'production' && !SESSION_SECRET) {
+    console.warn('[SECURITY WARNING] SESSION_SECRET is not set in environment! Generating ephemeral high-entropy secret.');
+  }
+  // Generate a cryptographically strong 256-bit runtime secret to prevent static signature forgery
+  SESSION_SECRET = process.env.SESSION_SECRET_EPHEMERAL || crypto.randomBytes(32).toString('hex');
+  process.env.SESSION_SECRET_EPHEMERAL = SESSION_SECRET;
+}
 
 export function createSessionToken(userId: string, expiresInDays = 90): string {
+  if (!userId || typeof userId !== 'string') {
+    throw new Error('Invalid user ID provided for session creation');
+  }
   const expiresAt = Date.now() + expiresInDays * 24 * 60 * 60 * 1000;
   const payload = `${userId}:${expiresAt}`;
   const signature = crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('hex');
@@ -33,11 +45,11 @@ export function createSessionToken(userId: string, expiresInDays = 90): string {
 }
 
 export function verifySessionToken(token: string): { userId: string } | null {
-  if (!token || !token.startsWith('hky_')) return null;
+  if (!token || typeof token !== 'string' || !token.startsWith('hky_')) return null;
   const parts = token.slice(4).split('.');
   if (parts.length !== 2) return null;
   const [b64, signature] = parts;
-  if (!b64 || !signature) return null;
+  if (!b64 || !signature || signature.length !== 64) return null;
   try {
     const payload = Buffer.from(b64, 'base64url').toString('utf8');
     const expectedSig = crypto.createHmac('sha256', SESSION_SECRET).update(payload).digest('hex');

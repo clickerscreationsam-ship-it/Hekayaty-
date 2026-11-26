@@ -663,8 +663,13 @@ adminEventsRouter.delete('/:id', async (req: any, res) => {
     const userId = req.user.id;
     const eventId = req.params.id;
 
-    // Delete from events table
-    await supabaseAdmin.from('events').delete().eq('id', eventId);
+    // Delete from events table by UUID or slug
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(eventId);
+    if (isUuid) {
+      await supabaseAdmin.from('events').delete().eq('id', eventId);
+    } else {
+      await supabaseAdmin.from('events').delete().eq('slug', eventId);
+    }
 
     // Record soft-delete tombstone in audit_logs
     await logEventAction(userId, 'delete_event', 'event', eventId, {

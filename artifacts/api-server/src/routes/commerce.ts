@@ -98,10 +98,39 @@ router.post('/orders/checkout', async (req, res) => {
       return res.status(400).json({ error: 'السلة فارغة' });
     }
 
-    // Calculate authoritative total
-    const totalEgp = items.reduce((sum: number, item: any) => {
-      return sum + (Number(item.priceEgp) || 100) * (Number(item.quantity) || 1);
-    }, 0);
+    // Authoritative Server-Side Price Verification to prevent Price Manipulation (BOLA / Tampering)
+    const productPriceMap = new Map<number | string, number>();
+    fallbackProducts.forEach(p => productPriceMap.set(p.id, p.priceEgp));
+
+    const sanitizedItems: Array<{ id: number | string; quantity: number; unitPriceEgp: number }> = [];
+    let calculatedTotalEgp = 0;
+
+    for (const rawItem of items) {
+      const productId = Number(rawItem.id) || rawItem.id;
+      const quantity = Math.min(100, Math.max(1, Math.floor(Number(rawItem.quantity) || 1)));
+      
+      // Look up authoritative catalog price
+      let unitPrice = productPriceMap.get(productId);
+      if (unitPrice === undefined) {
+        // If product is not in fallback catalog, validate client price strictly within reasonable safety bounds
+        const rawPrice = Number(rawItem.priceEgp);
+        if (Number.isFinite(rawPrice) && rawPrice >= 50 && rawPrice <= 50000) {
+          unitPrice = Math.round(rawPrice);
+        } else {
+          unitPrice = 150; // Fallback default safe price
+        }
+      }
+
+      sanitizedItems.push({
+        id: productId,
+        quantity,
+        unitPriceEgp: unitPrice,
+      });
+
+      calculatedTotalEgp += unitPrice * quantity;
+    }
+
+    const totalEgp = calculatedTotalEgp;
 
     let orderId: number | string = Math.floor(Math.random() * 90000) + 10000;
 
@@ -123,12 +152,12 @@ router.post('/orders/checkout', async (req, res) => {
         if (!orderErr && orderData) {
           orderId = orderData.id;
 
-          // Insert order items if product exists
-          const orderItems = items.map((item: any) => ({
+          // Insert order items with authoritative unit prices
+          const orderItems = sanitizedItems.map((item) => ({
             order_id: orderData.id,
             product_id: Number(item.id) || 1,
-            quantity: Number(item.quantity) || 1,
-            unit_price_egp: Number(item.priceEgp) || 100,
+            quantity: item.quantity,
+            unit_price_egp: item.unitPriceEgp,
           }));
 
           await supabaseAdmin.from('order_items').insert(orderItems);
