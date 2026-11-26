@@ -295,10 +295,18 @@ export async function checkUserSubscriptionStatus(
       const end = new Date(sub.end_date);
       if (sub.status === 'scheduled' && start <= now && end > now) {
         sub.status = 'active';
-        supabaseAdmin.from('subscriptions').update({ status: 'active' }).eq('id', sub.id).catch(() => {});
+        try {
+          await supabaseAdmin.from('subscriptions').update({ status: 'active' }).eq('id', sub.id);
+        } catch {
+          // ignore background sync error
+        }
       } else if (sub.status === 'active' && end <= now) {
         sub.status = 'expired';
-        supabaseAdmin.from('subscriptions').update({ status: 'expired' }).eq('id', sub.id).catch(() => {});
+        try {
+          await supabaseAdmin.from('subscriptions').update({ status: 'expired' }).eq('id', sub.id);
+        } catch {
+          // ignore background sync error
+        }
       }
     }
 
