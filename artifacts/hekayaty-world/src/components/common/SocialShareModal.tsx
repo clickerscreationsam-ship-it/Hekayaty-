@@ -9,6 +9,12 @@ import {
   ExternalLink,
   Sparkles,
 } from 'lucide-react';
+import {
+  WhatsAppIcon,
+  TelegramIcon,
+  FacebookIcon,
+  XTwitterIcon,
+} from '@/components/common/BrandIcons';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export interface SocialShareModalProps {
@@ -86,7 +92,7 @@ export function SocialShareModal({
     {
       name: 'واتساب',
       en: 'WhatsApp',
-      icon: '💬',
+      icon: <WhatsAppIcon className="w-5 h-5 text-[#25D366]" />,
       bgColor: 'bg-[#25D366]/15 hover:bg-[#25D366]/25 border-[#25D366]/40 text-[#25D366]',
       href: `https://api.whatsapp.com/send?text=${encodedText}%0A${encodedUrl}`,
       key: 'whatsapp',
@@ -94,7 +100,7 @@ export function SocialShareModal({
     {
       name: 'تيليجرام',
       en: 'Telegram',
-      icon: '✈️',
+      icon: <TelegramIcon className="w-5 h-5 text-[#0088CC]" />,
       bgColor: 'bg-[#0088CC]/15 hover:bg-[#0088CC]/25 border-[#0088CC]/40 text-[#0088CC]',
       href: `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`,
       key: 'telegram',
@@ -102,7 +108,7 @@ export function SocialShareModal({
     {
       name: 'فيسبوك',
       en: 'Facebook',
-      icon: '📘',
+      icon: <FacebookIcon className="w-5 h-5 text-[#1877F2]" />,
       bgColor: 'bg-[#1877F2]/15 hover:bg-[#1877F2]/25 border-[#1877F2]/40 text-[#1877F2]',
       href: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
       key: 'facebook',
@@ -110,7 +116,7 @@ export function SocialShareModal({
     {
       name: 'منصة X',
       en: 'X (Twitter)',
-      icon: '✖',
+      icon: <XTwitterIcon className="w-4 h-4 text-white" />,
       bgColor: 'bg-zinc-800/60 hover:bg-zinc-700/60 border-zinc-600 text-white',
       href: `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}&via=hekayatyn6`,
       key: 'x_twitter',
@@ -176,7 +182,7 @@ export function SocialShareModal({
               onClick={() => trackShareEvent(p.key)}
               className={`flex items-center gap-2.5 p-3 rounded-2xl border ${p.bgColor} transition-all duration-200 font-semibold text-xs`}
             >
-              <span className="text-lg">{p.icon}</span>
+              <span className="shrink-0 flex items-center justify-center">{p.icon}</span>
               <span className="text-zinc-100">{p.name}</span>
             </a>
           ))}

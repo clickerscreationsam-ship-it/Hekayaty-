@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import { Link } from 'wouter';
 import { FeatherLogo } from '@/components/common/FeatherLogo';
 import {
+  FacebookIcon,
+  InstagramIcon,
+  TikTokIcon,
+  XTwitterIcon,
+  ThreadsIcon,
+} from '@/components/common/BrandIcons';
+import {
   Sparkles,
   Send,
   BookOpen,
@@ -19,36 +26,41 @@ const SOCIAL_LINKS = [
     name: 'facebook',
     nameAr: 'فيسبوك',
     url: 'https://www.facebook.com/share/1CynVnhFwJ/',
-    icon: '📘',
-    color: 'hover:text-blue-600 hover:border-blue-500/50 dark:hover:text-blue-400',
+    icon: <FacebookIcon className="w-4 h-4 text-[#1877F2] group-hover:scale-110 transition-transform" />,
+    badgeBg: 'hover:border-[#1877F2]/50 hover:bg-[#1877F2]/10',
+    color: 'hover:text-[#1877F2]',
   },
   {
     name: 'instagram',
     nameAr: 'إنستغرام',
     url: 'https://www.instagram.com/hekayaty3949',
-    icon: '📸',
-    color: 'hover:text-pink-500 hover:border-pink-500/50 dark:hover:text-pink-400',
+    icon: <InstagramIcon className="w-4 h-4 text-[#E4405F] group-hover:scale-110 transition-transform" />,
+    badgeBg: 'hover:border-[#E4405F]/50 hover:bg-[#E4405F]/10',
+    color: 'hover:text-[#E4405F]',
   },
   {
     name: 'tiktok',
     nameAr: 'تيك توك',
     url: 'https://www.tiktok.com/@hekayaty0?lang=ar',
-    icon: '🎵',
-    color: 'hover:text-zinc-900 hover:border-zinc-500/50 dark:hover:text-white',
+    icon: <TikTokIcon className="w-4 h-4 text-[#000000] dark:text-white group-hover:scale-110 transition-transform" />,
+    badgeBg: 'hover:border-black/40 dark:hover:border-white/40 hover:bg-black/5 dark:hover:bg-white/10',
+    color: 'hover:text-zinc-900 dark:hover:text-white',
   },
   {
     name: 'x-twitter',
     nameAr: 'X (تويتر)',
     url: 'https://x.com/hekayatyn6',
-    icon: '✖',
-    color: 'hover:text-zinc-900 hover:border-zinc-500/50 dark:hover:text-white',
+    icon: <XTwitterIcon className="w-3.5 h-3.5 text-[#000000] dark:text-white group-hover:scale-110 transition-transform" />,
+    badgeBg: 'hover:border-black/40 dark:hover:border-white/40 hover:bg-black/5 dark:hover:bg-white/10',
+    color: 'hover:text-zinc-900 dark:hover:text-white',
   },
   {
     name: 'threads',
     nameAr: 'ثريدز',
     url: 'https://www.threads.com/@hekayaty3949',
-    icon: '🧵',
-    color: 'hover:text-purple-600 hover:border-purple-500/50 dark:hover:text-purple-400',
+    icon: <ThreadsIcon className="w-4 h-4 text-[#000000] dark:text-white group-hover:scale-110 transition-transform" />,
+    badgeBg: 'hover:border-purple-500/50 hover:bg-purple-500/10',
+    color: 'hover:text-purple-600 dark:hover:text-purple-400',
   },
 ];
 
@@ -100,10 +112,10 @@ export function Footer() {
                     target="_blank"
                     rel="noopener noreferrer"
                     title={s.nameAr}
-                    className={`px-3 py-1.5 rounded-xl border border-[#D8C5A8] dark:border-white/10 bg-white/50 dark:bg-white/[0.03] text-[#604735] dark:text-zinc-300 ${s.color} transition-all duration-300 flex items-center gap-1.5 text-xs font-semibold shadow-sm hover:scale-105 group`}
+                    className={`px-3 py-1.5 rounded-xl border border-[#D8C5A8] dark:border-white/10 bg-white/70 dark:bg-white/[0.04] text-[#2A1F17] dark:text-zinc-200 ${s.badgeBg} ${s.color} transition-all duration-300 flex items-center gap-2 text-xs font-semibold shadow-sm hover:scale-105 hover:shadow-md group`}
                   >
-                    <span className="shrink-0">{s.icon}</span>
-                    <span className="text-[11px] font-arabic">{s.nameAr}</span>
+                    <span className="shrink-0 flex items-center justify-center">{s.icon}</span>
+                    <span className="text-[12px] font-arabic font-medium">{s.nameAr}</span>
                   </a>
                 ))}
               </div>
