@@ -64,7 +64,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           isLoading: false,
         });
         useAppStore.getState().syncWithBackend().catch(() => {});
-      } else if (!cachedUser) {
+      } else {
+        // Backend returned not authenticated — session token expired or invalid
         storage.clearAuthSession();
         set({ user: null, isAuthenticated: false, subscription: null, isLoading: false });
       }
