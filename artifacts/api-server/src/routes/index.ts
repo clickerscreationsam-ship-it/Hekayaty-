@@ -10,6 +10,7 @@ import adminRouter from "./admin";
 import uploadRouter from "./upload";
 import eventsRouter, { adminEventsRouter } from "./events";
 import mysteryRouter, { adminMysteryRouter } from "./mystery";
+import { seriesPlatformRouter, adminSeriesPlatformRouter } from "./seriesPlatform";
 import seoRouter from "./seo";
 
 const router: IRouter = Router();
@@ -21,6 +22,8 @@ router.use("/events", eventsRouter);
 router.use("/admin/events", adminEventsRouter);
 router.use("/mystery", mysteryRouter);
 router.use("/admin/mystery", adminMysteryRouter);
+router.use("/series-platform", seriesPlatformRouter);
+router.use("/admin/series-platform", adminSeriesPlatformRouter);
 router.use("/", contentRouter);
 router.use("/user", userRouter);
 router.use("/", commerceRouter);

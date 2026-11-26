@@ -4,6 +4,7 @@ import { Link } from 'wouter';
 import { SEOHead } from '@/components/common/SEOHead';
 import { CinematicEventBanner } from '@/components/common/CinematicEventBanner';
 import { DailyMysterySection } from '@/components/common/DailyMysterySection';
+import { HekayatySeriesSection } from '@/components/common/HekayatySeriesSection';
 import { api } from '@/lib/api';
 import {
   useComics,
@@ -156,6 +157,9 @@ export default function Home() {
       {activeEvents.length > 0 && (
         <CinematicEventBanner events={activeEvents} />
       )}
+
+      {/* 1.7 DEDICATED HEKAYATY SERIES SECTION */}
+      <HekayatySeriesSection />
 
       {/* 1.8 DYNAMIC DAILY MYSTERY EXPERIENCE */}
       <DailyMysterySection />

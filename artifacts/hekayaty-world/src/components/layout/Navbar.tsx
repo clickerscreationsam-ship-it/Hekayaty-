@@ -57,6 +57,7 @@ export function Navbar() {
 
   const mainLinks = [
     { name: 'الرئيسية', path: '/', exact: true },
+    { name: 'السلاسل', path: '/series' },
     { name: 'اكتشف', path: '/discover' },
     { name: 'الكوميكس', path: '/comics' },
     { name: 'القصص', path: '/stories' },
@@ -66,6 +67,12 @@ export function Navbar() {
   ];
 
   const universeItems = [
+    {
+      title: 'سلاسل ومواسم حكاياتي',
+      desc: 'سلاسل الروايات والكوميكس بمواسم وفصول متتابعة',
+      path: '/series',
+      icon: Layers,
+    },
     {
       title: 'القارئ الذكي (PDF ونصوص)',
       desc: 'قراءة الروايات والكوميكس ورفع ملفاتك الخاصة',

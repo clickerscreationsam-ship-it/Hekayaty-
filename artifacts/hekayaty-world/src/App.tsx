@@ -25,6 +25,12 @@ const ComicReader = lazy(() => import('@/pages/ComicReader'));
 const UniversalCustomReader = lazy(() => import('@/pages/UniversalCustomReader'));
 const SeriesDetail = lazy(() => import('@/pages/SeriesDetail'));
 
+// Series Platform (Novels, Comics, Seasons, Episodes)
+const SeriesPlatform = lazy(() => import('@/pages/SeriesPlatform'));
+const SeriesLandingPage = lazy(() => import('@/pages/SeriesLandingPage'));
+const SeriesEpisodeReader = lazy(() => import('@/pages/SeriesEpisodeReader'));
+const MySeriesLibrary = lazy(() => import('@/pages/MySeriesLibrary'));
+
 // Stories
 const Stories = lazy(() => import('@/pages/Stories'));
 const StoryDetail = lazy(() => import('@/pages/StoryDetail'));
@@ -102,7 +108,12 @@ function Router() {
           <Route path="/comics/:id/immersive" component={UniversalCustomReader} />
           <Route path="/reader" component={UniversalCustomReader} />
           <Route path="/reader/:id" component={UniversalCustomReader} />
-          <Route path="/series/:id" component={SeriesDetail} />
+
+          {/* Hekayaty Series Platform */}
+          <Route path="/series" component={SeriesPlatform} />
+          <Route path="/series/:slug" component={SeriesLandingPage} />
+          <Route path="/series/:seriesSlug/read/:episodeId" component={SeriesEpisodeReader} />
+          <Route path="/my-series" component={MySeriesLibrary} />
 
           {/* Stories Ecosystem */}
           <Route path="/stories" component={Stories} />

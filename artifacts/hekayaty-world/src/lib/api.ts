@@ -680,4 +680,71 @@ export const api = {
       method: 'DELETE',
     });
   },
+
+  // ─── Hekayaty Series Platform API ──────────────────────────────────────────
+  async getSeriesPlatformList(params?: Record<string, any>): Promise<any[]> {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+    return safeFetch<any[]>(`${BASE_URL}/series-platform${qs}`, {}, []);
+  },
+  async getSeriesPlatformFeatured(): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/series-platform/featured`, {}, null);
+  },
+  async getSeriesPlatformCollections(): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/series-platform/collections`, {}, {
+      featured: [], originals: [], popular: [], new_releases: [], ongoing: [], completed: [], comics: [], novels: []
+    });
+  },
+  async getSeriesPlatformDetail(slug: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/series-platform/${slug}`, {}, null);
+  },
+  async getSeriesPlatformEpisode(slug: string, episodeId: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/series-platform/${slug}/episodes/${episodeId}`, {}, null);
+  },
+  async toggleFollowSeries(seriesId: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/series-platform/${seriesId}/follow`, { method: 'POST' });
+  },
+  async toggleFavoriteSeries(seriesId: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/series-platform/${seriesId}/favorite`, { method: 'POST' });
+  },
+  async saveSeriesProgress(seriesId: string, episodeId: string, isCompleted = false): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/series-platform/${seriesId}/episodes/${episodeId}/progress`, {
+      method: 'POST',
+      body: JSON.stringify({ isCompleted }),
+    });
+  },
+  async getUserSeriesLibrary(): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/series-platform/user/library`, {}, { following: [], in_progress: [] });
+  },
+
+  // Admin Series Platform
+  async adminListSeriesPlatform(): Promise<any[]> {
+    return safeFetch<any[]>(`${BASE_URL}/admin/series-platform`, {}, []);
+  },
+  async adminCreateSeriesPlatform(data: any): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/series-platform`, { method: 'POST', body: JSON.stringify(data) });
+  },
+  async adminUpdateSeriesPlatform(id: string, data: any): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/series-platform/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+  },
+  async adminDeleteSeriesPlatform(id: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/series-platform/${id}`, { method: 'DELETE' });
+  },
+  async adminCreateSeriesSeason(seriesId: string, data: any): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/series-platform/${seriesId}/seasons`, { method: 'POST', body: JSON.stringify(data) });
+  },
+  async adminDeleteSeriesSeason(seriesId: string, seasonId: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/series-platform/${seriesId}/seasons/${seasonId}`, { method: 'DELETE' });
+  },
+  async adminCreateSeriesEpisode(seriesId: string, data: any): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/series-platform/${seriesId}/episodes`, { method: 'POST', body: JSON.stringify(data) });
+  },
+  async adminUpdateSeriesEpisode(seriesId: string, episodeId: string, data: any): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/series-platform/${seriesId}/episodes/${episodeId}`, { method: 'PUT', body: JSON.stringify(data) });
+  },
+  async adminDeleteSeriesEpisode(seriesId: string, episodeId: string): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/series-platform/${seriesId}/episodes/${episodeId}`, { method: 'DELETE' });
+  },
+  async adminGetSeriesAnalytics(): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/admin/series-platform/analytics`, {}, {});
+  },
 };
