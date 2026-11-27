@@ -426,24 +426,24 @@ export const api = {
     });
   },
 
-  // Series Studio
+  // Series Studio — routed to /admin/series-platform
   async getAdminSeries() {
-    return safeFetch<any[]>(`${BASE_URL}/admin/series`, {}, []);
+    return safeFetch<any[]>(`${BASE_URL}/admin/series-platform`, {}, []);
   },
   async createAdminSeries(data: any) {
-    return safeFetch<any>(`${BASE_URL}/admin/series`, {
+    return safeFetch<any>(`${BASE_URL}/admin/series-platform`, {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
   async updateAdminSeries(id: string, data: any) {
-    return safeFetch<any>(`${BASE_URL}/admin/series/${id}`, {
+    return safeFetch<any>(`${BASE_URL}/admin/series-platform/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   },
   async deleteAdminSeries(id: string) {
-    return safeFetch<any>(`${BASE_URL}/admin/series/${id}`, { method: 'DELETE' });
+    return safeFetch<any>(`${BASE_URL}/admin/series-platform/${id}`, { method: 'DELETE' });
   },
 
   // Comic Pages Studio
