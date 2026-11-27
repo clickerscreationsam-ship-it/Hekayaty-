@@ -636,7 +636,7 @@ adminSeriesPlatformRouter.post('/', async (req: any, res) => {
       is_original: is_original !== false,
       classification: classification || 'original',
       publisher_name: publisher_name || 'دار حكاياتي للنشر الرقمي',
-      author_name: author_name || req.user.displayName,
+      author_name: author_name || 'فريق حكاياتي',
       artist_name,
       editor_name,
       translator_name,

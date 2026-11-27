@@ -144,7 +144,7 @@ export function HekayatySeriesSection() {
                 </p>
 
                 <div className="flex items-center gap-4 text-xs text-zinc-400 font-mono">
-                  <span className="text-zinc-300">الكاتب: {featured.author_name || 'حكاياتي'}</span>
+                  <span className="text-zinc-300">الكاتب: {featured.author_name || 'فريق حكاياتي'}</span>
                   <span className="flex items-center gap-0.5 text-amber-400 font-bold">
                     <Star className="w-3.5 h-3.5 fill-current" />
                     {featured.rating || 4.9}
@@ -243,7 +243,7 @@ export function HekayatySeriesSection() {
                     </div>
 
                     <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs font-bold text-zinc-500">
-                      <span className="text-zinc-400">{s.author_name || 'حكاياتي'}</span>
+                      <span className="text-zinc-400">{s.author_name || 'فريق حكاياتي'}</span>
                       <span className="text-[#C5A15B] flex items-center gap-0.5 group-hover:translate-x-[-3px] transition-transform">
                         <span>استكشاف</span>
                         <ChevronLeft className="w-3.5 h-3.5" />

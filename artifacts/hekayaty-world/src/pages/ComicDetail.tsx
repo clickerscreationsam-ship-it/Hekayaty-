@@ -191,7 +191,7 @@ export default function ComicDetail() {
             description={synopsisAr || `كوميكس ${titleAr} - ${seriesName}`}
             ogImage={comic.coverImage}
             ogType="book"
-            author={(comic as any).writer || 'حكاياتي'}
+            author={(comic as any).writer || 'فريق حكاياتي'}
             jsonLd={{
               '@context': 'https://schema.org',
               '@type': 'Book',
@@ -202,7 +202,7 @@ export default function ComicDetail() {
               inLanguage: 'ar',
               author: {
                 '@type': 'Person',
-                name: (comic as any).writer || 'حكاياتي',
+                name: (comic as any).writer || 'فريق حكاياتي',
               },
               publisher: {
                 '@type': 'Organization',
@@ -344,7 +344,7 @@ export default function ComicDetail() {
                 <h4 className="text-xs text-foreground/50 dark:text-white/40 uppercase tracking-widest mb-1 flex items-center gap-1 justify-end font-cinzel">
                   الكاتب <PenTool className="w-3 h-3 text-deep-teal dark:text-antique-gold" />
                 </h4>
-                <p className="text-foreground font-bold font-arabic">{comic.writer}</p>
+                <p className="text-foreground font-bold font-arabic">{comic.writer || 'فريق حكاياتي'}</p>
               </div>
               <div className="text-right">
                 <h4 className="text-xs text-foreground/50 dark:text-white/40 uppercase tracking-widest mb-1 flex items-center gap-1 justify-end font-cinzel">

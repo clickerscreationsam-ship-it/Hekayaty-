@@ -441,7 +441,7 @@ router.post('/comics', async (req, res) => {
       title_en: (titleEn || title_en)?.trim() || finalTitleAr.trim(),
       issue_number: Number(issueNumber || issue_number) || 1,
       synopsis_ar: synopsisAr || synopsis || '',
-      writer: writer || req.user!.displayName,
+      writer: writer || 'فريق حكاياتي',
       artist: artist || '',
       classification: ['original', 'hekayaty_selected', 'official_collaboration'].includes(classification)
         ? classification
@@ -655,7 +655,7 @@ router.post('/stories', async (req, res) => {
       title_en: (titleEn || title_en)?.trim() || finalTitleAr.trim(),
       synopsis_ar: synopsisAr || synopsis || excerptAr || '',
       content: contentAr || content || '',
-      author_ar: authorAr || req.user!.displayName,
+      author_ar: authorAr || 'فريق حكاياتي',
       read_time_minutes: Number(readTimeMinutes || reading_time_minutes) || 10,
       classification: ['original', 'hekayaty_selected', 'official_collaboration'].includes(classification)
         ? classification

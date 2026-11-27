@@ -85,7 +85,7 @@ export default function StoryDetail() {
           headline: story.titleAr,
           author: {
             '@type': 'Person',
-            name: story.authorAr || story.author || 'حكاياتي',
+            name: story.authorAr || story.author || 'فريق حكاياتي',
           },
           image: story.coverImage,
           description: story.synopsisAr,
@@ -205,7 +205,7 @@ export default function StoryDetail() {
             <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-foreground/60">
               <span className="flex items-center gap-1.5 font-semibold text-foreground/80">
                 <User className="w-4 h-4 text-deep-teal dark:text-antique-gold" />
-                بقلم: {story.authorAr}
+                بقلم: {story.authorAr || 'فريق حكاياتي'}
               </span>
               <span>•</span>
               <span className="flex items-center gap-1.5">
