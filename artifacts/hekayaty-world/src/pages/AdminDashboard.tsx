@@ -32,6 +32,7 @@ import {
   UserX,
   Upload,
   Zap,
+  Edit3,
 } from 'lucide-react';
 import { Link } from 'wouter';
 import { ImageUploadField } from '@/components/common/ImageUploadField';
@@ -47,6 +48,7 @@ import { MysteryMgmtPanel } from '@/components/admin/MysteryMgmtPanel';
 import { SeriesPlatformMgmtPanel } from '@/components/admin/SeriesPlatformMgmtPanel';
 import { SubscriptionsMgmtPanel } from '@/components/admin/SubscriptionsMgmtPanel';
 import { EngagementAnalyticsPanel } from '@/components/admin/EngagementAnalyticsPanel';
+import { EditPublicationModal } from '@/components/admin/EditPublicationModal';
 
 type AdminTab =
   | 'overview'
@@ -844,6 +846,8 @@ export default function AdminDashboard() {
   const [showCharStudioModal, setShowCharStudioModal] = useState(false);
   const [editingCharacter, setEditingCharacter] = useState<any | null>(null);
   const [showSeriesModal, setShowSeriesModal] = useState(false);
+  const [editingPublication, setEditingPublication] = useState<{ pub: any; type: 'story' | 'comic' } | null>(null);
+  const [showEditPublicationModal, setShowEditPublicationModal] = useState(false);
 
   // Subtabs & Filters
   const [operationsSubTab, setOperationsSubTab] = useState<OperationsSubTab>('financials');
@@ -1967,6 +1971,18 @@ export default function AdminDashboard() {
                               )}
                             </td>
                             <td className="p-4 flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingPublication({ pub: c, type: 'comic' });
+                                  setShowEditPublicationModal(true);
+                                }}
+                                className="px-2.5 py-1.5 rounded-lg bg-[#087C7B]/20 hover:bg-[#087C7B] text-[#087C7B] hover:text-white border border-[#087C7B]/40 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+                                title="تعديل بيانات الكوميكس"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                                <span>تعديل العمل</span>
+                              </button>
                               <Link
                                 href={`/reader?comicId=${c.id}`}
                                 className="text-[#087C7B] hover:text-white flex items-center gap-1 font-semibold"
@@ -2098,6 +2114,18 @@ export default function AdminDashboard() {
                               )}
                             </td>
                             <td className="p-4 flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setEditingPublication({ pub: s, type: 'story' });
+                                  setShowEditPublicationModal(true);
+                                }}
+                                className="px-2.5 py-1.5 rounded-lg bg-[#087C7B]/20 hover:bg-[#087C7B] text-[#087C7B] hover:text-white border border-[#087C7B]/40 font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+                                title="تعديل بيانات الرواية"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
+                                <span>تعديل العمل</span>
+                              </button>
                               <Link
                                 href={`/reader?storyId=${s.id}`}
                                 className="text-[#087C7B] hover:text-white flex items-center gap-1 font-semibold"
@@ -3935,6 +3963,23 @@ export default function AdminDashboard() {
           </div>
         </div>
         </ModalPortal>
+      )}
+
+      {/* Edit Publication Modal (Books, Stories, Comics) */}
+      {showEditPublicationModal && editingPublication && (
+        <EditPublicationModal
+          isOpen={showEditPublicationModal}
+          onClose={() => {
+            setShowEditPublicationModal(false);
+            setEditingPublication(null);
+          }}
+          onSuccess={() => {
+            fetchAllData();
+          }}
+          toast={toast}
+          publication={editingPublication.pub}
+          type={editingPublication.type}
+        />
       )}
     </div>
   );

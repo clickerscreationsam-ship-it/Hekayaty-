@@ -49,6 +49,9 @@ Thumbs.db
 .env.*
 !.env.example
 
+# Local server runtime data
+artifacts/api-server/data/
+
 # Replit
 .cache/
 .local/

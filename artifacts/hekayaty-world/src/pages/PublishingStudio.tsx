@@ -1681,14 +1681,18 @@ export default function PublishingStudio() {
 
               {/* 3 Main Actions */}
               <div className="space-y-2.5 pt-2 border-t border-[#1E2B42]">
-                {/* 1. Save Draft Action */}
+                {/* 1. Save Action */}
                 <button
                   type="button"
                   onClick={activeTab === 'novels' ? handleSaveDraftChapters : undefined}
                   className="w-full py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs flex items-center justify-center gap-2 border border-zinc-700 transition-all"
                 >
                   <Save className="w-3.5 h-3.5 text-[#087C7B]" />
-                  <span>حفظ التعديلات كمسودة (Save Draft)</span>
+                  <span>
+                    {currentStatus === 'published'
+                      ? 'حفظ وتحديث العمل المنشور (Save Published Work)'
+                      : 'حفظ التعديلات كمسودة (Save Draft)'}
+                  </span>
                 </button>
 
                 {/* 2. Preview Action */}
