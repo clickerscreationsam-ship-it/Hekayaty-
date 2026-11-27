@@ -36,7 +36,7 @@ export default function HekayatySelected() {
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-foreground font-cinzel leading-tight">
-            هـكـايـتـي <span className="text-transparent bg-clip-text bg-gradient-to-r from-deep-teal via-rich-turquoise to-emerald-600 dark:from-rich-turquoise dark:via-antique-gold dark:to-champagne-gold">الـمُـخـتـارة</span>
+            حكاياتي <span className="text-transparent bg-clip-text bg-gradient-to-r from-deep-teal via-rich-turquoise to-emerald-600 dark:from-rich-turquoise dark:via-antique-gold dark:to-champagne-gold">المُختارة</span>
           </h1>
 
           <p className="text-sm sm:text-lg text-foreground/80 leading-relaxed">
