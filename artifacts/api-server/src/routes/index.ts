@@ -12,6 +12,8 @@ import eventsRouter, { adminEventsRouter } from "./events";
 import mysteryRouter, { adminMysteryRouter } from "./mystery";
 import { seriesPlatformRouter, adminSeriesPlatformRouter } from "./seriesPlatform";
 import { subscriptionsRouter, adminSubscriptionsRouter } from "./subscriptions";
+import engagementRouter from "./engagement";
+import analyticsRouter from "./analytics";
 import seoRouter from "./seo";
 
 const router: IRouter = Router();
@@ -27,6 +29,8 @@ router.use("/mystery", mysteryRouter);
 router.use("/admin/mystery", adminMysteryRouter);
 router.use("/series-platform", seriesPlatformRouter);
 router.use("/admin/series-platform", adminSeriesPlatformRouter);
+router.use("/engagement", engagementRouter);
+router.use("/analytics", analyticsRouter);
 router.use("/", contentRouter);
 router.use("/user", userRouter);
 router.use("/", commerceRouter);

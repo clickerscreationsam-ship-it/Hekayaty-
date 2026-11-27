@@ -31,6 +31,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { api } from '@/lib/api';
 import { SubscriptionPaywall } from '@/components/subscription/SubscriptionPaywall';
+import { LikeButton } from '@/components/engagement/LikeButton';
+import { ContentViewTracker } from '@/components/engagement/ContentViewTracker';
 
 interface ChapterItem {
   id: string;
@@ -274,6 +276,13 @@ export default function UniversalCustomReader() {
       className={`min-h-screen transition-colors duration-300 font-arabic flex flex-col ${themeStyles[themeMode]}`}
       style={{ filter: `brightness(${brightness}%)` }}
     >
+      {(storyIdParam || comicIdParam) && (
+        <ContentViewTracker
+          contentType={comicIdParam ? 'comic' : 'story'}
+          contentId={String(comicIdParam || storyIdParam)}
+          source="reader"
+        />
+      )}
       {/* ── Top Bar Header ──────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 border-b border-black/10 dark:border-white/10 backdrop-blur-md bg-inherit/90 px-4 sm:px-6 py-3 flex items-center justify-between gap-4 shrink-0">
         <div className="flex items-center gap-3">
@@ -371,6 +380,15 @@ export default function UniversalCustomReader() {
             <span className="hidden md:inline">رفع PDF أو نص</span>
           </button>
           <input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".pdf,.txt,.md" className="hidden" />
+
+          {/* Like Button */}
+          {(storyIdParam || comicIdParam) && (
+            <LikeButton
+              contentType={comicIdParam ? 'comic' : 'story'}
+              contentId={String(comicIdParam || storyIdParam)}
+              size="sm"
+            />
+          )}
 
           {/* Fullscreen Toggle */}
           <button

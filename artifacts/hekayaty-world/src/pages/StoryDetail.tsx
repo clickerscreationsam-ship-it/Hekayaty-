@@ -15,6 +15,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useAppStore } from '@/stores/useAppStore';
 import { SEOHead } from '@/components/common/SEOHead';
 import { SocialShareModal } from '@/components/common/SocialShareModal';
+import { LikeButton } from '@/components/engagement/LikeButton';
+import { FollowButton } from '@/components/engagement/FollowButton';
+import { EngagementStats } from '@/components/engagement/EngagementStats';
+import { ContentViewTracker } from '@/components/engagement/ContentViewTracker';
 
 export default function StoryDetail() {
   const [, params] = useRoute('/stories/:id');
@@ -176,18 +180,9 @@ export default function StoryDetail() {
                 </button>
               </div>
 
-              <button
-                type="button"
-                onClick={toggleFavorite}
-                className={`p-2 rounded-xl border transition-all ${
-                  isFav
-                    ? 'bg-red-500/15 text-red-600 dark:text-red-400 border-red-500/30'
-                    : 'bg-soft-cream/80 dark:bg-white/5 text-foreground/70 border-soft-sand/60 dark:border-white/10 hover:border-deep-teal dark:hover:border-antique-gold'
-                }`}
-                title="إضافة للمفضلة"
-              >
-                <Bookmark className="w-4 h-4" />
-              </button>
+              {/* Engagement Buttons */}
+              <LikeButton contentType="story" contentId={story.id} size="sm" />
+              <FollowButton contentType="story" contentId={story.id} size="sm" />
 
               <button
                 type="button"
@@ -200,22 +195,28 @@ export default function StoryDetail() {
             </div>
           </div>
 
+          <ContentViewTracker contentType="story" contentId={story.id} source="story_detail" />
+
           <h1 className="text-2xl sm:text-4xl font-bold text-foreground font-cinzel leading-tight">
             {story.titleAr}
           </h1>
 
-          <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-foreground/60 pt-1">
-            <span className="flex items-center gap-1.5 font-semibold text-foreground/80">
-              <User className="w-4 h-4 text-deep-teal dark:text-antique-gold" />
-              بقلم: {story.authorAr}
-            </span>
-            <span>•</span>
-            <span className="flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-deep-teal dark:text-antique-gold" />
-              {story.readTimeMinutes} دقيقة قراءة ({story.wordCount || 3000} كلمة)
-            </span>
-            <span>•</span>
-            <span>عام {story.year}</span>
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
+            <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-foreground/60">
+              <span className="flex items-center gap-1.5 font-semibold text-foreground/80">
+                <User className="w-4 h-4 text-deep-teal dark:text-antique-gold" />
+                بقلم: {story.authorAr}
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-deep-teal dark:text-antique-gold" />
+                {story.readTimeMinutes} دقيقة قراءة ({story.wordCount || 3000} كلمة)
+              </span>
+              <span>•</span>
+              <span>عام {story.year}</span>
+            </div>
+
+            <EngagementStats contentType="story" contentId={story.id} chaptersCount={(story as any).chapters?.length || 1} />
           </div>
         </header>
 

@@ -65,6 +65,7 @@ const AwardDetail = lazy(() => import('@/pages/AwardDetail'));
 const CompetitionDetail = lazy(() => import('@/pages/CompetitionDetail'));
 const Community = lazy(() => import('@/pages/Community'));
 const CardGame = lazy(() => import('@/pages/CardGame'));
+const FollowingPage = lazy(() => import('@/pages/FollowingPage'));
 const Profile = lazy(() => import('@/pages/Profile'));
 const Editorial = lazy(() => import('@/pages/Editorial'));
 const AdminDashboard = lazy(() => import('@/pages/AdminDashboard'));
@@ -162,6 +163,7 @@ function Router() {
           <Route path="/card-game" component={CardGame} />
 
           {/* User Profile & Internal Editorial */}
+          <Route path="/following" component={FollowingPage} />
           <Route path="/profile" component={Profile} />
           <Route path="/profile/:id" component={Profile} />
           <Route path="/editorial" component={Editorial} />

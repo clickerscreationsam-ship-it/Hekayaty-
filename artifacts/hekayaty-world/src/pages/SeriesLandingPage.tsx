@@ -3,6 +3,10 @@ import { useParams, Link } from 'wouter';
 import { motion } from 'framer-motion';
 import { SEOHead } from '@/components/common/SEOHead';
 import { SocialShareModal } from '@/components/common/SocialShareModal';
+import { LikeButton } from '@/components/engagement/LikeButton';
+import { FollowButton } from '@/components/engagement/FollowButton';
+import { EngagementStats } from '@/components/engagement/EngagementStats';
+import { ContentViewTracker } from '@/components/engagement/ContentViewTracker';
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -192,20 +196,26 @@ export default function SeriesLandingPage() {
               </p>
 
               {/* Creator credits & schedule strip */}
-              <div className="flex flex-wrap items-center gap-4 text-xs text-zinc-400 border-t border-white/10 pt-3">
-                {series.author_name && (
-                  <span>بقلم: <strong className="text-white">{series.author_name}</strong></span>
-                )}
-                {series.artist_name && (
-                  <span>رسوم: <strong className="text-white">{series.artist_name}</strong></span>
-                )}
-                {series.publisher_name && (
-                  <span>الناشر: <strong className="text-white">{series.publisher_name}</strong></span>
-                )}
-                {series.release_day_time && (
-                  <span className="text-amber-300 font-mono">📅 {series.release_day_time}</span>
-                )}
+              <div className="flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-3">
+                <div className="flex flex-wrap items-center gap-4 text-xs text-zinc-400">
+                  {series.author_name && (
+                    <span>بقلم: <strong className="text-white">{series.author_name}</strong></span>
+                  )}
+                  {series.artist_name && (
+                    <span>رسوم: <strong className="text-white">{series.artist_name}</strong></span>
+                  )}
+                  {series.publisher_name && (
+                    <span>الناشر: <strong className="text-white">{series.publisher_name}</strong></span>
+                  )}
+                  {series.release_day_time && (
+                    <span className="text-amber-300 font-mono">📅 {series.release_day_time}</span>
+                  )}
+                </div>
+
+                <EngagementStats contentType="series" contentId={series.id} chaptersCount={series.episodes_count} rating={series.rating} />
               </div>
+
+              <ContentViewTracker contentType="series" contentId={series.id} source="series_landing" />
 
               {/* Action Buttons */}
               <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -226,29 +236,8 @@ export default function SeriesLandingPage() {
                   </Link>
                 )}
 
-                <button
-                  onClick={handleToggleFollow}
-                  className={`px-4 py-3 rounded-2xl border text-xs font-bold flex items-center gap-2 transition-all ${
-                    isFollowing
-                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                      : 'bg-black/60 text-white border-white/20 hover:border-[#C5A15B]'
-                  }`}
-                >
-                  <Bookmark className={`w-4 h-4 ${isFollowing ? 'fill-current' : ''}`} />
-                  <span>{isFollowing ? 'تتابع هذه السلسلة' : 'متابعة السلسلة'}</span>
-                </button>
-
-                <button
-                  onClick={handleToggleFavorite}
-                  className={`p-3 rounded-2xl border text-xs font-bold transition-all ${
-                    isFavorited
-                      ? 'bg-red-500/20 text-red-400 border-red-500/40'
-                      : 'bg-black/60 text-white border-white/20 hover:border-red-400'
-                  }`}
-                  title="إضافة للمفضلة"
-                >
-                  <Heart className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
-                </button>
+                <LikeButton contentType="series" contentId={series.id} size="md" />
+                <FollowButton contentType="series" contentId={series.id} size="md" />
 
                 <button
                   onClick={() => setShareOpen(true)}

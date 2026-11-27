@@ -27,6 +27,7 @@ import {
   LogOut,
   PenTool,
   Shield,
+  Bookmark,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -328,6 +329,15 @@ export function Navbar() {
                           >
                             <User className="w-3.5 h-3.5 text-deep-teal dark:text-antique-gold" />
                             <span>ملفي الشخصي والإعدادات</span>
+                          </Link>
+
+                          <Link
+                            href="/following"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="p-2 rounded-xl hover:bg-[#EFE5D4] dark:hover:bg-white/5 text-xs font-bold text-foreground flex items-center gap-2"
+                          >
+                            <Bookmark className="w-3.5 h-3.5 text-[#C5A15B]" />
+                            <span>متابعاتي (Following)</span>
                           </Link>
 
                           {(user.role === 'writer' || user.role === 'publishing_house') && (

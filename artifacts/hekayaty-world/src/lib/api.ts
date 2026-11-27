@@ -902,4 +902,102 @@ export const api = {
       body: JSON.stringify(payload),
     });
   },
+
+  // ---------------------------------------------------------------------------
+  // ENGAGEMENT SYSTEM (Likes, Follows, Views, Analytics)
+  // ---------------------------------------------------------------------------
+  async toggleLike(contentType: string, contentId: string): Promise<{ success: boolean; liked: boolean; likesCount: number; message: string }> {
+    return safeFetch<any>(`${BASE_URL}/engagement/likes`, {
+      method: 'POST',
+      body: JSON.stringify({ contentType, contentId }),
+    });
+  },
+
+  async getLikeStatus(contentType: string, contentId: string): Promise<{ liked: boolean; likesCount: number }> {
+    const q = new URLSearchParams({ contentType, contentId });
+    return safeFetch<any>(`${BASE_URL}/engagement/likes/status?${q.toString()}`, {}, { liked: false, likesCount: 0 });
+  },
+
+  async getUserLikes(contentType?: string): Promise<{ success: boolean; likes: any[] }> {
+    const q = contentType ? `?contentType=${contentType}` : '';
+    return safeFetch<any>(`${BASE_URL}/engagement/users/me/likes${q}`, {}, { success: true, likes: [] });
+  },
+
+  async toggleFollow(contentType: string, contentId: string): Promise<{ success: boolean; following: boolean; followersCount: number; message: string }> {
+    return safeFetch<any>(`${BASE_URL}/engagement/follows`, {
+      method: 'POST',
+      body: JSON.stringify({ contentType, contentId }),
+    });
+  },
+
+  async getFollowStatus(contentType: string, contentId: string): Promise<{ following: boolean; followersCount: number }> {
+    const q = new URLSearchParams({ contentType, contentId });
+    return safeFetch<any>(`${BASE_URL}/engagement/follows/status?${q.toString()}`, {}, { following: false, followersCount: 0 });
+  },
+
+  async getUserFollowing(contentType?: string): Promise<{ success: boolean; following: any[] }> {
+    const q = contentType ? `?contentType=${contentType}` : '';
+    return safeFetch<any>(`${BASE_URL}/engagement/users/me/following${q}`, {}, { success: true, following: [] });
+  },
+
+  async recordView(params: {
+    contentType: string;
+    contentId: string;
+    anonymousSessionId?: string | null;
+    sessionId?: string | null;
+    source?: string;
+    deviceCategory?: string;
+  }): Promise<{ success: boolean; recorded: boolean; deduplicated: boolean; totalViews: number }> {
+    return safeFetch<any>(`${BASE_URL}/engagement/views`, {
+      method: 'POST',
+      body: JSON.stringify(params),
+    }, { success: false, recorded: false, deduplicated: false, totalViews: 0 });
+  },
+
+  async getEngagementStats(contentType: string, contentId: string): Promise<{ views: number; uniqueViewers: number; likes: number; followers: number }> {
+    return safeFetch<any>(`${BASE_URL}/engagement/stats/${contentType}/${contentId}`, {}, { views: 0, uniqueViewers: 0, likes: 0, followers: 0 });
+  },
+
+  async getNotificationPreferences(): Promise<{ success: boolean; preferences: any }> {
+    return safeFetch<any>(`${BASE_URL}/engagement/preferences/notifications`, {}, {
+      success: true,
+      preferences: {
+        notifyChapters: true,
+        notifyEpisodes: true,
+        notifyNewWorks: true,
+        notifyAuthorUpdates: true,
+        emailNotifications: false,
+      },
+    });
+  },
+
+  async updateNotificationPreferences(prefs: any): Promise<{ success: boolean; preferences: any }> {
+    return safeFetch<any>(`${BASE_URL}/engagement/preferences/notifications`, {
+      method: 'PUT',
+      body: JSON.stringify(prefs),
+    });
+  },
+
+  // Analytics Client Methods
+  async getAdminAnalyticsOverview(timeRange = '30d'): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/analytics/admin/overview?timeRange=${timeRange}`, {}, {
+      success: true,
+      kpis: { totalViews: 0, uniqueViewers: 0, totalLikes: 0, totalFollows: 0, totalEngagements: 0, engagementRate: 0 },
+      chartData: { labels: [], views: [], likes: [], follows: [] },
+    });
+  },
+
+  async getAdminAnalyticsContent(contentType?: string, metric = 'views', limit = 10): Promise<any> {
+    const q = new URLSearchParams({ metric, limit: String(limit) });
+    if (contentType) q.append('contentType', contentType);
+    return safeFetch<any>(`${BASE_URL}/analytics/admin/content?${q.toString()}`, {}, { success: true, items: [] });
+  },
+
+  async getCreatorAnalyticsOverview(timeRange = '30d'): Promise<any> {
+    return safeFetch<any>(`${BASE_URL}/analytics/creator/overview?timeRange=${timeRange}`, {}, {
+      success: true,
+      overview: { totalWorks: 0, totalViews: 0, totalLikes: 0, totalFollowers: 0, engagementRate: 0 },
+      works: [],
+    });
+  },
 };

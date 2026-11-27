@@ -43,6 +43,11 @@ import {
   PartyPopper,
   Compass,
   SlidersHorizontal,
+  BarChart3,
+  Heart,
+  Bookmark,
+  TrendingUp,
+  RefreshCw,
 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
@@ -57,8 +62,31 @@ export default function PublishingStudio() {
   const initialComicId = searchParams.get('comicId');
   const initialTab = searchParams.get('tab') || (initialComicId ? 'comics' : 'novels');
 
-  // Main Tab: 'novels' (Chapters & Text) | 'comics' (Pages & Artwork) | 'pdf' (Documents)
-  const [activeTab, setActiveTab] = useState<'novels' | 'comics' | 'pdf'>(initialTab as any);
+  // Main Tab: 'novels' | 'comics' | 'pdf' | 'analytics'
+  const [activeTab, setActiveTab] = useState<'novels' | 'comics' | 'pdf' | 'analytics'>(initialTab as any);
+
+  // Creator Analytics State
+  const [creatorAnalytics, setCreatorAnalytics] = useState<any>(null);
+  const [creatorAnalyticsLoading, setCreatorAnalyticsLoading] = useState(false);
+
+  const loadCreatorAnalytics = async () => {
+    setCreatorAnalyticsLoading(true);
+    try {
+      const res = await api.getCreatorAnalyticsOverview('30d');
+      if (res.overview) {
+        setCreatorAnalytics(res);
+      }
+    } catch {}
+    finally {
+      setCreatorAnalyticsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'analytics') {
+      loadCreatorAnalytics();
+    }
+  }, [activeTab]);
 
   // ─────────────────────────────────────────────────────────────
   // NOVELS & CHAPTERS STATE
@@ -743,6 +771,19 @@ export default function PublishingStudio() {
               <FileUp className="w-3.5 h-3.5" />
               <span>مستندات PDF</span>
             </button>
+
+            <button
+              onClick={() => {
+                setActiveTab('analytics');
+                setHasPreviewed(false);
+              }}
+              className={`px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all ${
+                activeTab === 'analytics' ? 'bg-[#C5A15B] text-black font-black shadow-md' : 'text-zinc-400 hover:text-white'
+              }`}
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span>التحليلات والمتابعين</span>
+            </button>
           </div>
 
           {/* Toggle Publishing Panel Button */}
@@ -1405,6 +1446,126 @@ export default function PublishingStudio() {
                     <Eye className="w-4 h-4" />
                     <span>معاينة في القارئ</span>
                   </a>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ─────────────────────────────────────────────────────────────
+            TAB 4: CREATOR ANALYTICS STUDIO
+        ───────────────────────────────────────────────────────────── */}
+        {activeTab === 'analytics' && (
+          <div className="flex-1 p-6 sm:p-8 max-w-5xl mx-auto space-y-8 overflow-y-auto w-full">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#213047] pb-5">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-black text-white flex items-center gap-2">
+                  <BarChart3 className="w-6 h-6 text-[#C5A15B]" />
+                  <span>تحليلات وإحصائيات أعمالي الأدبية</span>
+                </h3>
+                <p className="text-xs text-zinc-400 mt-1">
+                  تتبع مؤشرات التفاعل الحقيقية الخاصة بأعمالك فقط (المشاهدات الفريدة، الإعجابات، والمتابعون) مع خصوصية كاملة.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={loadCreatorAnalytics}
+                disabled={creatorAnalyticsLoading}
+                className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-zinc-300 hover:text-white text-xs flex items-center gap-2 font-bold"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${creatorAnalyticsLoading ? 'animate-spin' : ''}`} />
+                <span>تحديث المؤشرات</span>
+              </button>
+            </div>
+
+            {/* Overview KPI Cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="p-5 rounded-2xl bg-[#121A2C] border border-[#213047] space-y-2">
+                <div className="flex items-center justify-between text-xs text-zinc-400">
+                  <span>الأعمال المنشورة</span>
+                  <BookOpen className="w-4 h-4 text-[#C5A15B]" />
+                </div>
+                <div className="text-2xl font-black text-white font-mono">
+                  {creatorAnalytics?.overview?.totalWorks || stories.length + comics.length}
+                </div>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-[#121A2C] border border-[#213047] space-y-2">
+                <div className="flex items-center justify-between text-xs text-zinc-400">
+                  <span>إجمالي المشاهدات</span>
+                  <Eye className="w-4 h-4 text-teal-400" />
+                </div>
+                <div className="text-2xl font-black text-teal-400 font-mono">
+                  {(creatorAnalytics?.overview?.totalViews || 0).toLocaleString('ar-EG')}
+                </div>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-[#121A2C] border border-[#213047] space-y-2">
+                <div className="flex items-center justify-between text-xs text-zinc-400">
+                  <span>إجمالي الإعجابات</span>
+                  <Heart className="w-4 h-4 text-rose-400" />
+                </div>
+                <div className="text-2xl font-black text-rose-400 font-mono">
+                  {(creatorAnalytics?.overview?.totalLikes || 0).toLocaleString('ar-EG')}
+                </div>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-[#121A2C] border border-[#213047] space-y-2">
+                <div className="flex items-center justify-between text-xs text-zinc-400">
+                  <span>المتابعون النشطون</span>
+                  <Bookmark className="w-4 h-4 text-amber-400" />
+                </div>
+                <div className="text-2xl font-black text-amber-400 font-mono">
+                  {(creatorAnalytics?.overview?.totalFollowers || 0).toLocaleString('ar-EG')}
+                </div>
+              </div>
+            </div>
+
+            {/* Works Breakdown Table */}
+            <div className="bg-[#121A2C] border border-[#213047] rounded-2xl p-6 space-y-4">
+              <h4 className="font-bold text-sm text-white flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-[#C5A15B]" />
+                <span>أداء الأعمال والمؤلفات الفردية</span>
+              </h4>
+
+              {(!creatorAnalytics?.works || creatorAnalytics.works.length === 0) ? (
+                <div className="text-center py-12 text-zinc-500 text-xs">
+                  لا توجد أعمال منشورة مسجلة بحسابك حالياً. ابدأ بنشر روايتك أو عملك المصور الأول لتبدأ الإحصائيات في الظهور!
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs text-right">
+                    <thead>
+                      <tr className="border-b border-white/5 text-zinc-400 font-bold">
+                        <th className="py-3 px-3">العمل</th>
+                        <th className="py-3 px-3">النوع</th>
+                        <th className="py-3 px-3">المشاهدات</th>
+                        <th className="py-3 px-3">الإعجابات</th>
+                        <th className="py-3 px-3">المتابعون</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {creatorAnalytics.works.map((w: any) => (
+                        <tr key={w.id} className="hover:bg-white/[0.02]">
+                          <td className="py-3 px-3">
+                            <div className="flex items-center gap-3">
+                              {w.coverUrl && <img src={w.coverUrl} alt={w.title} className="w-8 h-10 rounded object-cover" />}
+                              <span className="font-bold text-white">{w.title}</span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-3">
+                            <span className="px-2 py-0.5 rounded-full bg-white/5 text-zinc-300">
+                              {w.contentTypeLabel}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 font-mono text-teal-400">{w.views}</td>
+                          <td className="py-3 px-3 font-mono text-rose-400">{w.likes}</td>
+                          <td className="py-3 px-3 font-mono text-amber-400">{w.followers}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>

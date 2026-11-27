@@ -11,6 +11,10 @@ import { useAppStore } from '@/stores/useAppStore';
 import { useToast } from '@/hooks/use-toast';
 import { SEOHead } from '@/components/common/SEOHead';
 import { SocialShareModal } from '@/components/common/SocialShareModal';
+import { LikeButton } from '@/components/engagement/LikeButton';
+import { FollowButton } from '@/components/engagement/FollowButton';
+import { EngagementStats } from '@/components/engagement/EngagementStats';
+import { ContentViewTracker } from '@/components/engagement/ContentViewTracker';
 
 function getTitleAr(comic: Comic): string {
   return (comic as any).titleAr || (comic as any).title || '';
@@ -297,28 +301,37 @@ export default function ComicDetail() {
               {titleAr}
             </h1>
 
-            {/* Rating + Genres */}
-            <div className="flex items-center gap-6 mb-6 pb-6 border-b border-soft-sand/40 dark:border-white/10 flex-wrap flex-row-reverse">
-              <div className="flex items-center gap-2 flex-row-reverse">
-                <div className="flex gap-0.5">
-                  {Array.from({ length: stars.full }).map((_, i) => (
-                    <Star key={`f${i}`} className="w-4 h-4 text-antique-gold fill-antique-gold" />
-                  ))}
-                  {stars.half && <Star className="w-4 h-4 text-antique-gold fill-antique-gold/50" />}
-                  {Array.from({ length: stars.empty }).map((_, i) => (
-                    <Star key={`e${i}`} className="w-4 h-4 text-soft-sand/60 dark:text-white/20" />
+            {/* Rating + Genres + Engagement Stats */}
+            <div className="flex flex-col gap-4 mb-6 pb-6 border-b border-soft-sand/40 dark:border-white/10">
+              <div className="flex items-center gap-6 flex-wrap flex-row-reverse">
+                <div className="flex items-center gap-2 flex-row-reverse">
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: stars.full }).map((_, i) => (
+                      <Star key={`f${i}`} className="w-4 h-4 text-antique-gold fill-antique-gold" />
+                    ))}
+                    {stars.half && <Star className="w-4 h-4 text-antique-gold fill-antique-gold/50" />}
+                    {Array.from({ length: stars.empty }).map((_, i) => (
+                      <Star key={`e${i}`} className="w-4 h-4 text-soft-sand/60 dark:text-white/20" />
+                    ))}
+                  </div>
+                  <span className="text-foreground font-bold">{comic.rating}</span>
+                </div>
+                <div className="flex gap-2 flex-wrap flex-row-reverse">
+                  {genresAr.map((g) => (
+                    <span key={g} className="px-3 py-1 text-xs border border-soft-sand/60 dark:border-white/20 rounded-full text-foreground/70 dark:text-white/60 font-arabic bg-soft-cream/40 dark:bg-white/5">
+                      {g}
+                    </span>
                   ))}
                 </div>
-                <span className="text-foreground font-bold">{comic.rating}</span>
               </div>
-              <div className="flex gap-2 flex-wrap flex-row-reverse">
-                {genresAr.map((g) => (
-                  <span key={g} className="px-3 py-1 text-xs border border-soft-sand/60 dark:border-white/20 rounded-full text-foreground/70 dark:text-white/60 font-arabic bg-soft-cream/40 dark:bg-white/5">
-                    {g}
-                  </span>
-                ))}
+
+              {/* Engagement Badges */}
+              <div className="flex items-center justify-end">
+                <EngagementStats contentType="comic" contentId={comic.id} rating={comic.rating} chaptersCount={comic.pageCount || (comic as any).totalPages || 1} />
               </div>
             </div>
+
+            <ContentViewTracker contentType="comic" contentId={comic.id} source="comic_detail" />
 
             {/* Synopsis */}
             <p className="text-lg text-foreground/80 leading-relaxed mb-8 font-arabic">
@@ -342,36 +355,41 @@ export default function ComicDetail() {
             </div>
 
             {/* Action buttons */}
-            <div className="flex flex-wrap gap-4 mb-12 flex-row-reverse">
+            <div className="flex flex-wrap gap-3 mb-12 flex-row-reverse items-center">
               <Link href={`/comics/${comic.id}/read`}>
-                <button className="px-8 py-4 bg-deep-teal text-white hover:bg-deep-teal/90 dark:bg-antique-gold dark:text-midnight-navy dark:hover:bg-champagne-gold font-bold rounded-xl transition-colors flex items-center gap-2 shadow-[0_0_25px_rgba(8,124,123,0.3)] dark:shadow-[0_0_25px_rgba(197,161,91,0.3)] font-arabic">
+                <button className="px-8 py-3.5 bg-deep-teal text-white hover:bg-deep-teal/90 dark:bg-antique-gold dark:text-midnight-navy dark:hover:bg-champagne-gold font-bold rounded-xl transition-colors flex items-center gap-2 shadow-[0_0_25px_rgba(8,124,123,0.3)] dark:shadow-[0_0_25px_rgba(197,161,91,0.3)] font-arabic text-sm">
                   <BookOpen className="w-5 h-5" />
                   اقرأ الآن
                 </button>
               </Link>
               <Link href={`/comics/${comic.id}/immersive`}>
-                <button className="px-6 py-4 bg-soft-cream/60 dark:bg-white/5 border border-soft-sand/60 dark:border-white/10 text-foreground font-bold rounded-xl hover:border-deep-teal transition-colors flex items-center gap-2 font-arabic">
+                <button className="px-5 py-3.5 bg-soft-cream/60 dark:bg-white/5 border border-soft-sand/60 dark:border-white/10 text-foreground font-bold rounded-xl hover:border-deep-teal transition-colors flex items-center gap-2 font-arabic text-sm">
                   <Sparkles className="w-4 h-4 text-antique-gold" />
                   القارئ المتقدم
                 </button>
               </Link>
+
+              {/* Engagement Like & Follow */}
+              <LikeButton contentType="comic" contentId={comic.id} size="md" />
+              <FollowButton contentType="comic" contentId={comic.id} size="md" />
+
               <button
                 onClick={handleAddToCollection}
-                className={`px-6 py-4 font-bold rounded-xl border transition-colors flex items-center gap-2 font-arabic ${
+                className={`px-5 py-3.5 font-bold rounded-xl border transition-colors flex items-center gap-2 font-arabic text-sm ${
                   addedToCollection
                     ? 'bg-deep-teal/15 border-deep-teal/40 text-deep-teal dark:bg-antique-gold/20 dark:text-antique-gold'
                     : 'bg-soft-cream/60 dark:bg-white/5 text-foreground border-soft-sand/60 dark:border-white/10 hover:border-deep-teal/50'
                 }`}
               >
-                {addedToCollection ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
-                {addedToCollection ? 'أُضيف إلى مجموعتك' : 'أضف إلى المجموعة'}
+                {addedToCollection ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                {addedToCollection ? 'أُضيف' : 'للمجموعة'}
               </button>
               <button
                 onClick={handleShare}
-                className="p-4 bg-soft-cream/60 dark:bg-white/5 text-foreground rounded-xl border border-soft-sand/60 dark:border-white/10 hover:border-deep-teal/50 transition-colors"
+                className="p-3.5 bg-soft-cream/60 dark:bg-white/5 text-foreground rounded-xl border border-soft-sand/60 dark:border-white/10 hover:border-deep-teal/50 transition-colors"
                 title="مشاركة الرابط"
               >
-                <Share2 className="w-5 h-5" />
+                <Share2 className="w-4 h-4" />
               </button>
             </div>
 

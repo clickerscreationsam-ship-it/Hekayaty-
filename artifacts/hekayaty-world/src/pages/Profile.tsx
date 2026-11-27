@@ -35,7 +35,7 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useAppStore } from '@/stores/useAppStore';
-import { useComics, useCharacters, useWorlds } from '@/lib/hooks';
+import { useComics, useCharacters, useWorlds, useStories } from '@/lib/hooks';
 import { api } from '@/lib/api';
 
 const CLOUDINARY_CLOUD = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || 'x2f63nf1';
@@ -48,11 +48,24 @@ export default function Profile() {
   const { data: comics = [] } = useComics();
   const { data: characters = [] } = useCharacters();
   const { data: worlds = [] } = useWorlds();
+  const { data: stories = [] } = useStories();
 
   const isWriter = user?.role === 'writer' || user?.role === 'publishing_house';
   const isAdmin = user?.role === 'admin';
 
-  const [activeTab, setActiveTab] = useState<'reading' | 'favorites' | 'collections' | 'submissions' | 'notifications' | 'membership' | 'settings'>('reading');
+  const [activeTab, setActiveTab] = useState<'reading' | 'favorites' | 'following' | 'likes' | 'collections' | 'submissions' | 'notifications' | 'membership' | 'settings'>('reading');
+
+  // Engagement State
+  const [followingList, setFollowingList] = useState<any[]>([]);
+  const [likedList, setLikedList] = useState<any[]>([]);
+  const [notifPrefs, setNotifPrefs] = useState({
+    notifyChapters: true,
+    notifyEpisodes: true,
+    notifyNewWorks: true,
+    notifyAuthorUpdates: true,
+    emailNotifications: false,
+  });
+  const [prefsLoading, setPrefsLoading] = useState(false);
 
   // Subscription / Membership State
   const [subscriptionData, setSubscriptionData] = useState<{
@@ -131,6 +144,17 @@ export default function Profile() {
         .catch(() => setSubLoading(false));
     }
   }, [activeTab, isAuthenticated]);
+
+  // Load following & likes when user opens profile or tabs
+  useEffect(() => {
+    if (isAuthenticated) {
+      api.getUserFollowing().then(res => setFollowingList(res.following || [])).catch(() => {});
+      api.getUserLikes().then(res => setLikedList(res.likes || [])).catch(() => {});
+      api.getNotificationPreferences().then(res => {
+        if (res.preferences) setNotifPrefs(res.preferences);
+      }).catch(() => {});
+    }
+  }, [isAuthenticated, activeTab]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -343,7 +367,9 @@ export default function Profile() {
       <div className="flex flex-wrap gap-2 mb-8 border-b border-soft-sand/40 dark:border-white/10 pb-4">
         {([
           { key: 'reading', icon: Clock, label: `سجل القراءة (${readingProgress.length})` },
-          { key: 'favorites', icon: Heart, label: `المفضلة (${favorites.length})` },
+          { key: 'following', icon: Bookmark, label: `متابعاتي (${followingList.length})` },
+          { key: 'likes', icon: Heart, label: `إعجاباتي (${likedList.length})` },
+          { key: 'favorites', icon: FolderHeart, label: `المفضلة (${favorites.length})` },
           { key: 'collections', icon: FolderHeart, label: `مجموعاتي (${collections.length})` },
           ...(isWriter || isAdmin ? [{ key: 'submissions', icon: FileText, label: 'تقديماتي' }] : []),
           ...(isAuthenticated ? [{ key: 'membership', icon: Crown, label: 'عضويتي واشتراكي' }] : []),
@@ -398,6 +424,176 @@ export default function Profile() {
                         <span>استئناف القراءة</span>
                         <ChevronLeft className="w-3.5 h-3.5" />
                       </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ══ Tab: Following (متابعاتي) ══ */}
+      {activeTab === 'following' && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-base font-bold text-foreground font-cinzel">الأعمال التي تتابعها</h3>
+              <p className="text-xs text-foreground/60">ستصلك إشعارات وتحديثات الفصول الجديدة لهذه الأعمال فور نشرها.</p>
+            </div>
+            <Link href="/following" className="text-xs font-bold text-deep-teal dark:text-antique-gold hover:underline flex items-center gap-1">
+              <span>صفحة المتابعات الكاملة</span>
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+
+          {followingList.length === 0 ? (
+            <div className="text-center py-16 glass-panel rounded-3xl p-8 border border-soft-sand/50 dark:border-white/10 space-y-3">
+              <Bookmark className="w-12 h-12 text-foreground/20 mx-auto" />
+              <h3 className="text-base font-bold text-foreground font-cinzel">قائمة متابعاتك فارغة حالياً</h3>
+              <p className="text-xs text-foreground/60 max-w-sm mx-auto">
+                اضغط على زر "متابعة" في صفحات الروايات والقصص المصورة والسلاسل لتصلك إشعارات فورية بكل جديد.
+              </p>
+              <div className="pt-2">
+                <Link href="/discover" className="px-6 py-2.5 rounded-xl bg-deep-teal text-white dark:bg-antique-gold dark:text-midnight-navy font-bold text-xs shadow-md">
+                  استكشف الأعمال الأدبية
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {followingList.map((f) => {
+                let title = 'عمل إبداعي';
+                let cover = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80';
+                let link = '/';
+                const isStory = f.content_type === 'story' || f.content_type === 'novel';
+                const isComic = f.content_type === 'comic';
+                const isSeries = f.content_type === 'series';
+
+                if (isStory) {
+                  const s = stories.find((x) => String(x.id) === String(f.content_id));
+                  if (s) {
+                    title = s.titleAr || (s as any).title_ar || title;
+                    cover = s.coverImage || (s as any).imageUrl || (s as any).image_url || cover;
+                    link = `/stories/${s.id}`;
+                  }
+                } else if (isComic) {
+                  const c = comics.find((x) => String(x.id) === String(f.content_id));
+                  if (c) {
+                    title = c.titleAr || (c as any).title_ar || title;
+                    cover = c.coverImage || cover;
+                    link = `/comics/${c.id}`;
+                  }
+                } else if (isSeries) {
+                  title = 'سلسلة حكاياتي';
+                  link = `/series/${f.content_id}`;
+                }
+
+                return (
+                  <div key={`${f.content_type}_${f.content_id}`} className="glass-panel p-3.5 rounded-2xl border border-soft-sand/50 dark:border-white/10 flex items-center gap-3 group">
+                    <img src={cover} alt={title} className="w-14 h-20 object-cover rounded-xl shrink-0" />
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-deep-teal/10 dark:bg-antique-gold/15 text-deep-teal dark:text-antique-gold font-bold">
+                        {isStory ? 'رواية' : isComic ? 'كوميكس' : 'سلسلة'}
+                      </span>
+                      <h4 className="text-xs font-bold text-foreground truncate">{title}</h4>
+                      <div className="flex items-center gap-2 pt-1">
+                        <Link href={link} className="text-[11px] text-deep-teal dark:text-antique-gold font-bold hover:underline">
+                          فتح العمل
+                        </Link>
+                        <span className="text-zinc-500">•</span>
+                        <button
+                          onClick={async () => {
+                            await api.toggleFollow(f.content_type, f.content_id);
+                            setFollowingList((prev) => prev.filter((item) => !(item.content_type === f.content_type && item.content_id === f.content_id)));
+                          }}
+                          className="text-[11px] text-rose-400 hover:underline"
+                        >
+                          إلغاء المتابعة
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ══ Tab: Likes (إعجاباتي) ══ */}
+      {activeTab === 'likes' && (
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-base font-bold text-foreground font-cinzel">الأعمال التي أبدت إعجابك بها</h3>
+            <p className="text-xs text-foreground/60">جميع الروايات والقصص المصورة التي حازت على إعجابك وتقديرك.</p>
+          </div>
+
+          {likedList.length === 0 ? (
+            <div className="text-center py-16 glass-panel rounded-3xl p-8 border border-soft-sand/50 dark:border-white/10 space-y-3">
+              <Heart className="w-12 h-12 text-foreground/20 mx-auto" />
+              <h3 className="text-base font-bold text-foreground font-cinzel">لم تسجل إعجابك بأي عمل بعد</h3>
+              <p className="text-xs text-foreground/60 max-w-sm mx-auto">
+                انقر على زر القلب في أي عمل أدبي أو قصصي للتعبير عن تقديرك والرجوع إليه هنا في أي وقت.
+              </p>
+              <div className="pt-2">
+                <Link href="/comics" className="px-6 py-2.5 rounded-xl bg-deep-teal text-white dark:bg-antique-gold dark:text-midnight-navy font-bold text-xs shadow-md">
+                  تصفح الأعمال الأدبية
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {likedList.map((l) => {
+                let title = 'عمل إبداعي';
+                let cover = 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=400&q=80';
+                let link = '/';
+                const isStory = l.content_type === 'story' || l.content_type === 'novel';
+                const isComic = l.content_type === 'comic';
+                const isSeries = l.content_type === 'series';
+
+                if (isStory) {
+                  const s = stories.find((x) => String(x.id) === String(l.content_id));
+                  if (s) {
+                    title = s.titleAr || (s as any).title_ar || title;
+                    cover = s.coverImage || (s as any).imageUrl || (s as any).image_url || cover;
+                    link = `/stories/${s.id}`;
+                  }
+                } else if (isComic) {
+                  const c = comics.find((x) => String(x.id) === String(l.content_id));
+                  if (c) {
+                    title = c.titleAr || (c as any).title_ar || title;
+                    cover = c.coverImage || cover;
+                    link = `/comics/${c.id}`;
+                  }
+                } else if (isSeries) {
+                  title = 'سلسلة حكاياتي';
+                  link = `/series/${l.content_id}`;
+                }
+
+                return (
+                  <div key={`${l.content_type}_${l.content_id}`} className="glass-panel p-3.5 rounded-2xl border border-soft-sand/50 dark:border-white/10 flex items-center gap-3 group">
+                    <img src={cover} alt={title} className="w-14 h-20 object-cover rounded-xl shrink-0" />
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-400 font-bold">
+                        {isStory ? 'رواية' : isComic ? 'كوميكس' : 'سلسلة'}
+                      </span>
+                      <h4 className="text-xs font-bold text-foreground truncate">{title}</h4>
+                      <div className="flex items-center gap-2 pt-1">
+                        <Link href={link} className="text-[11px] text-deep-teal dark:text-antique-gold font-bold hover:underline">
+                          فتح العمل
+                        </Link>
+                        <span className="text-zinc-500">•</span>
+                        <button
+                          onClick={async () => {
+                            await api.toggleLike(l.content_type, l.content_id);
+                            setLikedList((prev) => prev.filter((item) => !(item.content_type === l.content_type && item.content_id === l.content_id)));
+                          }}
+                          className="text-[11px] text-rose-400 hover:underline"
+                        >
+                          إزالة الإعجاب
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -976,6 +1172,47 @@ export default function Profile() {
                 {passwordLoading ? 'جاري التحديث...' : 'تحديث كلمة المرور'}
               </button>
             </form>
+
+            {/* Notification Preferences */}
+            <div className="pt-6 border-t border-soft-sand/40 dark:border-white/10 space-y-4">
+              <h4 className="text-xs font-bold text-foreground font-cinzel flex items-center gap-1.5">
+                <Bell className="w-3.5 h-3.5 text-deep-teal dark:text-antique-gold" />
+                <span>تفضيلات إشعارات المتابعة</span>
+              </h4>
+              <p className="text-[11px] text-foreground/60 leading-relaxed">
+                حدد التنبيهات التي ترغب في استلامها عند قيام المبدعين والأعمال التي تتابعها بنشر محتوى جديد.
+              </p>
+
+              <div className="space-y-2.5 text-xs">
+                {[
+                  { key: 'notifyChapters', label: 'إشعارات فصول الروايات الجديدة' },
+                  { key: 'notifyEpisodes', label: 'إشعارات حلقات ومواسم السلاسل الجديدة' },
+                  { key: 'notifyNewWorks', label: 'إشعارات إطلاق أعمال جديدة من المؤلفين المتابعين' },
+                  { key: 'notifyAuthorUpdates', label: 'أخبار وتحديثات الكتاب ودور النشر' },
+                  { key: 'emailNotifications', label: 'تفعيل إشعارات البريد الإلكتروني' },
+                ].map(({ key, label }) => (
+                  <label key={key} className="flex items-center justify-between p-2.5 rounded-xl bg-soft-cream/60 dark:bg-white/[0.02] border border-soft-sand/40 dark:border-white/5 cursor-pointer">
+                    <span className="text-foreground/80 font-medium">{label}</span>
+                    <input
+                      type="checkbox"
+                      checked={(notifPrefs as any)[key]}
+                      disabled={prefsLoading}
+                      onChange={async (e) => {
+                        const next = { ...notifPrefs, [key]: e.target.checked };
+                        setNotifPrefs(next);
+                        setPrefsLoading(true);
+                        try {
+                          await api.updateNotificationPreferences(next);
+                        } finally {
+                          setPrefsLoading(false);
+                        }
+                      }}
+                      className="rounded accent-deep-teal dark:accent-antique-gold w-4 h-4"
+                    />
+                  </label>
+                ))}
+              </div>
+            </div>
 
             {/* Danger Zone */}
             <div className="pt-6 border-t border-soft-sand/40 dark:border-white/10">

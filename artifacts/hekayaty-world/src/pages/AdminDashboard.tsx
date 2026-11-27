@@ -46,12 +46,14 @@ import { SEOManagerSection } from '@/components/admin/SEOManagerSection';
 import { MysteryMgmtPanel } from '@/components/admin/MysteryMgmtPanel';
 import { SeriesPlatformMgmtPanel } from '@/components/admin/SeriesPlatformMgmtPanel';
 import { SubscriptionsMgmtPanel } from '@/components/admin/SubscriptionsMgmtPanel';
+import { EngagementAnalyticsPanel } from '@/components/admin/EngagementAnalyticsPanel';
 
 type AdminTab =
   | 'overview'
   | 'content_mgmt'
   | 'series_platform'
   | 'subscriptions_mgmt'
+  | 'engagement_analytics'
   | 'characters_studio'
   | 'universe_studio'
   | 'ip_mgmt'
@@ -1444,6 +1446,21 @@ export default function AdminDashboard() {
               <div className="flex items-center gap-3">
                 <span className="text-base">💳</span>
                 <span>إدارة الاشتراكات والمدفوعات</span>
+              </div>
+              <ChevronRight className="w-4 h-4 opacity-70" />
+            </button>
+
+            <button
+              onClick={() => setActiveTab('engagement_analytics')}
+              className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-medium transition-all ${
+                activeTab === 'engagement_analytics'
+                  ? 'bg-gradient-to-l from-[#C5A15B] to-[#a8873a] text-black shadow-md font-bold'
+                  : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Activity className="w-4 h-4 text-[#C5A15B]" />
+                <span>التحليلات وإحصائيات التفاعل</span>
               </div>
               <ChevronRight className="w-4 h-4 opacity-70" />
             </button>
@@ -2951,6 +2968,11 @@ export default function AdminDashboard() {
           {/* SEO & SOCIAL SHARING MANAGEMENT TAB */}
           {activeTab === 'seo_mgmt' && (
             <SEOManagerSection />
+          )}
+
+          {/* ENGAGEMENT & ANALYTICS TAB */}
+          {activeTab === 'engagement_analytics' && (
+            <EngagementAnalyticsPanel toast={toast} />
           )}
         </div>
       </div>
