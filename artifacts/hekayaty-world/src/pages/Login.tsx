@@ -121,7 +121,12 @@ export default function Login() {
               <label htmlFor="login-password" className="text-xs font-semibold text-warm-ivory/70">
                 كلمة المرور
               </label>
-              <Link href="/forgot-password" className="text-[11px] text-antique-gold/80 hover:text-antique-gold transition-colors">
+              <Link 
+                href="/forgot-password" 
+                className="text-[11px] text-antique-gold/80 hover:text-antique-gold transition-colors font-arabic"
+                title="Forgot Password? / نسيت كلمة المرور؟"
+                aria-label="Forgot Password? / نسيت كلمة المرور؟"
+              >
                 نسيت كلمة المرور؟
               </Link>
             </div>

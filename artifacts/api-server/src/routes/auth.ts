@@ -259,7 +259,7 @@ router.post('/forgot-password', authPasswordResetLimiter, async (req, res) => {
     }
 
     const cleanEmail = email.toLowerCase().trim();
-    const origin = req.headers.origin || 'http://localhost:3000';
+    const origin = req.headers.origin || process.env.APP_URL || (process.env.NODE_ENV === 'production' ? 'https://hekayaty-v3.vercel.app' : 'http://localhost:3000');
 
     await supabaseAnon.auth.resetPasswordForEmail(cleanEmail, {
       redirectTo: `${origin}/reset-password`,
